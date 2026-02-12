@@ -3,34 +3,2051 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MW3</title>
+  <title>Radiant Ellipse Crystal — MW3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=DM+Serif+Display&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Outfit:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <style>
+    @font-face {
+      font-family: 'Engraving CC';
+      src: url('cristals/FONT/EngravingCC.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Engraver Normal';
+      src: url('cristals/FONT/Engraver%20Normal.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Engraver Light';
+      src: url('cristals/FONT/Engraver%20Light.ttf') format('truetype');
+      font-weight: 300;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Engraver Italic';
+      src: url('cristals/FONT/Engraver%20Italic.ttf') format('truetype');
+      font-weight: normal;
+      font-style: italic;
+    }
+    @font-face {
+      font-family: 'Engraver Bold';
+      src: url('cristals/FONT/Engraver%20Bold.ttf') format('truetype');
+      font-weight: bold;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Engraver Bold Italic';
+      src: url('cristals/FONT/Engraver%20Bold%20Italic.ttf') format('truetype');
+      font-weight: bold;
+      font-style: italic;
+    }
+    @font-face {
+      font-family: 'Academy Engraved';
+      src: url('cristals/FONT/Academy%20Engraved.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'BankGothic Bold';
+      src: url('cristals/FONT/BankGothic%20Bold.ttf') format('truetype');
+      font-weight: bold;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Boldpact';
+      src: url('cristals/FONT/BOLDPACT.TTF') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Grammara';
+      src: url('cristals/FONT/GRAMMARA.TTF') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    :root {
+      --bg: #0d0d0d;
+      --surface: #1a1a1a;
+      --border: #2d2d2d;
+      --text: #f0f0f0;
+      --muted: #888;
+      --accent: #c9a962;
+      --accent-hover: #d4b872;
+    }
+    * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
     }
-    body {
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      min-height: 100vh;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* Left: image gallery */
+    .gallery-section {
+      position: relative;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
     }
-    .viewer {
-      position: fixed;
-      inset: 0;
-      border: none;
+    #gallery-main-wrap {
+      padding: 1rem;
+      min-height: 50vh;
       width: 100%;
-      height: 100%;
-      display: block;
+      max-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
+    #gallery-main-wrap.zoomed {
+      height: 70vh;
+      min-height: 320px;
+    }
+    #preview-canvas {
+      max-width: 100%;
+      max-height: 70vh;
+      width: auto;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      transition: transform 0.2s ease-out;
+    }
+    #gallery-main-wrap.zoomed #preview-canvas {
+      max-height: 100%;
+      transform-origin: var(--edit-zoom-origin, 50% 52%);
+      transform: scale(var(--edit-zoom-scale, 1.85));
+    }
+    .start-edit-wrap { text-align: center; padding: 0.5rem 1rem; }
+    .start-edit-wrap .start-edit-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
+    #preview-canvas {
+      border-radius: 4px;
+    }
+    .gallery-thumbs {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      border-top: 1px solid var(--border);
+    }
+    .gallery-thumbs img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      opacity: 0.85;
+    }
+    .gallery-thumbs img:hover,
+    .gallery-thumbs img.active {
+      border-color: var(--accent);
+      opacity: 1;
+    }
+    .gallery-placeholder {
+      color: var(--muted);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+    }
+
+    /* Right: options */
+    .options-section {
+      padding: 2rem 1.75rem;
+      overflow-y: auto;
+    }
+    .product-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.75rem;
+      font-weight: 400;
+      margin: 0 0 0.25rem 0;
+    }
+    .product-subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0 0 1.5rem 0;
+    }
+    .price {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .price .currency { color: var(--muted); font-weight: 400; }
+
+    .option-group {
+      margin-bottom: 1.75rem;
+    }
+    .option-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+    .style-card {
+      aspect-ratio: 1.2;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .style-card:hover {
+      border-color: var(--muted);
+    }
+    .style-card.selected {
+      border-color: var(--accent);
+      background: rgba(201, 169, 98, 0.08);
+    }
+    .style-card input { display: none; }
+
+    .personalization input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font: inherit;
+      margin-bottom: 0.5rem;
+    }
+    .personalization input::placeholder { color: var(--muted); }
+    .personalization input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .char-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .char-count.at-limit { color: var(--accent); }
+
+    .option-hint { font-size: 0.8rem; color: var(--muted); margin: 0 0 0.5rem 0; }
+    .line-tabs-wrap { margin-bottom: 1.5rem; }
+    .line-tabs { display: flex; gap: 2px; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+    .line-tab { padding: 0.5rem 0.85rem; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-size: 0.9rem; cursor: pointer; margin-bottom: -1px; }
+    .line-tab:hover { color: var(--text); }
+    .line-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .line-panel { display: none; }
+    .line-panel.active { display: block; }
+    .line-panel .option-label { margin-top: 1rem; display: block; }
+    .line-panel .option-label:first-child { margin-top: 0; }
+    .line-panel input[type="text"] {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font: inherit;
+      margin-bottom: 0.25rem;
+    }
+    .line-panel input[type="text"]::placeholder { color: var(--muted); }
+    .line-panel input[type="text"]:focus { outline: none; border-color: var(--accent); }
+    .line-box-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.25rem; }
+    .line-box-row label { display: flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; }
+    .line-box-row input[type="number"], .line-panel #size-line1, .line-panel #size-line2, .line-panel #size-line3 { width: 3.5rem; padding: 0.35rem; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font: inherit; }
+    .line-panel .align-btns { margin: 0.25rem 0; }
+    .font-select { width: 100%; margin-top: 0.25rem; }
+    .align-row { display: grid; grid-template-columns: auto 1fr auto 1fr auto 1fr; gap: 0.35rem 0.5rem; align-items: center; }
+    .align-btns { display: flex; gap: 2px; }
+    .align-btn { padding: 0.35rem 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); cursor: pointer; font-size: 0.9rem; }
+    .align-btn:hover { color: var(--text); border-color: var(--muted); }
+    .align-btn.selected { border-color: var(--accent); color: var(--accent); }
+    .font-select {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+    .font-select:focus { outline: none; border-color: var(--accent); }
+    .art-add-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+    .art-add-row select { padding: 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font: inherit; }
+    .art-add-row select#art-type { flex: 1; }
+    .art-item select { padding: 0.25rem 0.4rem; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font: inherit; font-size: 0.85rem; }
+    .art-list { margin-top: 0.75rem; }
+    .art-item { display: flex; flex-wrap: wrap; gap: 0.35rem 0.5rem; align-items: center; padding: 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.5rem; font-size: 0.85rem; }
+    .art-item .art-type-name { width: 100%; color: var(--muted); margin-bottom: 0.25rem; }
+    .art-item label { display: flex; align-items: center; gap: 0.2rem; }
+    .art-item input[type="number"] { width: 2.8rem; padding: 0.25rem; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font: inherit; }
+    .art-item .art-remove { margin-left: auto; padding: 0.2rem 0.4rem; font-size: 0.8rem; }
+
+    .quantity-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .quantity-controls button {
+      width: 40px;
+      height: 40px;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .quantity-controls button:hover { background: rgba(255,255,255,0.06); }
+    .quantity-controls input {
+      width: 48px;
+      text-align: center;
+      background: none;
+      border: none;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      color: var(--text);
+      font: inherit;
+      font-weight: 500;
+    }
+    .quantity-controls input:focus { outline: none; }
+
+    /* Top step navigation */
+    #top-steps-nav {
+      position: sticky;
+      top: 0;
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(13, 13, 13, 0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+    .top-step {
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .top-step span.step-index {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+    }
+    .top-step.active {
+      border-color: var(--accent);
+      background: rgba(201, 169, 98, 0.15);
+      color: var(--accent);
+    }
+    .top-step.active span.step-index {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #0d0d0d;
+    }
+
+    .cta {
+      display: block;
+      width: 100%;
+      padding: 0.9rem 1.25rem;
+      margin-top: 1.5rem;
+      background: var(--accent);
+      color: #0d0d0d;
+      border: none;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .cta:hover { background: var(--accent-hover); }
+    .cta.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      margin-top: 0.5rem;
+    }
+    .cta.secondary:hover { background: rgba(201, 169, 98, 0.12); }
+
+    .map-btn { margin-top: 0.5rem; }
+    .confirm-design { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    .confirm-design h3 { font-size: 1.1rem; margin: 0 0 0.75rem 0; font-family: 'DM Serif Display', serif; font-weight: 400; }
+    .confirm-checkboxes { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+    .confirm-checkboxes label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; }
+    .confirm-checkboxes input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
+    .confirm-email-wrap { margin-bottom: 1rem; }
+    .confirm-email-wrap label { display: block; font-size: 0.9rem; margin-bottom: 0.35rem; }
+    .confirm-email-wrap input[type="email"] { width: 100%; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font: inherit; }
+    .confirm-email-wrap input[type="email"]:focus { outline: none; border-color: var(--accent); }
+    .confirm-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
+    .confirm-success { display: none; padding: 1rem; background: rgba(201, 169, 98, 0.15); border: 1px solid var(--accent); border-radius: 8px; margin-top: 1rem; font-size: 0.9rem; }
+    .confirm-success.visible { display: block; }
+    #mapping-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 1rem;
+      text-align: center;
+      pointer-events: none;
+    }
+    #mapping-overlay.active { display: flex; }
+    #mapping-overlay .instruction { pointer-events: auto; }
+    #mapping-overlay .cancel, #mapping-overlay button { pointer-events: auto; }
+    #mapping-overlay .instruction { color: #fff; font-size: 1rem; margin-bottom: 0.5rem; }
+    #mapping-overlay .step { color: var(--accent); font-weight: 600; }
+    #mapping-overlay .cancel { margin-top: 1rem; color: var(--muted); cursor: pointer; font-size: 0.9rem; }
+    #mapping-overlay .cancel:hover { color: #fff; }
+    #mapping-result {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 200px;
+      overflow: auto;
+    }
+    #mapping-result.active { display: block; }
+    #mapping-result-actions { margin-top: 0.5rem; }
+    #mapping-result-actions button { margin-right: 0.5rem; }
+
+    .step-screen { position: fixed; inset: 0; z-index: 100; display: none; flex-direction: column; background: var(--bg); overflow: auto; transition: opacity 0.5s ease; }
+    .step-screen.active { display: flex; opacity: 1; }
+    .step-screen.leaving { opacity: 0; pointer-events: none; }
+    .step-screen.entering { opacity: 0; }
+    .step-screen.entering.active { opacity: 1; }
+    #step-intro { align-items: center; justify-content: center; overflow: hidden; }
+    #step-intro video { width: 100%; height: 100%; object-fit: cover; transform: scale(1.15); }
+    #step-intro .intro-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.25); transition: opacity 0.4s ease; }
+    #step-intro .intro-overlay.overlay-hidden { opacity: 0; pointer-events: none; }
+    #step-intro .start-btn { padding: 0.65rem 1.5rem; font-size: 1rem; min-width: auto; width: auto; }
+    #step-crystal-select { padding: 1rem; box-sizing: border-box; }
+    #step-crystal-select h2 { text-align: center; margin: 0 0 1rem 0; font-family: 'DM Serif Display', serif; font-weight: 400; }
+    .crystal-select-content { display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; align-items: start; flex: 1; min-height: 0; max-width: 1200px; margin: 0 auto; width: 100%; }
+    @media (max-width: 900px) {
+      .crystal-select-content { grid-template-columns: 1fr; }
+    }
+    .crystal-carousel-wrap { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 55vh; }
+    .crystal-carousel { display: flex; transition: transform 0.35s ease-out; height: 100%; width: 100%; }
+    .crystal-slide { flex: 0 0 100%; width: 100%; min-height: 55vh; display: flex; align-items: center; justify-content: center; padding: 1rem; box-sizing: border-box; }
+    .crystal-slide video { max-width: 100%; max-height: 55vh; width: auto; height: auto; object-fit: contain; border-radius: 8px; }
+    .carousel-nav { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; }
+    .carousel-nav button { padding: 0.6rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font: inherit; cursor: pointer; }
+    .carousel-nav button:hover { border-color: var(--accent); color: var(--accent); }
+    .carousel-dots { display: flex; gap: 0.5rem; justify-content: center; }
+    .carousel-dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background 0.2s; }
+    .carousel-dots span.active { background: var(--accent); }
+    .crystal-stats-wrap { position: sticky; top: 4rem; max-height: 55vh; overflow-y: auto; }
+    .crystal-stats {
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.35);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+    }
+    .crystal-stats.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .crystal-stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-bottom: 0.35rem;
+    }
+    .crystal-stats-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+    }
+    .crystal-stats-price {
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .crystal-stats-desc {
+      margin: 0.35rem 0 0.75rem 0;
+      color: var(--muted);
+    }
+    .crystal-stats-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.4rem 1.25rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.85rem;
+    }
+    .crystal-stats-list li span.label {
+      color: var(--muted);
+      font-weight: 500;
+      margin-right: 0.15rem;
+    }
+
+    #step-product { position: relative; z-index: 1; min-height: 100vh; }
+    #step-plan-production { padding: 1.5rem; max-width: 900px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
+    #step-plan-production h2 { font-family: 'DM Serif Display', serif; font-weight: 400; margin: 0 0 0.5rem 0; font-size: 1.5rem; }
+    #step-plan-production .plan-subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .production-timeline-note { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .plan-quantity-row { margin-bottom: 1.5rem; }
+    .plan-quantity-row label { display: block; margin-bottom: 0.35rem; font-size: 0.9rem; }
+    .plan-quantity-row input { width: 5rem; padding: 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font: inherit; }
+    .calendar-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; font-size: 0.9rem; }
+    .calendar-legend span { display: flex; align-items: center; gap: 0.35rem; }
+    .calendar-legend .dot { width: 14px; height: 14px; border-radius: 4px; }
+    .calendar-legend .dot.red { background: #c45c4a; }
+    .calendar-legend .dot.orange { background: #d4a84b; }
+    .calendar-legend .dot.green { background: #5a9a5a; }
+    .production-calendar { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+    .production-slot { padding: 1rem; border-radius: 8px; border: 2px solid transparent; cursor: pointer; text-align: center; font-size: 0.85rem; transition: border-color 0.2s, transform 0.15s; }
+    .production-slot:hover { transform: scale(1.02); }
+    .production-slot.red { background: rgba(196, 92, 74, 0.35); color: #f0e0dd; }
+    .production-slot.orange { background: rgba(212, 168, 75, 0.35); color: #f0ebe0; }
+    .production-slot.green { background: rgba(90, 154, 90, 0.35); color: #d8ecd8; }
+    .production-slot.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    .production-slot .slot-week { font-weight: 600; margin-bottom: 0.25rem; }
+    .production-slot .slot-note { font-size: 0.75rem; opacity: 0.9; }
+    .production-slot.disabled { opacity: 0.45; cursor: not-allowed; border-style: dashed; }
+    .plan-result { margin-top: 1.5rem; padding: 1rem; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
+    .plan-result h3 { font-size: 1rem; margin: 0 0 0.5rem 0; }
+    .plan-result p { margin: 0.25rem 0; font-size: 0.9rem; }
+    .plan-result .expected-date { font-weight: 600; color: var(--accent); }
+    .plan-submit { margin-top: 1rem; }
   </style>
 </head>
 <body>
-  <iframe
-    class="viewer"
-    src="https://app.sloyd.ai/embed/ni8b9qll?width=800&height=600&fullscreen=true&mode=deferred"
-    frameborder="0"
-    allowfullscreen
-  ></iframe>
+  <nav id="top-steps-nav" aria-label="Configuration steps">
+    <button type="button" class="top-step active" data-step="0"><span class="step-index">1</span> Intro</button>
+    <button type="button" class="top-step" data-step="1"><span class="step-index">2</span> Choose crystal</button>
+    <button type="button" class="top-step" data-step="2"><span class="step-index">3</span> Customize</button>
+    <button type="button" class="top-step" data-step="3"><span class="step-index">4</span> Plan production</button>
+  </nav>
+  <div id="step-intro" class="step-screen active">
+    <video id="intro-video" src="cristals/intro.mp4?v=2" muted playsinline preload="auto"></video>
+    <div class="intro-overlay">
+      <button type="button" class="cta start-btn" id="start-btn">Start</button>
+    </div>
+  </div>
+  <div id="step-crystal-select" class="step-screen">
+    <h2>Choose your crystal</h2>
+    <div class="crystal-select-content">
+      <div class="crystal-carousel-wrap">
+        <div class="crystal-carousel" id="crystal-carousel">
+          <div class="crystal-slide"><video src="cristals/c2video.mp4" muted loop playsinline></video></div>
+          <div class="crystal-slide"><video src="cristals/c3.mp4" muted loop playsinline></video></div>
+          <div class="crystal-slide"><video src="cristals/c4.mp4" muted loop playsinline></video></div>
+        </div>
+      </div>
+      <div class="crystal-stats-wrap">
+        <div class="crystal-stats" id="crystal-stats" aria-live="polite">
+        <div class="crystal-stats-header">
+          <div class="crystal-stats-name" id="crystal-stats-name"></div>
+          <div class="crystal-stats-price" id="crystal-stats-price"></div>
+        </div>
+        <p class="crystal-stats-desc" id="crystal-stats-desc"></p>
+        <ul class="crystal-stats-list">
+          <li><span class="label">Dimensions:</span><span id="crystal-stats-dimensions"></span></li>
+          <li><span class="label">Personalization:</span><span id="crystal-stats-personal"></span></li>
+          <li><span class="label">Materials:</span><span id="crystal-stats-materials"></span></li>
+          <li><span class="label">SKU:</span><span id="crystal-stats-sku"></span></li>
+          <li><span class="label">Lead time:</span><span id="crystal-stats-lead"></span></li>
+        </ul>
+      </div>
+      </div>
+    </div>
+    <div class="carousel-nav">
+      <button type="button" id="carousel-prev" aria-label="Previous">← Previous</button>
+      <div class="carousel-dots" id="carousel-dots"></div>
+      <button type="button" id="carousel-next" aria-label="Next">Next →</button>
+      <button type="button" class="cta" id="select-crystal-btn">Select this crystal</button>
+    </div>
+  </div>
+  <div id="step-product" class="step-screen">
+  <div class="layout">
+    <section class="gallery-section" aria-label="Product images">
+      <div id="gallery-main-wrap" style="position: relative;">
+        <div id="mapping-overlay" aria-live="polite">
+          <p class="instruction step" id="mapping-step-msg">Click on the crystal where Line 1 should go</p>
+          <p class="instruction">(x, y are saved as 0–1; center of engraving area)</p>
+          <button type="button" class="cta secondary" id="mapping-cancel" style="margin-top: 0.75rem;">Cancel</button>
+        </div>
+        <canvas id="preview-canvas" aria-label="Crystal with your engraving" hidden></canvas>
+        <p id="gallery-placeholder" class="gallery-placeholder">Add your crystal images to the <strong>cristals</strong> folder, then list their filenames in the <code>crystalImages</code> array in index.html.</p>
+      </div>
+      <div class="start-edit-wrap" id="start-edit-wrap" hidden>
+        <button type="button" class="cta secondary start-edit-btn" id="start-edit-btn">Start edit</button>
+      </div>
+      <div id="gallery-thumbs" class="gallery-thumbs" hidden></div>
+    </section>
+    <section class="options-section">
+      <h1 class="product-title">Radiant Ellipse Crystal</h1>
+      <p class="product-subtitle">Award trophy — personalize with your message</p>
+      <p class="price"><span class="currency">$</span>49.99</p>
+
+      <div class="option-group">
+        <span class="option-label">Graphic style</span>
+        <div class="style-grid" role="group" aria-label="Choose graphic style">
+          <label class="style-card selected">
+            <input type="radio" name="style" value="above-beyond" checked>
+            Above & Beyond
+          </label>
+          <label class="style-card">
+            <input type="radio" name="style" value="achievement">
+            Achievement
+          </label>
+          <label class="style-card">
+            <input type="radio" name="style" value="excellence">
+            Excellence
+          </label>
+          <label class="style-card">
+            <input type="radio" name="style" value="team">
+            Team Spirit
+          </label>
+        </div>
+      </div>
+
+      <div class="option-group line-tabs-wrap">
+        <div class="line-tabs" role="tablist">
+          <button type="button" class="line-tab active" role="tab" id="tab-btn-1" aria-selected="true" aria-controls="panel-1" data-line="1">Line 1</button>
+          <button type="button" class="line-tab" role="tab" id="tab-btn-2" aria-selected="false" aria-controls="panel-2" data-line="2">Line 2</button>
+          <button type="button" class="line-tab" role="tab" id="tab-btn-3" aria-selected="false" aria-controls="panel-3" data-line="3">Line 3</button>
+          <button type="button" class="line-tab" role="tab" id="tab-btn-art" aria-selected="false" aria-controls="panel-art" data-line="art">Art</button>
+        </div>
+        <div id="panel-1" class="line-panel active" role="tabpanel" aria-labelledby="tab-btn-1">
+          <span class="option-label">Text</span>
+          <input type="text" id="line1" placeholder="e.g. Awarded to" maxlength="60" autocomplete="off">
+          <span class="char-count" id="count1">0 / 60</span>
+          <span class="option-label">Position</span>
+          <div class="line-box-row">
+            <label>X <input type="number" id="pos-x1" min="0" max="100" value="50" aria-label="Line 1 X"> %</label>
+            <label>Y <input type="number" id="pos-y1" min="0" max="100" value="38" aria-label="Line 1 Y"> %</label>
+          </div>
+          <span class="option-label">Box size</span>
+          <div class="line-box-row">
+            <label>W <input type="number" id="box-w1" min="10" max="80" step="1" value="18" aria-label="Line 1 box width"> %</label>
+            <label>H <input type="number" id="box-h1" min="5" max="40" step="1" value="20" aria-label="Line 1 box height"> %</label>
+          </div>
+          <span class="option-label">Text size</span>
+          <label class="line-box-row"><input type="number" id="size-line1" min="50" max="150" step="5" value="100" aria-label="Line 1 text size"> % of auto</label>
+          <span class="option-label">Align</span>
+          <div class="align-btns" role="group" aria-label="Line 1 alignment">
+            <button type="button" class="align-btn" data-line="1" data-align="left" title="Left">⬅</button>
+            <button type="button" class="align-btn selected" data-line="1" data-align="center" title="Center">⬌</button>
+            <button type="button" class="align-btn" data-line="1" data-align="right" title="Right">➡</button>
+          </div>
+          <span class="option-label">Font</span>
+          <select id="font-line1" class="font-select" aria-label="Line 1 font">
+            <option value="Engraving CC">Engraving CC</option>
+            <option value="Engraver Normal">Engraver Normal</option>
+            <option value="Engraver Light">Engraver Light</option>
+            <option value="Engraver Italic">Engraver Italic</option>
+            <option value="Engraver Bold">Engraver Bold</option>
+            <option value="Engraver Bold Italic">Engraver Bold Italic</option>
+            <option value="Academy Engraved">Academy Engraved</option>
+            <option value="BankGothic Bold">BankGothic Bold</option>
+            <option value="Boldpact">Boldpact</option>
+            <option value="Grammara">Grammara</option>
+            <option value="DM Serif Display">DM Serif Display</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Cormorant Garamond">Cormorant Garamond</option>
+            <option value="Cinzel">Cinzel</option>
+            <option value="Lora">Lora</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="Libre Baskerville">Libre Baskerville</option>
+            <option value="Crimson Text">Crimson Text</option>
+            <option value="Georgia">Georgia</option>
+          </select>
+        </div>
+        <div id="panel-2" class="line-panel" role="tabpanel" aria-labelledby="tab-btn-2" hidden>
+          <span class="option-label">Text</span>
+          <input type="text" id="line2" placeholder="Name or title" maxlength="60" autocomplete="off">
+          <span class="char-count" id="count2">0 / 60</span>
+          <span class="option-label">Position</span>
+          <div class="line-box-row">
+            <label>X <input type="number" id="pos-x2" min="0" max="100" value="50" aria-label="Line 2 X"> %</label>
+            <label>Y <input type="number" id="pos-y2" min="0" max="100" value="52" aria-label="Line 2 Y"> %</label>
+          </div>
+          <span class="option-label">Box size</span>
+          <div class="line-box-row">
+            <label>W <input type="number" id="box-w2" min="10" max="80" step="1" value="18" aria-label="Line 2 box width"> %</label>
+            <label>H <input type="number" id="box-h2" min="5" max="40" step="1" value="20" aria-label="Line 2 box height"> %</label>
+          </div>
+          <span class="option-label">Text size</span>
+          <label class="line-box-row"><input type="number" id="size-line2" min="50" max="150" step="5" value="100" aria-label="Line 2 text size"> % of auto</label>
+          <span class="option-label">Align</span>
+          <div class="align-btns" role="group" aria-label="Line 2 alignment">
+            <button type="button" class="align-btn" data-line="2" data-align="left" title="Left">⬅</button>
+            <button type="button" class="align-btn selected" data-line="2" data-align="center" title="Center">⬌</button>
+            <button type="button" class="align-btn" data-line="2" data-align="right" title="Right">➡</button>
+          </div>
+          <span class="option-label">Font</span>
+          <select id="font-line2" class="font-select" aria-label="Line 2 font">
+            <option value="Engraving CC">Engraving CC</option>
+            <option value="Engraver Normal">Engraver Normal</option>
+            <option value="Engraver Light">Engraver Light</option>
+            <option value="Engraver Italic">Engraver Italic</option>
+            <option value="Engraver Bold">Engraver Bold</option>
+            <option value="Engraver Bold Italic">Engraver Bold Italic</option>
+            <option value="Academy Engraved">Academy Engraved</option>
+            <option value="BankGothic Bold">BankGothic Bold</option>
+            <option value="Boldpact">Boldpact</option>
+            <option value="Grammara">Grammara</option>
+            <option value="DM Serif Display">DM Serif Display</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Cormorant Garamond">Cormorant Garamond</option>
+            <option value="Cinzel">Cinzel</option>
+            <option value="Lora">Lora</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="Libre Baskerville">Libre Baskerville</option>
+            <option value="Crimson Text">Crimson Text</option>
+            <option value="Georgia">Georgia</option>
+          </select>
+        </div>
+        <div id="panel-3" class="line-panel" role="tabpanel" aria-labelledby="tab-btn-3" hidden>
+          <span class="option-label">Text</span>
+          <input type="text" id="line3" placeholder="Date or subtitle" maxlength="60" autocomplete="off">
+          <span class="char-count" id="count3">0 / 60</span>
+          <span class="option-label">Position</span>
+          <div class="line-box-row">
+            <label>X <input type="number" id="pos-x3" min="0" max="100" value="50" aria-label="Line 3 X"> %</label>
+            <label>Y <input type="number" id="pos-y3" min="0" max="100" value="66" aria-label="Line 3 Y"> %</label>
+          </div>
+          <span class="option-label">Box size</span>
+          <div class="line-box-row">
+            <label>W <input type="number" id="box-w3" min="10" max="80" step="1" value="18" aria-label="Line 3 box width"> %</label>
+            <label>H <input type="number" id="box-h3" min="5" max="40" step="1" value="20" aria-label="Line 3 box height"> %</label>
+          </div>
+          <span class="option-label">Text size</span>
+          <label class="line-box-row"><input type="number" id="size-line3" min="50" max="150" step="5" value="100" aria-label="Line 3 text size"> % of auto</label>
+          <span class="option-label">Align</span>
+          <div class="align-btns" role="group" aria-label="Line 3 alignment">
+            <button type="button" class="align-btn" data-line="3" data-align="left" title="Left">⬅</button>
+            <button type="button" class="align-btn selected" data-line="3" data-align="center" title="Center">⬌</button>
+            <button type="button" class="align-btn" data-line="3" data-align="right" title="Right">➡</button>
+          </div>
+          <span class="option-label">Font</span>
+          <select id="font-line3" class="font-select" aria-label="Line 3 font">
+            <option value="Engraving CC">Engraving CC</option>
+            <option value="Engraver Normal">Engraver Normal</option>
+            <option value="Engraver Light">Engraver Light</option>
+            <option value="Engraver Italic">Engraver Italic</option>
+            <option value="Engraver Bold">Engraver Bold</option>
+            <option value="Engraver Bold Italic">Engraver Bold Italic</option>
+            <option value="Academy Engraved">Academy Engraved</option>
+            <option value="BankGothic Bold">BankGothic Bold</option>
+            <option value="Boldpact">Boldpact</option>
+            <option value="Grammara">Grammara</option>
+            <option value="DM Serif Display">DM Serif Display</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Cormorant Garamond">Cormorant Garamond</option>
+            <option value="Cinzel">Cinzel</option>
+            <option value="Lora">Lora</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="Libre Baskerville">Libre Baskerville</option>
+            <option value="Crimson Text">Crimson Text</option>
+            <option value="Georgia">Georgia</option>
+          </select>
+        </div>
+        <div id="panel-art" class="line-panel" role="tabpanel" aria-labelledby="tab-btn-art" hidden>
+          <span class="option-label">Add line or symbol</span>
+          <div class="art-add-row">
+            <select id="art-type" aria-label="Art type">
+              <option value="line">— Line</option>
+              <option value="doubleLine">═ Double line</option>
+              <option value="star">★ Star</option>
+              <option value="diamond">◆ Diamond</option>
+              <option value="dot">• Dot</option>
+              <option value="dashes">⋯ Dashes</option>
+            </select>
+            <select id="art-color-new" aria-label="Art color">
+              <option value="white">White</option>
+              <option value="blue">Blue</option>
+              <option value="black">Black</option>
+            </select>
+            <button type="button" class="cta secondary" id="art-add-btn">Add</button>
+          </div>
+          <p class="option-hint">Position (x, y) and width/size in % of image. Adjust then redraws.</p>
+          <div id="art-list" class="art-list"></div>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <span class="option-label">Quantity</span>
+        <div class="quantity-row">
+          <div class="quantity-controls">
+            <button type="button" id="qty-minus" aria-label="Decrease quantity">−</button>
+            <input type="number" id="qty" value="1" min="1" max="99" aria-label="Quantity">
+            <button type="button" id="qty-plus" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="confirm-design" id="confirm-design">
+        <h3>Confirm your design</h3>
+        <p class="confirm-note">Check each item to confirm. Your design will be sent as a PNG and two confirmation emails will be sent.</p>
+        <div class="confirm-checkboxes">
+          <label><input type="checkbox" id="confirm-line1" aria-label="Confirm Line 1"> I confirm Line 1 text</label>
+          <label><input type="checkbox" id="confirm-line2" aria-label="Confirm Line 2"> I confirm Line 2 text</label>
+          <label><input type="checkbox" id="confirm-line3" aria-label="Confirm Line 3"> I confirm Line 3 text</label>
+          <label><input type="checkbox" id="confirm-style" aria-label="Confirm style"> I confirm graphic style</label>
+          <label><input type="checkbox" id="confirm-art" aria-label="Confirm artwork"> I confirm artwork / decorations</label>
+          <label><input type="checkbox" id="confirm-production" aria-label="Accept production"> I accept that my design will be sent for production</label>
+        </div>
+        <div class="confirm-email-wrap">
+          <label for="confirm-email">Email for confirmation</label>
+          <input type="email" id="confirm-email" placeholder="your@email.com" required aria-required="true">
+          <p class="confirm-note">Two emails will be sent: one to you (customer) and one to Cristoux International for final tuning and production start.</p>
+        </div>
+        <button type="button" class="cta" id="confirm-design-btn">Confirm design & request production</button>
+        <div class="confirm-success" id="confirm-success" aria-live="polite">
+          <strong>Design confirmed.</strong> Two PNG files were downloaded: the full crystal design and the artwork-only label (transparent). A confirmation email will be sent to you and to Cristoux International for final check, tuning and production start.
+          <p style="margin-top: 0.75rem;"><button type="button" class="cta" id="go-to-plan-btn">Plan your production and track your order</button></p>
+        </div>
+      </div>
+      <button type="button" class="cta secondary map-btn" id="map-positions" style="display:none;">Map text positions</button>
+      <div id="mapping-result"></div>
+      <div id="mapping-result-actions"></div>
+    </section>
+  </div>
+  </div>
+  <div id="step-plan-production" class="step-screen">
+    <h2>Plan your production and track your order</h2>
+    <p class="plan-subtitle">Choose your production slot based on availability. From design confirmation to production to expedition takes about 3 weeks; more awards may extend the timeline.</p>
+    <div class="production-timeline-note">
+      <strong>Timeline:</strong> Design confirmation → production → expedition ≈ 3 weeks. The number of awards in your order affects the realistic completion date.
+    </div>
+    <div class="plan-quantity-row">
+      <label for="plan-qty">Number of awards in this order</label>
+      <input type="number" id="plan-qty" min="1" max="999" value="1" aria-label="Number of awards">
+    </div>
+    <p class="option-label" style="margin-bottom: 0.5rem;">Availability — select a slot</p>
+    <div class="calendar-legend">
+      <span><span class="dot red"></span> Red: Fast delivery — higher cost (tight timing)</span>
+      <span><span class="dot orange"></span> Orange: Medium — standard rush cost</span>
+      <span><span class="dot green"></span> Green: Standard — lower cost (recommended)</span>
+    </div>
+    <div class="production-calendar" id="production-calendar" role="group" aria-label="Production slot calendar"></div>
+    <div class="plan-result" id="plan-result" hidden>
+      <h3>Your selection</h3>
+      <p class="expected-date" id="plan-expected-date"></p>
+      <p id="plan-cost-note"></p>
+      <p id="plan-tracking-note">You will receive order tracking by email once production starts.</p>
+      <button type="button" class="cta plan-submit" id="plan-submit-btn">Submit production plan</button>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var currentStep = 0;
+      var currentSlide = 0;
+      var totalSlides = 3;
+      var crystalMeta = [
+        {
+          name: 'Eminence',
+          price: '$95 USD',
+          desc: 'Design on a budget! Though costing far less, our multi-dimensional acrylic awards have the sparkle and clarity of fine crystal and are perfect for motivating, recognizing or saying, \"thank you.\" These designer awards display well and will surely be appreciated by customers, employees, athletes, or anyone deserving a pat on the back.',
+          dimensions: '9.5\"H x 4.75\"W x 2\"D',
+          personal: '5\"H x 2\"W',
+          materials: 'Clear Acrylic, Red Acrylic',
+          sku: 'ECX10282',
+          lead: '7–10 business days'
+        },
+        {
+          name: 'Skape',
+          price: '$135 USD',
+          desc: 'Our Skape Award borrows its name and silhouette from today\'s urban landscape. Designed to put emphasis on the recipient\'s name, this dimensional award is a profile of one who has achieved great things. A Cristaux design original made of Starphire Crystal and your choice of black, blue or clear accent.',
+          dimensions: '9\"H x 3.75\"W x 3\"D',
+          personal: 'Left: 5\"H x 0.75\"W / Right: 5\"H x 1.75\"W',
+          materials: 'Starphire Optic Crystal',
+          sku: 'ECX10767',
+          lead: '7–10 business days'
+        },
+        {
+          name: 'Indigo Peak',
+          price: '$575 USD',
+          desc: 'Salute the past and inspire the future! This museum quality piece combines clear and cobalt optic crystal for a look that can\'t be ignored. You\'ll be fascinated by the way this award changes in color and form as you view it from different angles. Featuring strong architectural lines, our Indigo Peak is modern, graphic, and sure to be proudly displayed.',
+          dimensions: '11.25\"H x 5.5\"W x 4.5\"D',
+          personal: '4.5\"H x 3\"W',
+          materials: 'Optic Crystal',
+          sku: 'ECX10549',
+          lead: '7–10 business days'
+        }
+      ];
+      function updateTopNav(step) {
+        var navSteps = document.querySelectorAll('.top-step');
+        navSteps.forEach(function (btn) {
+          var s = parseInt(btn.getAttribute('data-step'), 10);
+          btn.classList.toggle('active', s === step);
+        });
+      }
+      function showStep(step) {
+        currentStep = step;
+        document.querySelectorAll('.step-screen').forEach(function (el) { el.classList.remove('active'); });
+        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production'];
+        var el = document.getElementById(stepIds[step] || 'step-product');
+        if (el) el.classList.add('active');
+        updateTopNav(step);
+        if (step === 0) {
+          var introV = document.getElementById('intro-video');
+          if (introV) { introV.pause(); introV.currentTime = 0; }
+        } else if (step === 1) {
+          updateCarousel();
+          playSlideVideo(currentSlide);
+        } else if (step === 3) {
+          if (typeof renderProductionCalendar === 'function') renderProductionCalendar();
+        }
+      }
+      function updateCarousel() {
+        var carousel = document.getElementById('crystal-carousel');
+        if (carousel) carousel.style.transform = 'translateX(-' + currentSlide * 100 + '%)';
+        document.querySelectorAll('#carousel-dots span').forEach(function (dot, i) {
+          dot.classList.toggle('active', i === currentSlide);
+        });
+      }
+      function updateCrystalStats() {
+        var statsEl = document.getElementById('crystal-stats');
+        if (!statsEl) return;
+        var meta = crystalMeta[currentSlide] || crystalMeta[0];
+        document.getElementById('crystal-stats-name').textContent = meta.name;
+        document.getElementById('crystal-stats-price').textContent = meta.price;
+        document.getElementById('crystal-stats-desc').textContent = meta.desc;
+        document.getElementById('crystal-stats-dimensions').textContent = meta.dimensions;
+        document.getElementById('crystal-stats-personal').textContent = meta.personal;
+        document.getElementById('crystal-stats-materials').textContent = meta.materials;
+        document.getElementById('crystal-stats-sku').textContent = meta.sku;
+        document.getElementById('crystal-stats-lead').textContent = meta.lead;
+        statsEl.classList.remove('visible');
+        void statsEl.offsetWidth;
+        statsEl.classList.add('visible');
+      }
+      function playSlideVideo(index) {
+        var slides = document.querySelectorAll('.crystal-slide video');
+        slides.forEach(function (v, i) {
+          if (i === index) { v.currentTime = 0; v.play().catch(function () {}); } else { v.pause(); }
+        });
+      }
+      var introPlayed = false;
+      document.querySelectorAll('.top-step').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var s = parseInt(this.getAttribute('data-step'), 10);
+          if (!isNaN(s)) showStep(s);
+        });
+      });
+      document.getElementById('start-btn').addEventListener('click', function () {
+        if (introPlayed) return;
+        introPlayed = true;
+        var overlay = document.querySelector('#step-intro .intro-overlay');
+        var introV = document.getElementById('intro-video');
+        overlay.classList.add('overlay-hidden');
+        introV.playbackRate = 1.6;
+        introV.play().catch(function () {});
+        introV.onended = function () {
+          introV.onended = null;
+          var introEl = document.getElementById('step-intro');
+          introEl.classList.add('leaving');
+          introEl.addEventListener('transitionend', function onLeave() {
+            introEl.removeEventListener('transitionend', onLeave);
+            introEl.classList.remove('leaving', 'active');
+            var nextEl = document.getElementById('step-crystal-select');
+            nextEl.classList.add('active', 'entering');
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () { nextEl.classList.remove('entering'); });
+            });
+            currentStep = 1;
+            updateCarousel();
+            playSlideVideo(currentSlide);
+          }, { once: true });
+        };
+      });
+      document.getElementById('carousel-prev').addEventListener('click', function () {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateCarousel();
+        playSlideVideo(currentSlide);
+        updateCrystalStats();
+      });
+      document.getElementById('carousel-next').addEventListener('click', function () {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateCarousel();
+        playSlideVideo(currentSlide);
+        updateCrystalStats();
+      });
+      (function initDots() {
+        var dotsEl = document.getElementById('carousel-dots');
+        for (var i = 0; i < totalSlides; i++) {
+          (function (idx) {
+            var span = document.createElement('span');
+            span.setAttribute('aria-label', 'Slide ' + (idx + 1));
+            span.addEventListener('click', function () {
+              currentSlide = idx;
+              updateCarousel();
+              playSlideVideo(currentSlide);
+              updateCrystalStats();
+            });
+            dotsEl.appendChild(span);
+          })(i);
+        }
+        updateCarousel();
+        updateCrystalStats();
+      })();
+      var TUTORIAL_IMAGE = 'tutorial.jpg';
+      function buildEditorGallery(selectedName) {
+        thumbsEl.innerHTML = '';
+        thumbsEl.hidden = false;
+        var names = [selectedName, TUTORIAL_IMAGE];
+        names.forEach(function (name, i) {
+          var img = document.createElement('img');
+          img.src = 'cristals/' + name;
+          img.alt = i === 0 ? 'Your crystal' : 'Tutorial reference';
+          if (i === 0) img.classList.add('active');
+          img.addEventListener('click', function () {
+            setMainImage(name);
+            thumbsEl.querySelectorAll('img').forEach(function (t) { t.classList.remove('active'); });
+            img.classList.add('active');
+          });
+          thumbsEl.appendChild(img);
+        });
+        if (typeof setMainImage === 'function') setMainImage(selectedName);
+      }
+      document.getElementById('select-crystal-btn').addEventListener('click', function () {
+        var idx = currentSlide % crystalImages.length;
+        var selected = crystalImages[idx];
+        buildEditorGallery(selected);
+        showStep(2);
+      });
+
+      // Add your crystal image filenames here (files go in the cristals/ folder)
+      var crystalImages = ['c2.png', 'c3.png', 'c4.png'];
+
+      // Loaded from cristals/mapping.json (or leave {} to use defaults / map via UI)
+      var crystalTextPositions = {};
+
+      var canvas = document.getElementById('preview-canvas');
+      var ctx = canvas.getContext('2d');
+      var mainEl = document.getElementById('gallery-main');
+      var placeholderEl = document.getElementById('gallery-placeholder');
+      var thumbsEl = document.getElementById('gallery-thumbs');
+      var currentImageName = null;
+      var currentImage = null;
+      var mappingStep = 0;
+      var mappingPositions = {};
+      var focusedLine = 0;
+
+      function defaultPositions() {
+        return {
+          line1: { x: 0.5, y: 0.38 },
+          line2: { x: 0.5, y: 0.52 },
+          line3: { x: 0.5, y: 0.66 }
+        };
+      }
+
+      function getPositions(name) {
+        var custom = crystalTextPositions[name];
+        if (custom) return custom;
+        return defaultPositions();
+      }
+
+      var defaultBoxPerLine = { line1: { w: 0.18, h: 0.2 }, line2: { w: 0.18, h: 0.2 }, line3: { w: 0.18, h: 0.2 } };
+      var lineKeys = ['line1', 'line2', 'line3'];
+      function getLineBoxSize(name, lineKey) {
+        var pos = getPositions(name);
+        var lineEntry = pos[lineKey];
+        var entry = crystalTextPositions[name];
+        var def = defaultBoxPerLine[lineKey] || { w: 0.18, h: 0.2 };
+        var w = (lineEntry && typeof lineEntry.boxW === 'number') ? lineEntry.boxW : (entry && typeof entry.boxW === 'number') ? entry.boxW : def.w;
+        var h = (lineEntry && typeof lineEntry.boxH === 'number') ? lineEntry.boxH : (entry && typeof entry.boxH === 'number') ? entry.boxH : def.h;
+        return { boxW: w, boxH: h };
+      }
+      function getAlign(name, lineKey) {
+        var lineEntry = getPositions(name)[lineKey];
+        var align = (lineEntry && (lineEntry.align === 'left' || lineEntry.align === 'right' || lineEntry.align === 'center')) ? lineEntry.align : 'center';
+        return align;
+      }
+      function setAlign(name, lineKey, align) {
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        var line = crystalTextPositions[name][lineKey];
+        if (!line || typeof line.x !== 'number') crystalTextPositions[name][lineKey] = { x: defaultPositions()[lineKey].x, y: defaultPositions()[lineKey].y };
+        crystalTextPositions[name][lineKey].align = align;
+      }
+      function wrapText(ctx, text, maxWidth) {
+        var words = text.split(/\s+/);
+        var lines = [];
+        var current = '';
+        for (var i = 0; i < words.length; i++) {
+          var word = words[i];
+          var test = current ? current + ' ' + word : word;
+          if (ctx.measureText(test).width <= maxWidth) {
+            current = test;
+            continue;
+          }
+          if (current) {
+            lines.push(current);
+            current = '';
+          }
+          if (ctx.measureText(word).width <= maxWidth) {
+            current = word;
+            continue;
+          }
+          for (var j = 0; j < word.length; j++) {
+            var seg = word.substring(j, j + 1);
+            if (ctx.measureText(current + seg).width <= maxWidth) current += seg;
+            else {
+              if (current) lines.push(current);
+              current = seg;
+            }
+          }
+        }
+        if (current) lines.push(current);
+        return lines.length ? lines : [''];
+      }
+      function getSlant(name, lineKey) {
+        var lineEntry = getPositions(name)[lineKey];
+        if (lineEntry && typeof lineEntry.slant === 'number') return lineEntry.slant;
+        return 0;
+      }
+      var engravingFonts = ['Engraving CC', 'Engraver Normal', 'Engraver Light', 'Engraver Italic', 'Engraver Bold', 'Engraver Bold Italic', 'Academy Engraved', 'BankGothic Bold', 'Boldpact', 'Grammara', 'DM Serif Display', 'Playfair Display', 'Cormorant Garamond', 'Cinzel', 'Lora', 'Merriweather', 'Libre Baskerville', 'Crimson Text', 'Georgia'];
+      function getFont(name, lineKey) {
+        var pos = getPositions(name);
+        var lineEntry = pos[lineKey];
+        if (lineEntry && typeof lineEntry.font === 'string' && engravingFonts.indexOf(lineEntry.font) >= 0) return lineEntry.font;
+        var entry = crystalTextPositions[name];
+        if (entry && typeof entry.font === 'string' && engravingFonts.indexOf(entry.font) >= 0) return entry.font;
+        return 'DM Serif Display';
+      }
+      function setFont(name, lineKey, font) {
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        var line = crystalTextPositions[name][lineKey];
+        if (!line || typeof line.x !== 'number') crystalTextPositions[name][lineKey] = { x: defaultPositions()[lineKey].x, y: defaultPositions()[lineKey].y };
+        crystalTextPositions[name][lineKey].font = font;
+      }
+      function updateFontSelect() {
+        if (!currentImageName) return;
+        lineKeys.forEach(function (key, i) {
+          var font = getFont(currentImageName, key);
+          var sel = document.getElementById('font-line' + (i + 1));
+          if (sel && sel.value !== font) sel.value = font;
+        });
+      }
+      function getFontSizePercent(name, lineKey) {
+        var lineEntry = getPositions(name)[lineKey];
+        if (lineEntry && typeof lineEntry.fontSizePercent === 'number') return Math.max(50, Math.min(150, lineEntry.fontSizePercent));
+        return 100;
+      }
+      function setFontSizePercent(name, lineKey, percent) {
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        var line = crystalTextPositions[name][lineKey];
+        if (!line || typeof line.x !== 'number') crystalTextPositions[name][lineKey] = { x: defaultPositions()[lineKey].x, y: defaultPositions()[lineKey].y };
+        crystalTextPositions[name][lineKey].fontSizePercent = Math.max(50, Math.min(150, percent));
+      }
+      function updateSizeInputs() {
+        if (!currentImageName) return;
+        lineKeys.forEach(function (key, i) {
+          var pct = getFontSizePercent(currentImageName, key);
+          var el = document.getElementById('size-line' + (i + 1));
+          if (el && parseInt(el.value, 10) !== pct) el.value = pct;
+        });
+      }
+      function setLineBoxSize(name, lineKey, wPercent, hPercent) {
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        var line = crystalTextPositions[name][lineKey];
+        if (!line || typeof line.x !== 'number') crystalTextPositions[name][lineKey] = line = { x: defaultPositions()[lineKey].x, y: defaultPositions()[lineKey].y };
+        line.boxW = wPercent / 100;
+        line.boxH = hPercent / 100;
+      }
+      function setLinePosition(name, lineKey, xPercent, yPercent) {
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        var line = crystalTextPositions[name][lineKey];
+        if (!line) crystalTextPositions[name][lineKey] = line = { x: 0.5, y: defaultPositions()[lineKey].y };
+        line.x = Math.max(0, Math.min(1, xPercent / 100));
+        line.y = Math.max(0, Math.min(1, yPercent / 100));
+      }
+      function updateBoxSizeInputs() {
+        if (!currentImageName) return;
+        lineKeys.forEach(function (key, i) {
+          var s = getLineBoxSize(currentImageName, key);
+          document.getElementById('box-w' + (i + 1)).value = Math.round(s.boxW * 100);
+          document.getElementById('box-h' + (i + 1)).value = (s.boxH * 100).toFixed(1);
+        });
+      }
+      function updatePositionInputs() {
+        if (!currentImageName) return;
+        lineKeys.forEach(function (key, i) {
+          var p = getPositions(currentImageName)[key] || defaultPositions()[key];
+          var xEl = document.getElementById('pos-x' + (i + 1));
+          var yEl = document.getElementById('pos-y' + (i + 1));
+          if (xEl) xEl.value = Math.round((p.x != null ? p.x : 0.5) * 100);
+          if (yEl) yEl.value = Math.round((p.y != null ? p.y : 0.5) * 100);
+        });
+      }
+      function updateAlignButtons() {
+        if (!currentImageName) return;
+        lineKeys.forEach(function (key, i) {
+          var align = getAlign(currentImageName, key);
+          document.querySelectorAll('.align-btn[data-line="' + (i + 1) + '"]').forEach(function (btn) {
+            btn.classList.toggle('selected', btn.getAttribute('data-align') === align);
+          });
+        });
+      }
+
+      var artTypeNames = { line: 'Line', doubleLine: 'Double line', star: 'Star', diamond: 'Diamond', dot: 'Dot', dashes: 'Dashes' };
+      function getArts(name) {
+        var entry = crystalTextPositions[name];
+        return (entry && Array.isArray(entry.arts)) ? entry.arts : [];
+      }
+      function setArts(name, arts) {
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        crystalTextPositions[name].arts = arts;
+      }
+      function addArt(name, art) {
+        var arts = getArts(name).slice();
+        arts.push(art);
+        setArts(name, arts);
+      }
+      function removeArt(name, index) {
+        var arts = getArts(name).slice();
+        arts.splice(index, 1);
+        setArts(name, arts);
+      }
+      function updateArt(name, index, updates) {
+        var arts = getArts(name).slice();
+        if (arts[index]) Object.assign(arts[index], updates);
+        setArts(name, arts);
+      }
+      var artColors = { white: 'rgba(255,255,255,0.9)', blue: 'rgba(60,120,220,0.95)', black: 'rgba(0,0,0,0.85)' };
+      function drawOneArt(ctx, art, w, h) {
+        var x = (art.x != null ? art.x : 0.5) * w;
+        var y = (art.y != null ? art.y : 0.5) * h;
+        var width = (art.width != null ? art.width : 0.4) * w;
+        var size = (art.size != null ? art.size : 0.03) * Math.min(w, h);
+        var color = artColors[art.color] || artColors.white;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = Math.max(1, Math.min(w, h) * 0.004);
+        ctx.lineCap = 'round';
+        if (art.type === 'line') {
+          ctx.beginPath();
+          ctx.moveTo(x - width / 2, y);
+          ctx.lineTo(x + width / 2, y);
+          ctx.stroke();
+        } else if (art.type === 'doubleLine') {
+          var gap = size * 0.5;
+          ctx.beginPath();
+          ctx.moveTo(x - width / 2, y - gap);
+          ctx.lineTo(x + width / 2, y - gap);
+          ctx.moveTo(x - width / 2, y + gap);
+          ctx.lineTo(x + width / 2, y + gap);
+          ctx.stroke();
+        } else if (art.type === 'star') {
+          ctx.font = size + 'px serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('\u2605', x, y);
+        } else if (art.type === 'diamond') {
+          ctx.beginPath();
+          ctx.moveTo(x, y - size);
+          ctx.lineTo(x + size, y);
+          ctx.lineTo(x, y + size);
+          ctx.lineTo(x - size, y);
+          ctx.closePath();
+          ctx.stroke();
+        } else if (art.type === 'dot') {
+          ctx.beginPath();
+          ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (art.type === 'dashes') {
+          var step = size * 2;
+          var n = Math.floor(width / step);
+          for (var i = 0; i < n; i++) {
+            var px = x - width / 2 + step / 2 + i * step;
+            ctx.beginPath();
+            ctx.moveTo(px - step / 4, y);
+            ctx.lineTo(px + step / 4, y);
+            ctx.stroke();
+          }
+        }
+      }
+      function renderArtList() {
+        var list = document.getElementById('art-list');
+        if (!list || !currentImageName) return;
+        var arts = getArts(currentImageName);
+        list.innerHTML = '';
+        arts.forEach(function (art, idx) {
+          var div = document.createElement('div');
+          div.className = 'art-item';
+          var typeName = artTypeNames[art.type] || art.type;
+          var x = Math.round((art.x != null ? art.x : 0.5) * 100);
+          var y = Math.round((art.y != null ? art.y : 0.5) * 100);
+          var width = Math.round((art.width != null ? art.width : 0.4) * 100);
+          var size = Math.round((art.size != null ? art.size : 0.03) * 100);
+          var color = (art.color === 'blue' || art.color === 'black') ? art.color : 'white';
+          div.innerHTML = '<span class="art-type-name">' + typeName + '</span>' +
+            '<label>X <input type="number" min="0" max="100" value="' + x + '" data-art-idx="' + idx + '" data-art-field="x"> %</label>' +
+            '<label>Y <input type="number" min="0" max="100" value="' + y + '" data-art-idx="' + idx + '" data-art-field="y"> %</label>' +
+            (art.type === 'line' || art.type === 'doubleLine' || art.type === 'dashes' ? '<label>W <input type="number" min="5" max="100" value="' + width + '" data-art-idx="' + idx + '" data-art-field="width"> %</label>' : '<label>Size <input type="number" min="1" max="20" value="' + size + '" data-art-idx="' + idx + '" data-art-field="size"> %</label>') +
+            '<label>Color <select data-art-idx="' + idx + '" data-art-field="color">' +
+            '<option value="white"' + (color === 'white' ? ' selected' : '') + '>White</option>' +
+            '<option value="blue"' + (color === 'blue' ? ' selected' : '') + '>Blue</option>' +
+            '<option value="black"' + (color === 'black' ? ' selected' : '') + '>Black</option></select></label>' +
+            '<button type="button" class="cta secondary art-remove" data-art-idx="' + idx + '">Remove</button>';
+          list.appendChild(div);
+        });
+        list.querySelectorAll('input[data-art-idx]').forEach(function (inp) {
+          inp.addEventListener('change', function () {
+            var idx = parseInt(this.getAttribute('data-art-idx'), 10);
+            var field = this.getAttribute('data-art-field');
+            var val = parseInt(this.value, 10) / 100;
+            updateArt(currentImageName, idx, { [field]: val });
+            drawPreview();
+          });
+        });
+        list.querySelectorAll('select[data-art-field="color"]').forEach(function (sel) {
+          sel.addEventListener('change', function () {
+            var idx = parseInt(this.getAttribute('data-art-idx'), 10);
+            updateArt(currentImageName, idx, { color: this.value });
+            drawPreview();
+          });
+        });
+        list.querySelectorAll('.art-remove').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var idx = parseInt(this.getAttribute('data-art-idx'), 10);
+            removeArt(currentImageName, idx);
+            renderArtList();
+            drawPreview();
+          });
+        });
+      }
+
+      var previewRAF = null;
+      function scheduleDraw() {
+        if (previewRAF !== null) return;
+        previewRAF = requestAnimationFrame(function () {
+          previewRAF = null;
+          drawPreview();
+        });
+      }
+      function drawPreview() {
+        if (!currentImage || !currentImage.complete || !ctx) return;
+        var w = currentImage.naturalWidth;
+        var h = currentImage.naturalHeight;
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(currentImage, 0, 0);
+        var pos = getPositions(currentImageName);
+        var line1 = (document.getElementById('line1').value || '').trim();
+        var line2 = (document.getElementById('line2').value || '').trim();
+        var line3 = (document.getElementById('line3').value || '').trim();
+        var lines = [line1, line2, line3];
+        var keys = ['line1', 'line2', 'line3'];
+        for (var i = 0; i < 3; i++) {
+          var p = pos[keys[i]] || defaultPositions()[keys[i]];
+          var cx = p.x * w;
+          var cy = p.y * h;
+          var size = getLineBoxSize(currentImageName, keys[i]);
+          var boxW = w * size.boxW;
+          var boxH = h * size.boxH;
+          var isFocused = focusedLine === i + 1;
+          ctx.setLineDash([6, 4]);
+          ctx.strokeStyle = isFocused ? 'rgba(201, 169, 98, 0.9)' : 'rgba(255,255,255,0.5)';
+          ctx.lineWidth = isFocused ? 2.5 : 1.5;
+          ctx.strokeRect(cx - boxW / 2, cy - boxH / 2, boxW, boxH);
+          ctx.setLineDash([]);
+        }
+        var padding = 2;
+        for (var i = 0; i < 3; i++) {
+          var text = lines[i];
+          if (!text) continue;
+          var p = pos[keys[i]] || defaultPositions()[keys[i]];
+          var align = getAlign(currentImageName, keys[i]);
+          var slant = getSlant(currentImageName, keys[i]);
+          var cx = p.x * w;
+          var cy = p.y * h;
+          var size = getLineBoxSize(currentImageName, keys[i]);
+          var boxW = w * size.boxW;
+          var boxH = h * size.boxH;
+          var boxLeft = cx - boxW / 2;
+          var boxTop = cy - boxH / 2;
+          var sizePct = getFontSizePercent(currentImageName, keys[i]) / 100;
+          var maxFontByBox = Math.floor(boxH * 0.4);
+          var fontSize = Math.min(Math.round(Math.min(w, h) * 0.05), maxFontByBox);
+          if (fontSize < 10) fontSize = 10;
+          fontSize = Math.max(10, Math.round(fontSize * sizePct));
+          ctx.font = fontSize + 'px "' + getFont(currentImageName, keys[i]) + '", Georgia, serif';
+          var wrapped = wrapText(ctx, text, boxW - padding * 2);
+          var lineHeight = fontSize * 1.2;
+          var totalH = wrapped.length * lineHeight;
+          if (totalH > boxH - padding * 2 && wrapped.length > 1) {
+            fontSize = Math.max(10, Math.floor((boxH - padding * 2) / wrapped.length / 1.2));
+            fontSize = Math.max(10, Math.round(fontSize * sizePct));
+            ctx.font = fontSize + 'px "' + getFont(currentImageName, keys[i]) + '", Georgia, serif';
+            lineHeight = fontSize * 1.2;
+          }
+          var strokeW = Math.max(2, fontSize / 12);
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(boxLeft, boxTop, boxW, boxH);
+          ctx.clip();
+          if (slant !== 0) {
+            ctx.translate(cx, cy);
+            ctx.transform(1, slant, 0, 1, 0, 0);
+            ctx.translate(-cx, -cy);
+          }
+          ctx.textBaseline = 'top';
+          ctx.textAlign = align;
+          var startY = cy - (wrapped.length * lineHeight) / 2;
+          for (var j = 0; j < wrapped.length; j++) {
+            var x = align === 'left' ? boxLeft + padding : align === 'right' ? cx + boxW / 2 - padding : cx;
+            var y = startY + j * lineHeight;
+            ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+            ctx.lineWidth = strokeW;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(wrapped[j], x, y);
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            ctx.fillText(wrapped[j], x, y);
+          }
+          ctx.restore();
+        }
+        var arts = getArts(currentImageName);
+        arts.forEach(function (art) { drawOneArt(ctx, art, w, h); });
+        if (mappingStep > 0) {
+          var r = Math.min(w, h) * 0.02;
+          ['line1', 'line2', 'line3'].forEach(function (key, i) {
+            var pp = mappingPositions[key] || pos[key] || defaultPositions()[key];
+            if (!pp) return;
+            var cx = pp.x * w;
+            var cy = pp.y * h;
+            ctx.strokeStyle = '#c9a962';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(201, 169, 98, 0.3)';
+            ctx.fill();
+          });
+        }
+      }
+
+      function drawArtworkOnly(ctx, w, h) {
+        if (!currentImageName) return;
+        var pos = getPositions(currentImageName);
+        var line1 = (document.getElementById('line1').value || '').trim();
+        var line2 = (document.getElementById('line2').value || '').trim();
+        var line3 = (document.getElementById('line3').value || '').trim();
+        var lines = [line1, line2, line3];
+        var keys = ['line1', 'line2', 'line3'];
+        var padding = 2;
+        for (var i = 0; i < 3; i++) {
+          var text = lines[i];
+          var p = pos[keys[i]] || defaultPositions()[keys[i]];
+          var cx = p.x * w;
+          var cy = p.y * h;
+          var size = getLineBoxSize(currentImageName, keys[i]);
+          var boxW = w * size.boxW;
+          var boxH = h * size.boxH;
+          var boxLeft = cx - boxW / 2;
+          var boxTop = cy - boxH / 2;
+          if (!text) continue;
+          var align = getAlign(currentImageName, keys[i]);
+          var slant = getSlant(currentImageName, keys[i]);
+          var sizePct = getFontSizePercent(currentImageName, keys[i]) / 100;
+          var maxFontByBox = Math.floor(boxH * 0.4);
+          var fontSize = Math.min(Math.round(Math.min(w, h) * 0.05), maxFontByBox);
+          if (fontSize < 10) fontSize = 10;
+          fontSize = Math.max(10, Math.round(fontSize * sizePct));
+          ctx.font = fontSize + 'px "' + getFont(currentImageName, keys[i]) + '", Georgia, serif';
+          var wrapped = wrapText(ctx, text, boxW - padding * 2);
+          var lineHeight = fontSize * 1.2;
+          var totalH = wrapped.length * lineHeight;
+          if (totalH > boxH - padding * 2 && wrapped.length > 1) {
+            fontSize = Math.max(10, Math.floor((boxH - padding * 2) / wrapped.length / 1.2));
+            fontSize = Math.max(10, Math.round(fontSize * sizePct));
+            ctx.font = fontSize + 'px "' + getFont(currentImageName, keys[i]) + '", Georgia, serif';
+            lineHeight = fontSize * 1.2;
+          }
+          var strokeW = Math.max(2, fontSize / 12);
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(boxLeft, boxTop, boxW, boxH);
+          ctx.clip();
+          if (slant !== 0) {
+            ctx.translate(cx, cy);
+            ctx.transform(1, slant, 0, 1, 0, 0);
+            ctx.translate(-cx, -cy);
+          }
+          ctx.textBaseline = 'top';
+          ctx.textAlign = align;
+          var startY = cy - (wrapped.length * lineHeight) / 2;
+          for (var j = 0; j < wrapped.length; j++) {
+            var x = align === 'left' ? boxLeft + padding : align === 'right' ? cx + boxW / 2 - padding : cx;
+            var y = startY + j * lineHeight;
+            ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+            ctx.lineWidth = strokeW;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(wrapped[j], x, y);
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            ctx.fillText(wrapped[j], x, y);
+          }
+          ctx.restore();
+        }
+        var arts = getArts(currentImageName);
+        arts.forEach(function (art) { drawOneArt(ctx, art, w, h); });
+        var borderW = 300;
+        var borderH = 400;
+        var bx = (w - borderW) / 2;
+        var by = (h - borderH) / 2;
+        ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+        ctx.lineWidth = Math.max(1, Math.min(w, h) * 0.003);
+        ctx.setLineDash([]);
+        ctx.strokeRect(bx, by, borderW, borderH);
+      }
+
+      var EDITOR_ZOOM = 1.85;
+      var isZoomedToEdit = false;
+      var galleryWrapEl = document.getElementById('gallery-main-wrap');
+      var startEditWrap = document.getElementById('start-edit-wrap');
+      function stripTransformInline(el) {
+        if (!el) return;
+        el.style.removeProperty('transform');
+        el.style.removeProperty('transform-origin');
+        var styleAttr = el.getAttribute('style');
+        if (styleAttr && styleAttr.trim() === '') el.removeAttribute('style');
+      }
+      function clearEngravingZoom() {
+        isZoomedToEdit = false;
+        if (galleryWrapEl) {
+          galleryWrapEl.classList.remove('zoomed');
+          galleryWrapEl.style.removeProperty('--edit-zoom-origin');
+          galleryWrapEl.style.removeProperty('--edit-zoom-scale');
+        }
+        stripTransformInline(canvas);
+        if (mainEl) stripTransformInline(mainEl);
+      }
+      function applyEngravingZoom() {
+        if (!currentImageName) return;
+        isZoomedToEdit = true;
+        if (galleryWrapEl) galleryWrapEl.classList.add('zoomed');
+        var pos = getPositions(currentImageName);
+        var y1 = (pos.line1 && typeof pos.line1.y === 'number') ? pos.line1.y : 0.38;
+        var y2 = (pos.line2 && typeof pos.line2.y === 'number') ? pos.line2.y : 0.52;
+        var y3 = (pos.line3 && typeof pos.line3.y === 'number') ? pos.line3.y : 0.66;
+        var centerY = (y1 + y2 + y3) / 3;
+        var origin = '50% ' + (Math.round(centerY * 1000) / 10) + '%';
+        if (galleryWrapEl) {
+          galleryWrapEl.style.setProperty('--edit-zoom-origin', origin);
+          galleryWrapEl.style.setProperty('--edit-zoom-scale', String(EDITOR_ZOOM));
+        }
+      }
+      document.getElementById('start-edit-btn').addEventListener('click', function () {
+        applyEngravingZoom();
+      });
+      function setMainImage(name) {
+        if (currentImageName === name && currentImage) {
+          drawPreview();
+          return;
+        }
+        currentImageName = name;
+        var src = 'cristals/' + name;
+        currentImage = new Image();
+        currentImage.crossOrigin = 'anonymous';
+        currentImage.onload = function () {
+          if (mainEl) mainEl.hidden = true;
+          canvas.hidden = false;
+          updateBoxSizeInputs();
+          updateAlignButtons();
+          updateFontSelect();
+          updateSizeInputs();
+          updatePositionInputs();
+          renderArtList();
+          drawPreview();
+          clearEngravingZoom();
+          if (startEditWrap) startEditWrap.hidden = false;
+        };
+        currentImage.onerror = function () {
+          canvas.hidden = true;
+          if (mainEl) { mainEl.hidden = false; mainEl.src = src; }
+          placeholderEl.hidden = false;
+          if (startEditWrap) startEditWrap.hidden = true;
+          clearEngravingZoom();
+        };
+        currentImage.src = src;
+      }
+
+      fetch('cristals/mapping.json')
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function (data) {
+          crystalTextPositions = data;
+          updateBoxSizeInputs();
+          updateAlignButtons();
+          updateFontSelect();
+          updateSizeInputs();
+          updatePositionInputs();
+          renderArtList();
+          if (currentImage) { drawPreview(); clearEngravingZoom(); }
+        })
+        .catch(function () {});
+
+      if (crystalImages.length > 0) {
+        placeholderEl.hidden = true;
+        buildEditorGallery(crystalImages[0]);
+      }
+
+      canvas.addEventListener('click', function (e) {
+        if (mappingStep < 1 || mappingStep > 3) return;
+        var rect = canvas.getBoundingClientRect();
+        var visX = (e.clientX - rect.left) / rect.width;
+        var visY = (e.clientY - rect.top) / rect.height;
+        var x = visX;
+        var y = visY;
+        if (isZoomedToEdit) {
+          var pos = getPositions(currentImageName);
+          var cy = ((pos.line1 && pos.line1.y) || 0.38) + ((pos.line2 && pos.line2.y) || 0.52) + ((pos.line3 && pos.line3.y) || 0.66);
+          cy /= 3;
+          var z = EDITOR_ZOOM;
+          x = 0.5 - 0.5 / z + visX / z;
+          y = cy - 0.5 / z + visY / z;
+        }
+        var keys = ['line1', 'line2', 'line3'];
+        mappingPositions[keys[mappingStep - 1]] = { x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 };
+        if (mappingStep === 3) {
+          var prev = crystalTextPositions[currentImageName] || {};
+          function keepLineProps(ln) {
+            var o = {};
+            if (ln && typeof ln.boxW === 'number') o.boxW = ln.boxW;
+            if (ln && typeof ln.boxH === 'number') o.boxH = ln.boxH;
+            if (ln && (ln.align === 'left' || ln.align === 'center' || ln.align === 'right')) o.align = ln.align;
+            if (ln && typeof ln.slant === 'number') o.slant = ln.slant;
+            if (ln && typeof ln.font === 'string') o.font = ln.font;
+            if (ln && typeof ln.fontSizePercent === 'number') o.fontSizePercent = ln.fontSizePercent;
+            return o;
+          }
+          crystalTextPositions[currentImageName] = {
+            line1: Object.assign({}, mappingPositions.line1, keepLineProps(prev.line1)),
+            line2: Object.assign({}, mappingPositions.line2, keepLineProps(prev.line2)),
+            line3: Object.assign({}, mappingPositions.line3, keepLineProps(prev.line3))
+          };
+          if (prev.font) crystalTextPositions[currentImageName].font = prev.font;
+          if (Array.isArray(prev.arts)) crystalTextPositions[currentImageName].arts = prev.arts;
+          mappingStep = 0;
+          document.getElementById('mapping-overlay').classList.remove('active');
+          drawPreview();
+          var resultEl = document.getElementById('mapping-result');
+          var actionsEl = document.getElementById('mapping-result-actions');
+          resultEl.textContent = 'Save this as cristals/mapping.json:\n\n' + JSON.stringify(crystalTextPositions, null, 2);
+          resultEl.classList.add('active');
+          actionsEl.innerHTML = '<button type="button" class="cta secondary" id="mapping-download">Download mapping.json</button> <button type="button" class="cta secondary" id="mapping-copy">Copy</button>';
+          document.getElementById('mapping-download').onclick = function () {
+            var a = document.createElement('a');
+            a.href = 'data:application/json,' + encodeURIComponent(JSON.stringify(crystalTextPositions, null, 2));
+            a.download = 'mapping.json';
+            a.click();
+          };
+          document.getElementById('mapping-copy').onclick = function () {
+            navigator.clipboard.writeText(JSON.stringify(crystalTextPositions, null, 2));
+          };
+          return;
+        }
+        mappingStep++;
+        document.getElementById('mapping-step-msg').textContent = 'Click where Line ' + (mappingStep + 1) + ' should go';
+        drawPreview();
+      });
+
+      document.getElementById('map-positions').addEventListener('click', function () {
+        if (!currentImageName) return;
+        mappingStep = 1;
+        mappingPositions = {};
+        document.getElementById('mapping-step-msg').textContent = 'Click on the crystal where Line 1 should go';
+        document.getElementById('mapping-overlay').classList.add('active');
+        document.getElementById('mapping-result').classList.remove('active');
+        document.getElementById('mapping-result').textContent = '';
+        document.getElementById('mapping-result-actions').innerHTML = '';
+        drawPreview();
+      });
+      document.getElementById('mapping-cancel').addEventListener('click', function () {
+        mappingStep = 0;
+        document.getElementById('mapping-overlay').classList.remove('active');
+        drawPreview();
+      });
+
+      [1, 2, 3].forEach(function (i) {
+        var key = 'line' + i;
+        function onBoxW(useSchedule) {
+          var v = parseFloat(this.value, 10);
+          if (!isNaN(v) && currentImageName) {
+            var s = getLineBoxSize(currentImageName, key);
+            setLineBoxSize(currentImageName, key, v, s.boxH * 100);
+            (useSchedule ? scheduleDraw : drawPreview)();
+          }
+        }
+        function onBoxH(useSchedule) {
+          var v = parseFloat(this.value, 10);
+          if (!isNaN(v) && currentImageName) {
+            var s = getLineBoxSize(currentImageName, key);
+            setLineBoxSize(currentImageName, key, s.boxW * 100, v);
+            (useSchedule ? scheduleDraw : drawPreview)();
+          }
+        }
+        var boxW = document.getElementById('box-w' + i);
+        var boxH = document.getElementById('box-h' + i);
+        if (boxW) { boxW.addEventListener('change', function () { onBoxW.call(this, false); }); boxW.addEventListener('input', function () { onBoxW.call(this, true); }); }
+        if (boxH) { boxH.addEventListener('change', function () { onBoxH.call(this, false); }); boxH.addEventListener('input', function () { onBoxH.call(this, true); }); }
+      });
+      document.querySelectorAll('.align-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var lineNum = this.getAttribute('data-line');
+          var align = this.getAttribute('data-align');
+          if (!currentImageName || !lineNum || !align) return;
+          setAlign(currentImageName, 'line' + lineNum, align);
+          updateAlignButtons();
+          drawPreview();
+        });
+      });
+      [1, 2, 3].forEach(function (n) {
+        var key = 'line' + n;
+        var sel = document.getElementById('font-line' + n);
+        if (sel) sel.addEventListener('change', function () {
+          if (!currentImageName) return;
+          var fontName = this.value;
+          setFont(currentImageName, key, fontName);
+          drawPreview();
+          if (document.fonts && document.fonts.load) {
+            document.fonts.load('16px "' + fontName + '"').then(function () { drawPreview(); }).catch(function () {});
+          }
+        });
+        var sizeEl = document.getElementById('size-line' + n);
+        if (sizeEl) {
+          sizeEl.addEventListener('change', function () {
+            var v = parseInt(this.value, 10);
+            if (!isNaN(v) && currentImageName) {
+              setFontSizePercent(currentImageName, key, v);
+              drawPreview();
+            }
+          });
+          sizeEl.addEventListener('input', function () {
+            var v = parseInt(this.value, 10);
+            if (!isNaN(v) && currentImageName) {
+              setFontSizePercent(currentImageName, key, v);
+              scheduleDraw();
+            }
+          });
+        }
+        var posX = document.getElementById('pos-x' + n);
+        var posY = document.getElementById('pos-y' + n);
+        if (posX) {
+          posX.addEventListener('change', function () {
+            var v = parseInt(this.value, 10);
+            if (!isNaN(v) && currentImageName) {
+              var p = getPositions(currentImageName)[key] || defaultPositions()[key];
+              setLinePosition(currentImageName, key, v, (p.y != null ? p.y : 0.5) * 100);
+              drawPreview();
+            }
+          });
+          posX.addEventListener('input', function () {
+            var v = parseInt(this.value, 10);
+            if (!isNaN(v) && currentImageName) {
+              var p = getPositions(currentImageName)[key] || defaultPositions()[key];
+              setLinePosition(currentImageName, key, v, (p.y != null ? p.y : 0.5) * 100);
+              scheduleDraw();
+            }
+          });
+        }
+        if (posY) {
+          posY.addEventListener('change', function () {
+            var v = parseInt(this.value, 10);
+            if (!isNaN(v) && currentImageName) {
+              var p = getPositions(currentImageName)[key] || defaultPositions()[key];
+              setLinePosition(currentImageName, key, (p.x != null ? p.x : 0.5) * 100, v);
+              drawPreview();
+            }
+          });
+          posY.addEventListener('input', function () {
+            var v = parseInt(this.value, 10);
+            if (!isNaN(v) && currentImageName) {
+              var p = getPositions(currentImageName)[key] || defaultPositions()[key];
+              setLinePosition(currentImageName, key, (p.x != null ? p.x : 0.5) * 100, v);
+              scheduleDraw();
+            }
+          });
+        }
+      });
+      document.querySelectorAll('.line-tab').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var lineNum = this.getAttribute('data-line');
+          if (!lineNum) return;
+          document.querySelectorAll('.line-tab').forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+          this.classList.add('active');
+          this.setAttribute('aria-selected', 'true');
+          document.querySelectorAll('.line-panel').forEach(function (p) { p.classList.remove('active'); p.hidden = true; });
+          var panel = document.getElementById(lineNum === 'art' ? 'panel-art' : 'panel-' + lineNum);
+          if (panel) { panel.classList.add('active'); panel.hidden = false; }
+        });
+      });
+      document.getElementById('art-add-btn').addEventListener('click', function () {
+        if (!currentImageName) return;
+        var type = document.getElementById('art-type').value;
+        var defaultW = (type === 'line' || type === 'doubleLine') ? 0.18 : 0.4;
+        var color = document.getElementById('art-color-new').value;
+        var art = { type: type, x: 0.5, y: 0.45, width: defaultW, size: 0.03, color: color };
+        addArt(currentImageName, art);
+        renderArtList();
+        drawPreview();
+      });
+
+      ['line1', 'line2', 'line3'].forEach(function (id, idx) {
+        var el = document.getElementById(id);
+        el.addEventListener('input', scheduleDraw);
+        el.addEventListener('focus', function () { focusedLine = idx + 1; drawPreview(); });
+        el.addEventListener('blur', function () { focusedLine = 0; drawPreview(); });
+      });
+
+      var styleCards = document.querySelectorAll('.style-card');
+      styleCards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          styleCards.forEach(function (c) { c.classList.remove('selected'); });
+          card.classList.add('selected');
+          card.querySelector('input').checked = true;
+        });
+      });
+
+      function updateCount(inputId, countId, max) {
+        var input = document.getElementById(inputId);
+        var count = document.getElementById(countId);
+        function update() {
+          var len = input.value.length;
+          count.textContent = len + ' / ' + max;
+          count.classList.toggle('at-limit', len >= max);
+        }
+        input.addEventListener('input', update);
+        update();
+      }
+      updateCount('line1', 'count1', 60);
+      updateCount('line2', 'count2', 60);
+      updateCount('line3', 'count3', 60);
+
+      var qtyInput = document.getElementById('qty');
+      document.getElementById('qty-minus').addEventListener('click', function () {
+        var n = Math.max(1, parseInt(qtyInput.value, 10) - 1);
+        qtyInput.value = n;
+      });
+      document.getElementById('qty-plus').addEventListener('click', function () {
+        var n = Math.min(99, parseInt(qtyInput.value, 10) + 1);
+        qtyInput.value = n;
+      });
+      qtyInput.addEventListener('change', function () {
+        var n = parseInt(qtyInput.value, 10);
+        if (isNaN(n) || n < 1) qtyInput.value = 1;
+        else if (n > 99) qtyInput.value = 99;
+      });
+
+      document.getElementById('confirm-design-btn').addEventListener('click', function () {
+        var emailEl = document.getElementById('confirm-email');
+        var email = (emailEl && emailEl.value) ? emailEl.value.trim() : '';
+        var emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        var c1 = document.getElementById('confirm-line1').checked;
+        var c2 = document.getElementById('confirm-line2').checked;
+        var c3 = document.getElementById('confirm-line3').checked;
+        var cStyle = document.getElementById('confirm-style').checked;
+        var cArt = document.getElementById('confirm-art').checked;
+        var cProd = document.getElementById('confirm-production').checked;
+        if (!c1 || !c2 || !c3 || !cStyle || !cArt || !cProd) {
+          alert('Please check all confirmation boxes.');
+          return;
+        }
+        if (!emailValid) {
+          alert('Please enter a valid email address.');
+          if (emailEl) emailEl.focus();
+          return;
+        }
+        if (!currentImage || !currentImage.complete || !canvas || !ctx) {
+          alert('Preview is not ready. Please wait for the crystal image to load.');
+          return;
+        }
+        drawPreview();
+        var baseName = currentImageName ? currentImageName.replace(/\.[^.]+$/, '') : 'design';
+        try {
+          var dataUrl = canvas.toDataURL('image/png');
+          var a = document.createElement('a');
+          a.href = dataUrl;
+          a.download = 'crystal-design-' + baseName + '.png';
+          a.click();
+        } catch (e) {
+          alert('Could not generate full design image. Try again.');
+          return;
+        }
+        try {
+          var w = currentImage.naturalWidth;
+          var h = currentImage.naturalHeight;
+          var labelCanvas = document.createElement('canvas');
+          labelCanvas.width = w;
+          labelCanvas.height = h;
+          var labelCtx = labelCanvas.getContext('2d');
+          drawArtworkOnly(labelCtx, w, h);
+          var labelUrl = labelCanvas.toDataURL('image/png');
+          var labelLink = document.createElement('a');
+          labelLink.href = labelUrl;
+          labelLink.download = 'crystal-design-' + baseName + '-label.png';
+          labelLink.click();
+        } catch (e) {
+          alert('Could not generate label/artwork image. Full design was downloaded.');
+        }
+        document.getElementById('confirm-success').classList.add('visible');
+        document.getElementById('confirm-design-btn').disabled = true;
+      });
+      document.getElementById('go-to-plan-btn').addEventListener('click', function () {
+        var qtyEl = document.getElementById('qty');
+        var planQtyEl = document.getElementById('plan-qty');
+        if (qtyEl && planQtyEl) planQtyEl.value = qtyEl.value;
+        showStep(3);
+      });
+      var selectedProductionSlot = null;
+      var BASE_WEEKS = 3;
+      var EXTRA_WEEKS_PER_AWARDS = 15;
+      var COST_RED = 1.25;
+      var COST_ORANGE = 1.1;
+      var COST_GREEN = 1;
+      function slotConfigForQuantity(qty) {
+        if (qty <= 10) {
+          return [
+            { label: 'Week 1', color: 'red', costMult: COST_RED, note: 'Fast — higher cost', enabled: true },
+            { label: 'Week 2', color: 'red', costMult: COST_RED, note: 'Fast — higher cost', enabled: true },
+            { label: 'Week 3', color: 'orange', costMult: COST_ORANGE, note: 'Medium', enabled: true },
+            { label: 'Week 4', color: 'orange', costMult: COST_ORANGE, note: 'Medium', enabled: true },
+            { label: 'Week 5', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true },
+            { label: 'Week 6', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true },
+            { label: 'Week 7', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true },
+            { label: 'Week 8', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true }
+          ];
+        } else if (qty <= 30) {
+          return [
+            { label: 'Week 1', color: 'red', costMult: COST_RED, note: 'Not available for this quantity', enabled: false },
+            { label: 'Week 2', color: 'red', costMult: COST_RED, note: 'Fast — higher cost', enabled: true },
+            { label: 'Week 3', color: 'orange', costMult: COST_ORANGE, note: 'Medium — some rush cost', enabled: true },
+            { label: 'Week 4', color: 'orange', costMult: COST_ORANGE, note: 'Medium — some rush cost', enabled: true },
+            { label: 'Week 5', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true },
+            { label: 'Week 6', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true },
+            { label: 'Week 7', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true },
+            { label: 'Week 8', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true }
+          ];
+        } else {
+          return [
+            { label: 'Week 1', color: 'red', costMult: COST_RED, note: 'Not available for this quantity', enabled: false },
+            { label: 'Week 2', color: 'red', costMult: COST_RED, note: 'Not available for this quantity', enabled: false },
+            { label: 'Week 3', color: 'red', costMult: COST_RED, note: 'Fast — higher cost', enabled: true },
+            { label: 'Week 4', color: 'orange', costMult: COST_ORANGE, note: 'Medium — some rush cost', enabled: true },
+            { label: 'Week 5', color: 'orange', costMult: COST_ORANGE, note: 'Medium — some rush cost', enabled: true },
+            { label: 'Week 6', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true },
+            { label: 'Week 7', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true },
+            { label: 'Week 8', color: 'green', costMult: COST_GREEN, note: 'Standard — lower cost', enabled: true }
+          ];
+        }
+      }
+      function renderProductionCalendar() {
+        var calendar = document.getElementById('production-calendar');
+        var planQtyEl = document.getElementById('plan-qty');
+        if (!calendar) return;
+        calendar.innerHTML = '';
+        var today = new Date();
+        var qtyBase = parseInt(planQtyEl && planQtyEl.value ? planQtyEl.value : 1, 10) || 1;
+        var slots = slotConfigForQuantity(qtyBase);
+        for (var i = 0; i < slots.length; i++) {
+          var s = slots[i];
+          var startDate = new Date(today);
+          startDate.setDate(startDate.getDate() + i * 7);
+          var div = document.createElement('button');
+          div.type = 'button';
+          div.className = 'production-slot ' + s.color + (s.enabled ? '' : ' disabled');
+          div.setAttribute('data-slot-index', String(i));
+          var label = s.label + ' — week of ' + startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          div.innerHTML = '<span class=\"slot-week\">' + label + '</span><br><span class=\"slot-note\">' + s.note + '</span>';
+          div.addEventListener('click', function () {
+            var idx = parseInt(this.getAttribute('data-slot-index'), 10);
+            var slot = slots[idx];
+            if (!slot.enabled) return;
+            var start = new Date(today);
+            start.setDate(start.getDate() + idx * 7);
+            selectedProductionSlot = { index: idx, startDate: start, slot: slot };
+            calendar.querySelectorAll('.production-slot').forEach(function (b) { b.classList.remove('selected'); });
+            this.classList.add('selected');
+            var qty = parseInt(planQtyEl && planQtyEl.value ? planQtyEl.value : 1, 10) || 1;
+            var extraWeeks = Math.ceil(qty / EXTRA_WEEKS_PER_AWARDS);
+            var delivery = new Date(selectedProductionSlot.startDate);
+            delivery.setDate(delivery.getDate() + (BASE_WEEKS + extraWeeks) * 7);
+            document.getElementById('plan-expected-date').textContent = 'Expected delivery: ' + delivery.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            var costNote = slot.costMult === COST_RED ? 'Rush timing — higher cost applies.' : slot.costMult === COST_ORANGE ? 'Medium timing — moderate rush cost.' : 'Standard timing — best value.';
+            document.getElementById('plan-cost-note').textContent = costNote;
+            document.getElementById('plan-result').hidden = false;
+          });
+          calendar.appendChild(div);
+        }
+        document.getElementById('plan-result').hidden = true;
+        selectedProductionSlot = null;
+      }
+      document.getElementById('plan-qty').addEventListener('input', function () {
+        renderProductionCalendar();
+      });
+      document.getElementById('plan-submit-btn').addEventListener('click', function () {
+        if (!selectedProductionSlot) return;
+        alert('Production plan submitted. You will receive confirmation and tracking by email. Thank you!');
+      });
+    })();
+  </script>
 </body>
 </html>
