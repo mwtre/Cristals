@@ -1,0 +1,24 @@
+{
+  "templates": [
+    {
+      "name": "New Template",
+      "description": "",
+      "price": 0,
+      "line1": "",
+      "line2": "",
+      "line3": "",
+      "arts": [],
+      "positions": {}
+    },
+    {
+      "name": "New Template",
+      "description": "",
+      "price": 0,
+      "line1": "",
+      "line2": "",
+      "line3": "",
+      "arts": [],
+      "positions": {}
+    }
+  ]
+}

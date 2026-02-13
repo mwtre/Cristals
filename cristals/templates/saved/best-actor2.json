@@ -1,0 +1,83 @@
+{
+  "templates": [
+    {
+      "name": "Best actor2",
+      "description": "",
+      "price": 0,
+      "line1": "Best actor",
+      "line2": "Walter White",
+      "line3": "01-01-26",
+      "arts": [
+        {
+          "type": "line",
+          "x": 0.5,
+          "y": 0.58,
+          "width": 0.14,
+          "size": 0.03,
+          "color": "white"
+        },
+        {
+          "type": "line",
+          "x": 0.5,
+          "y": 0.45,
+          "width": 0.18,
+          "size": 0.03,
+          "color": "white"
+        },
+        {
+          "type": "diamond",
+          "x": 0.51,
+          "y": 0.38,
+          "width": 0.4,
+          "size": 0.03,
+          "color": "white"
+        },
+        {
+          "type": "diamond",
+          "x": 0.48,
+          "y": 0.38,
+          "width": 0.4,
+          "size": 0.03,
+          "color": "black"
+        },
+        {
+          "type": "dot",
+          "x": 0.5,
+          "y": 0.58,
+          "width": 0.4,
+          "size": 0.03,
+          "color": "black"
+        },
+        {
+          "type": "dashes",
+          "x": 0.5,
+          "y": 0.63,
+          "width": 0.19,
+          "size": 0.03,
+          "color": "white"
+        }
+      ],
+      "positions": {
+        "line1": {
+          "x": 0.5,
+          "y": 0.3,
+          "font": "Engraver Light",
+          "fontSizePercent": 40
+        },
+        "line2": {
+          "x": 0.5,
+          "y": 0.52,
+          "font": "Engraver Light",
+          "fontSizePercent": 50
+        },
+        "line3": {
+          "x": 0.5,
+          "y": 0.66,
+          "font": "Engraver Light",
+          "fontSizePercent": 40
+        }
+      },
+      "align": "center"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "images": [
+    { "id": "prize-ribbon-white", "file": "prize-ribbon-white.svg", "name": "Prize ribbon" },
+    { "id": "award-alt-svgrepo-com", "file": "award-alt-svgrepo-com.svg", "name": "Award" }
+  ]
+}

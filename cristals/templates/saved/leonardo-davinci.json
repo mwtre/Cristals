@@ -1,0 +1,67 @@
+{
+  "templates": [
+    {
+      "name": "Leonardo DaVinci",
+      "description": "",
+      "price": 0,
+      "line1": "Leonardo DaVinci",
+      "line2": "Best artist",
+      "line3": "2026",
+      "arts": [
+        {
+          "type": "line",
+          "x": 0.5,
+          "y": 0.45,
+          "width": 0.18,
+          "size": 0.03,
+          "color": "white"
+        },
+        {
+          "type": "star",
+          "x": 0.5,
+          "y": 0.45,
+          "width": 0.4,
+          "size": 0.04,
+          "color": "black"
+        },
+        {
+          "type": "doubleLine",
+          "x": 0.5,
+          "y": 0.6,
+          "width": 0.14,
+          "size": 0.03,
+          "color": "white"
+        },
+        {
+          "type": "line",
+          "x": 0.5,
+          "y": 0.6,
+          "width": 0.1,
+          "size": 0.03,
+          "color": "black"
+        }
+      ],
+      "positions": {
+        "line1": {
+          "x": 0.5,
+          "y": 0.38,
+          "font": "BankGothic Bold",
+          "fontSizePercent": 75
+        },
+        "line2": {
+          "x": 0.5,
+          "y": 0.52,
+          "font": "BankGothic Bold",
+          "fontSizePercent": 85
+        },
+        "line3": {
+          "x": 0.5,
+          "y": 0.66,
+          "font": "BankGothic Bold",
+          "fontSizePercent": 90
+        }
+      },
+      "align": "center"
+    }
+  ]
+}
