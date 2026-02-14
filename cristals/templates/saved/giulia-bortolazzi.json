@@ -1,0 +1,69 @@
+{
+  "templates": [
+    {
+      "name": "Giulia Bortolazzi",
+      "description": "",
+      "price": 0,
+      "line1": "Giulia Bortolazzi",
+      "line2": "BEST TIRAMISU'",
+      "line3": "01-01-2026",
+      "arts": [
+        {
+          "type": "image",
+          "x": 0.51,
+          "y": 0.6,
+          "width": 0.4,
+          "size": 0.13,
+          "color": "white",
+          "src": "https://cdn.svgapi.com/vector/86536/cooking.svg",
+          "imageName": "Cooking"
+        },
+        {
+          "type": "star",
+          "x": 0.54,
+          "y": 0.56,
+          "width": 0.4,
+          "size": 0.04,
+          "color": "white"
+        },
+        {
+          "type": "line",
+          "x": 0.5,
+          "y": 0.52,
+          "width": 0.18,
+          "size": 0.03,
+          "color": "gold"
+        },
+        {
+          "type": "line",
+          "x": 0.47,
+          "y": 0.42,
+          "width": 0.12,
+          "size": 0.03,
+          "color": "gold"
+        }
+      ],
+      "positions": {
+        "line1": {
+          "x": 0.55,
+          "y": 0.72,
+          "font": "Great Vibes",
+          "fontSizePercent": 75
+        },
+        "line2": {
+          "x": 0.54,
+          "y": 0.48,
+          "font": "Italiana",
+          "fontSizePercent": 75
+        },
+        "line3": {
+          "x": 0.54,
+          "y": 0.77,
+          "font": "Italiana",
+          "fontSizePercent": 100
+        }
+      },
+      "align": "left"
+    }
+  ]
+}
