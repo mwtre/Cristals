@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Radiant Ellipse Crystal — MW3</title>
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=DM+Serif+Display&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Outfit:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.bunny.net/css?family=Cinzel:400,600|Cormorant+Garamond:400,600|Crimson+Text:400,600|DM+Serif+Display|Libre+Baskerville:400,700|Lora:400,600|Merriweather:400,700|Outfit:400,500,600|Playfair+Display:400,600&display=swap" rel="stylesheet">
   <style>
     @font-face {
       font-family: 'Engraving CC';
@@ -89,15 +90,68 @@
     }
     .layout {
       display: grid;
-      grid-template-columns: 1fr 380px;
-      min-height: calc(100vh - 4.5rem);
+      grid-template-columns: 1fr 400px;
       flex: 1;
+      min-height: 0;
+      overflow: hidden;
     }
     @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
     }
 
-    /* Left: image gallery */
+    /* Palette bar: on top of image, under headbar */
+    .palette-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem 1.25rem;
+      padding: 0.5rem 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .palette-bar-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: 0.25rem;
+    }
+    .palette-bar-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .palette-bar-group-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-right: 0.15rem;
+    }
+    .palette-bar-actions { display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0; margin-left: 0.5rem; padding-left: 0.75rem; border-left: 1px solid var(--border); }
+    .palette-bar-actions .cta { padding: 0.35rem 0.6rem; font-size: 0.78rem; white-space: nowrap; }
+    .surface-overlay {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1rem;
+      padding: 0.5rem 1rem;
+      background: rgba(201, 169, 98, 0.12);
+      border-bottom: 1px solid var(--border);
+    }
+    .surface-overlay[hidden] { display: none !important; }
+    .surface-overlay .instruction {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .surface-overlay .instruction.step { font-weight: 600; color: var(--accent); margin-right: 0.25rem; }
+    .surface-overlay button { flex-shrink: 0; }
+
+    /* Left + center: edit column and image */
     .gallery-section {
       position: relative;
       background: var(--surface);
@@ -111,38 +165,162 @@
       overflow: hidden;
       padding: 0;
     }
+    .editor-preview-row {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      padding: 0;
+      margin: 0;
+    }
+    .palette-column {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      padding: 0.5rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .palette-column .left-edit-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 0.5rem 0;
+      margin-top: 0.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .palette-column .left-edit-scroll .option-label { font-size: 0.7rem; margin-bottom: 0.35rem; }
+    .palette-column .left-edit-scroll .line-tabs { display: flex; gap: 2px; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+    .palette-column .left-edit-scroll .line-tab { padding: 0.35rem 0.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-size: 0.78rem; cursor: pointer; margin-bottom: -1px; }
+    .palette-column .left-edit-scroll .line-tab:hover { color: var(--text); }
+    .palette-column .left-edit-scroll .line-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .palette-column .left-edit-scroll .line-panel { display: none; }
+    .palette-column .left-edit-scroll .line-panel.active { display: block; margin-top: 0.5rem; }
+    .palette-column .left-edit-scroll .line-panel input[type="text"],
+    .palette-column .left-edit-scroll .line-panel select { width: 100%; max-width: 100%; box-sizing: border-box; }
+    .palette-column .left-edit-scroll .panel-placeholder { font-size: 0.8rem; margin-bottom: 0.5rem; }
+    .palette-column .left-edit-scroll .bunny-fonts-preview-wrap { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); }
+    .palette-column .left-edit-scroll .font-preview-grid { max-height: 160px; }
+    .palette-column.left-edit-column {
+      padding-top: 0.5rem;
+    }
+    .palette-item {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      cursor: grab;
+      user-select: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .palette-item:hover {
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+    .palette-item:active {
+      cursor: grabbing;
+    }
+    .palette-item.palette-square {
+      border-radius: 4px;
+    }
+    .palette-item.palette-rect {
+      width: 44px;
+      height: 28px;
+      border-radius: 2px;
+    }
+    .palette-item.palette-circle {
+      border-radius: 50%;
+    }
+    .palette-item span {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.1;
+      padding: 0 2px;
+    }
+    .preview-column {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 0;
+      margin: 0;
+      position: relative;
+    }
+    .preview-column #gallery-main-wrap {
+      flex: 1;
+      min-height: 0;
+    }
+    #zoom-controls-wrap,
+    #gallery-thumbs { display: none !important; }
+    #preview-drop-zone {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    #preview-drop-zone.drag-over {
+      pointer-events: auto;
+      background: rgba(201, 169, 98, 0.08);
+      outline: 2px dashed var(--accent);
+      outline-offset: -2px;
+    }
     #gallery-main-wrap {
       flex: 1;
       min-height: 0;
       width: 100%;
       padding: 0;
+      margin: 0;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      align-items: stretch;
+      align-content: flex-start;
+      justify-content: flex-start;
       overflow: hidden;
     }
+    .gallery-section { padding-left: 0; padding-right: 0; }
     #gallery-main-wrap.zoomed {
       flex: 1;
       min-height: 320px;
     }
+    #preview-canvas-wrap {
+      margin: 0;
+      padding: 0;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: stretch;
+      background: var(--surface);
+    }
     #preview-canvas {
-      width: 100%;
-      height: 100%;
+      display: block;
       max-width: 100%;
       max-height: 100%;
-      display: block;
-      object-fit: contain;
-      object-position: center;
+      width: auto;
+      height: auto;
+      vertical-align: top;
       transition: transform 0.2s ease-out;
-      border-radius: 4px;
+      border-radius: 0;
     }
     #gallery-main-wrap.zoomed #preview-canvas {
-      max-height: 100%;
       transform-origin: var(--edit-zoom-origin, 50% 52%);
       transform: scale(var(--edit-zoom-scale, 1.85));
     }
-    .start-edit-wrap { text-align: center; padding: 0.35rem 0.6rem; }
-    .start-edit-wrap .start-edit-btn { padding: 0.4rem 0.75rem; font-size: 0.82rem; }
+    .zoom-controls-wrap { display: flex; gap: 0.35rem; padding: 0.35rem 0.5rem; justify-content: center; align-items: center; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .zoom-controls-wrap button { padding: 0.35rem 0.6rem; font-size: 0.78rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 4px; cursor: pointer; font: inherit; }
+    .zoom-controls-wrap button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .zoom-controls-wrap button:disabled { opacity: 0.5; cursor: default; }
     .gallery-thumbs {
       display: flex;
       gap: 0.35rem;
@@ -172,12 +350,14 @@
       font-size: 0.9rem;
     }
 
-    /* Right: options — compact like competitor */
+    /* Right: editor commands — compact */
     .options-section {
-      padding: 1rem 1.1rem;
+      padding: 0.6rem 0.75rem;
       overflow-y: auto;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
+    .options-section .option-group { margin-bottom: 0.75rem; }
+    .options-section .option-label { font-size: 0.82rem; }
     .editor-cart {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -308,7 +488,6 @@
 
     .option-hint { font-size: 0.72rem; color: var(--muted); margin: 0 0 0.35rem 0; }
     .customize-cta { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
-    .customize-cta .start-edit-btn { display: inline-block; width: auto; margin-top: 0.25rem; padding: 0.4rem 0.75rem; font-size: 0.8rem; }
     .line-tabs-wrap { margin-bottom: 0.9rem; }
     .line-tabs { display: flex; gap: 2px; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
     .line-tab { padding: 0.4rem 0.6rem; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-size: 0.82rem; cursor: pointer; margin-bottom: -1px; }
@@ -316,6 +495,8 @@
     .line-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
     .line-panel { display: none; }
     .line-panel.active { display: block; }
+    .panel-placeholder { margin: 0 0 0.75rem 0; padding: 0.4rem 0.6rem; background: var(--surface); border-left: 3px solid var(--accent); border-radius: 4px; font-size: 0.9rem; color: var(--text-muted); }
+    .panel-placeholder strong { color: var(--text); }
     .line-panel .option-label { margin-top: 0.6rem; display: block; }
     .line-panel .option-label:first-child { margin-top: 0; }
     .line-panel input[type="text"] {
@@ -363,10 +544,28 @@
     .art-item .art-remove { margin-left: auto; padding: 0.2rem 0.4rem; font-size: 0.8rem; }
 
     .svg-api-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; max-height: 180px; overflow-y: auto; padding: 0.25rem 0; }
-    .svg-api-results .svg-api-icon { width: 48px; height: 48px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
-    .svg-api-results .svg-api-icon:hover { border-color: var(--accent); background: rgba(201, 169, 98, 0.1); }
-    .svg-api-results .svg-api-icon img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .svg-api-results .svg-api-icon { width: 48px; height: 48px; padding: 6px; background: #3a3a3a; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
+    .svg-api-results .svg-api-icon:hover { border-color: var(--accent); background: rgba(201, 169, 98, 0.2); }
+    .svg-api-results .svg-api-icon img { max-width: 100%; max-height: 100%; object-fit: contain; filter: brightness(0) invert(1); }
     .svg-api-results .svg-api-empty { grid-column: 1 / -1; color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0; }
+
+    .bunny-fonts-preview-wrap { margin-top: 0.5rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+    .font-preview-row { margin-bottom: 0.5rem; }
+    .font-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; max-height: 220px; overflow-y: auto; padding: 0.25rem 0; }
+    .font-preview-card { padding: 0.5rem 0.6rem; background: #3a3a3a; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 0.95rem; min-height: 2.5rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+    .font-preview-card:hover { border-color: var(--accent); background: rgba(201, 169, 98, 0.15); }
+    .font-preview-card .font-preview-sample { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+    .creation-mode-tabs { display: flex; gap: 0.25rem; margin: 0.5rem 0 0.75rem; border-bottom: 1px solid var(--border); }
+    .creation-tab { padding: 0.5rem 1rem; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font: inherit; cursor: pointer; margin-bottom: -1px; }
+    .creation-tab:hover { color: var(--text); }
+    .creation-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+    .creation-panel { display: none; }
+    .creation-panel.active { display: block; }
+    .regulate-placement-wrap { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .ai-generate-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+    .creation-panel .option-hint a { color: var(--accent); }
+    .ai-generate-status { margin-top: 0.35rem; min-height: 1.2em; }
 
     .quantity-row {
       display: flex;
@@ -491,6 +690,27 @@
     .confirm-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
     .confirm-success { display: none; padding: 1rem; background: rgba(201, 169, 98, 0.15); border: 1px solid var(--accent); border-radius: 8px; margin-top: 1rem; font-size: 0.9rem; }
     .confirm-success.visible { display: block; }
+
+    /* Bottom bar: Confirm only, in flow so it does not cover the image */
+    #step-product .bottom-edit-bar {
+      flex-shrink: 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      max-height: 38vh;
+      overflow: hidden;
+    }
+    #step-product .bottom-edit-tab-btn { display: none !important; }
+    #step-product .bottom-edit-panel {
+      display: block;
+      overflow-y: auto;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.85rem;
+      background: var(--bg);
+    }
+    #step-product .bottom-edit-panel .confirm-design { margin-top: 0; padding-top: 0; border-top: none; }
+
     #mapping-overlay {
       position: absolute;
       inset: 0;
@@ -534,11 +754,115 @@
     .step-screen.leaving { opacity: 0; pointer-events: none; }
     .step-screen.entering { opacity: 0; }
     .step-screen.entering.active { opacity: 1; }
-    #step-intro { align-items: center; justify-content: center; overflow: hidden; }
-    #step-intro video { width: 100%; height: 100%; object-fit: cover; transform: scale(1.15); }
-    #step-intro .intro-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.25); transition: opacity 0.4s ease; }
+    #step-intro { align-items: center; justify-content: center; overflow: hidden; background: #000; }
+    #step-intro .intro-video-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80vmin;
+      height: 80vmin;
+      margin: auto;
+    }
+    #step-intro .intro-video-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    #step-intro .intro-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.35);
+      transition: opacity 0.4s ease;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
     #step-intro .intro-overlay.overlay-hidden { opacity: 0; pointer-events: none; }
-    #step-intro .start-btn { padding: 0.65rem 1.5rem; font-size: 1rem; min-width: auto; width: auto; }
+    #step-intro .intro-overlay .intro-overlay-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 90%;
+    }
+    #step-intro .intro-logo {
+      max-width: 62%;
+      max-height: 38%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      opacity: 0;
+      animation: intro-logo-fadein 1.2s ease-out 0.3s forwards;
+      pointer-events: none;
+      flex-shrink: 0;
+      margin-top: -8vh;
+    }
+    #step-intro .intro-overlay.overlay-hidden .intro-logo {
+      animation: none;
+      opacity: 0;
+      transition: opacity 0.5s ease-out;
+    }
+    @keyframes intro-logo-fadein {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    #step-intro .intro-loading {
+      margin-top: 5rem;
+      width: 100%;
+      max-width: 380px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    #step-intro .intro-loading.visible { opacity: 1; }
+    #step-intro .intro-loading-label {
+      font-size: 1.15rem;
+      color: rgba(255,255,255,0.95);
+      margin-bottom: 0.6rem;
+      text-align: center;
+      font-weight: 500;
+    }
+    #step-intro .intro-loading-bar-wrap {
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    #step-intro .intro-loading-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #c9a962, #d4b872);
+      border-radius: 3px;
+      transition: width 0.15s ease-out;
+    }
+    #step-intro .intro-loading-pct {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.8);
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+    #step-intro .start-btn {
+      padding: 0.65rem 1.5rem;
+      font-size: 1rem;
+      min-width: auto;
+      width: auto;
+      margin-top: 1.75rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    #step-intro .start-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
     #step-crystal-select { padding: 1rem; padding-top: 4.5rem; box-sizing: border-box; }
     #step-crystal-select h2 { text-align: center; margin: 0 0 1rem 0; font-family: 'DM Serif Display', serif; font-weight: 400; }
     .crystal-select-content { flex: 1; min-height: 0; max-width: 1000px; margin: 0 auto; width: 100%; }
@@ -620,7 +944,7 @@
       .crystal-stats-list { grid-template-columns: 1fr; }
     }
 
-    #step-product { position: relative; z-index: 1; min-height: 100vh; padding-top: 4.5rem; box-sizing: border-box; }
+    #step-product { position: relative; z-index: 1; min-height: 100vh; padding-top: 4.5rem; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; }
     #step-plan-production { padding: 1.5rem; padding-top: 4.5rem; max-width: 900px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
     #step-plan-production h2 { font-family: 'DM Serif Display', serif; font-weight: 400; margin: 0 0 0.5rem 0; font-size: 1.5rem; }
     #step-plan-production .plan-subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
@@ -769,9 +1093,21 @@
     <button type="button" class="top-step" data-step="4"><span class="step-index">5</span> Checkout</button>
   </nav>
   <div id="step-intro" class="step-screen active">
-    <video id="intro-video" src="cristals/intro.mp4?v=2" muted playsinline preload="auto"></video>
+    <div class="intro-video-wrap">
+      <video id="intro-video" src="cristals/intro.mp4?v=4" muted playsinline preload="auto"></video>
+    </div>
     <div class="intro-overlay">
-      <button type="button" class="cta start-btn" id="start-btn">Start</button>
+      <div class="intro-overlay-inner">
+        <img class="intro-logo" id="intro-logo" src="cristals/cristaux-logo-light%20(2).webp" alt="Cristaux" />
+        <div class="intro-loading" id="intro-loading" aria-live="polite">
+          <div class="intro-loading-label" id="intro-loading-label">Loading editor</div>
+          <div class="intro-loading-bar-wrap">
+            <div class="intro-loading-bar-fill" id="intro-loading-bar-fill"></div>
+          </div>
+          <div class="intro-loading-pct" id="intro-loading-pct">0%</div>
+        </div>
+        <button type="button" class="cta start-btn" id="start-btn">Start</button>
+      </div>
     </div>
   </div>
   <div id="step-crystal-select" class="step-screen">
@@ -809,63 +1145,43 @@
     </div>
   </div>
   <div id="step-product" class="step-screen">
+  <div class="palette-bar" id="palette-column" aria-label="Drag elements onto the design">
+    <span class="palette-bar-label">Place:</span>
+    <span class="palette-bar-group">
+      <span class="palette-bar-group-label">Text</span>
+      <div class="palette-item palette-square" draggable="true" data-palette-type="text" data-line="1" title="Drag to place Text 1"><span>1</span></div>
+      <div class="palette-item palette-square" draggable="true" data-palette-type="text" data-line="2" title="Drag to place Text 2"><span>2</span></div>
+      <div class="palette-item palette-square" draggable="true" data-palette-type="text" data-line="3" title="Drag to place Text 3"><span>3</span></div>
+    </span>
+    <span class="palette-bar-group">
+      <span class="palette-bar-group-label">Line</span>
+      <div class="palette-item palette-rect" draggable="true" data-palette-type="line" title="Drag to add line/separator"><span>—</span></div>
+    </span>
+    <span class="palette-bar-group">
+      <span class="palette-bar-group-label">Symbol</span>
+      <div class="palette-item palette-circle" draggable="true" data-palette-type="symbol" title="Drag to add symbol or logo"><span>★</span></div>
+    </span>
+    <span class="palette-bar-group palette-bar-actions">
+      <span class="palette-bar-group-label">Surface</span>
+      <button type="button" class="cta secondary" id="draw-surface-btn" title="Define irregular crystal surface – content outside will be hidden">Draw surface</button>
+    </span>
+  </div>
+  <div id="surface-overlay" class="surface-overlay" aria-live="polite" hidden>
+    <span class="instruction step">Draw surface:</span>
+    <span class="instruction">Click on the preview to add points, then click Finish.</span>
+    <button type="button" class="cta" id="surface-finish-btn">Finish surface</button>
+    <button type="button" class="cta secondary" id="surface-cancel-btn">Cancel</button>
+  </div>
   <div class="layout">
     <section class="gallery-section" aria-label="Product images">
-      <div id="gallery-main-wrap" style="position: relative;">
-        <div id="mapping-overlay" aria-live="polite">
-          <p class="instruction step" id="mapping-step-msg">Click on the crystal where Line 1 should go</p>
-          <p class="instruction">(x, y are saved as 0–1; center of engraving area)</p>
-          <button type="button" class="cta secondary" id="mapping-cancel" style="margin-top: 0.75rem;">Cancel</button>
-        </div>
-        <div id="preview-canvas-wrap" style="position: relative; display: none;">
-          <canvas id="preview-canvas" aria-label="Crystal with your engraving" hidden></canvas>
-          <div id="preview-image-art-overlay" aria-hidden="true" style="position: absolute; top: 0; left: 0; pointer-events: none; overflow: hidden;"></div>
-        </div>
-        <p id="gallery-placeholder" class="gallery-placeholder">Add your crystal images to the <strong>cristals</strong> folder, then list their filenames in the <code>crystalImages</code> array in index.html.</p>
-      </div>
-      <div class="start-edit-wrap" id="start-edit-wrap" hidden>
-        <button type="button" class="cta secondary start-edit-btn" id="start-edit-btn">Start edit</button>
-      </div>
-      <div id="gallery-thumbs" class="gallery-thumbs" hidden></div>
-    </section>
-    <section class="options-section">
-      <h1 class="product-title" id="product-title">Radiant Ellipse Crystal</h1>
-      <p class="product-subtitle">Award trophy — personalize with your message</p>
-      <div class="product-price-row">
-        <p class="price" id="product-base-price"><span class="currency">$</span><span id="product-base-price-value">49.99</span></p>
-        <span class="price-qty-label">Qty:</span>
-        <div class="quantity-controls">
-          <button type="button" id="qty-minus" aria-label="Decrease quantity">−</button>
-          <input type="number" id="qty" value="1" min="1" max="99" aria-label="Quantity">
-          <button type="button" id="qty-plus" aria-label="Increase quantity">+</button>
-        </div>
-      </div>
-      <p class="customize-cta">Quickly customize below or click <strong>Start edit</strong> on the image to zoom.</p>
-
-      <div class="editor-cart" id="editor-cart">
-        <div class="editor-cart-title">Your order</div>
-        <div class="editor-cart-rows">
-          <div class="editor-cart-row" id="cart-row-crystal"><span class="cart-label">Crystal</span><span class="cart-value" id="cart-crystal"></span></div>
-          <div class="editor-cart-row" id="cart-row-included"><span class="cart-label">Included</span><span class="cart-value">3 lines, 1 art</span></div>
-          <div class="editor-cart-row cart-row-extra" id="cart-row-template" hidden><span class="cart-label">Template</span><span class="cart-value" id="cart-template-value"></span></div>
-          <div class="editor-cart-row cart-row-extra" id="cart-row-extra-art" hidden><span class="cart-label">Extra art</span><span class="cart-value" id="cart-extra-art"></span></div>
-          <div class="editor-cart-row cart-row-extra" id="cart-row-extra-chars" hidden><span class="cart-label">Extra letters</span><span class="cart-value" id="cart-extra-chars"></span></div>
-          <div class="editor-cart-row"><span class="cart-label">Quantity</span><span class="cart-value" id="cart-qty"></span></div>
-        </div>
-        <div class="editor-cart-total">
-          <span class="cart-total-label">Subtotal</span>
-          <span class="cart-total-value" id="cart-total-value">$0</span>
-        </div>
-      </div>
-
-      <div class="option-group">
-        <span class="option-label">Graphic</span>
-        <p class="option-hint">Choose a preset. <button type="button" class="link-btn" id="open-template-manager">Manage templates</button> · <button type="button" class="link-btn" id="save-design-btn">Save design</button></p>
-        <p class="option-hint save-design-hint" id="save-design-hint">Save design exports one JSON file per design. Put each file in <code>cristals/templates/saved/</code> and add its filename to <code>cristals/templates/saved/index.json</code> to use it as a preset.</p>
-        <div class="template-grid" id="template-grid" role="group" aria-label="Choose template"></div>
-      </div>
-
-      <div class="option-group line-tabs-wrap">
+      <div class="editor-preview-row">
+        <div class="palette-column left-edit-column" aria-label="Edit text and art">
+          <div class="left-edit-scroll" id="left-edit-scroll">
+          <div class="regulate-placement-wrap">
+          <span class="option-label">Place and edit</span>
+          <p class="option-hint"><strong>Drag</strong> square (Text 1–3), rectangle (line), or circle (symbol) onto the preview. Use tabs below to edit. Drag and resize on preview.</p>
+          </div>
+          <div class="option-group line-tabs-wrap">
         <div class="line-tabs" role="tablist">
           <button type="button" class="line-tab active" role="tab" id="tab-btn-1" aria-selected="true" aria-controls="panel-1" data-line="1">Line 1</button>
           <button type="button" class="line-tab" role="tab" id="tab-btn-2" aria-selected="false" aria-controls="panel-2" data-line="2">Line 2</button>
@@ -873,6 +1189,7 @@
           <button type="button" class="line-tab" role="tab" id="tab-btn-art" aria-selected="false" aria-controls="panel-art" data-line="art">Art</button>
         </div>
         <div id="panel-1" class="line-panel active" role="tabpanel" aria-labelledby="tab-btn-1">
+          <p class="panel-placeholder" aria-live="polite">Editing: <strong>Line 1</strong> (top text box)</p>
           <span class="option-label">Text</span>
           <input type="text" id="line1" placeholder="e.g. Awarded to" maxlength="60" autocomplete="off">
           <span class="char-count" id="count1">0 / 60</span>
@@ -918,6 +1235,7 @@
           </select>
         </div>
         <div id="panel-2" class="line-panel" role="tabpanel" aria-labelledby="tab-btn-2" hidden>
+          <p class="panel-placeholder" aria-live="polite">Editing: <strong>Line 2</strong> (middle)</p>
           <span class="option-label">Text</span>
           <input type="text" id="line2" placeholder="Name or title" maxlength="60" autocomplete="off">
           <span class="char-count" id="count2">0 / 60</span>
@@ -963,6 +1281,7 @@
           </select>
         </div>
         <div id="panel-3" class="line-panel" role="tabpanel" aria-labelledby="tab-btn-3" hidden>
+          <p class="panel-placeholder" aria-live="polite">Editing: <strong>Line 3</strong> (bottom)</p>
           <span class="option-label">Text</span>
           <input type="text" id="line3" placeholder="Date or subtitle" maxlength="60" autocomplete="off">
           <span class="char-count" id="count3">0 / 60</span>
@@ -1007,7 +1326,16 @@
             <option value="Georgia">Georgia</option>
           </select>
         </div>
+        <div id="bunny-fonts-preview-wrap" class="bunny-fonts-preview-wrap">
+          <span class="option-label">Preview Bunny Fonts</span>
+          <p class="option-hint">Click a font to apply it to the current line.</p>
+          <div class="font-preview-row">
+            <input type="text" id="font-preview-search" placeholder="Search fonts…" aria-label="Search fonts" style="flex: 1; min-width: 120px; padding: 0.35rem 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text);">
+          </div>
+          <div id="font-preview-grid" class="font-preview-grid"></div>
+        </div>
         <div id="panel-art" class="line-panel" role="tabpanel" aria-labelledby="tab-btn-art" hidden>
+          <p class="panel-placeholder" aria-live="polite">Editing: <strong>Art</strong> (decorations)</p>
           <span class="option-label">Add line or symbol</span>
           <div class="art-add-row">
             <select id="art-type" aria-label="Art type">
@@ -1020,8 +1348,11 @@
             </select>
             <select id="art-color-new" aria-label="Art color">
               <option value="white">White</option>
-              <option value="blue">Blue</option>
               <option value="black">Black</option>
+              <option value="gold">Gold</option>
+              <option value="blue">Blue</option>
+              <option value="red">Red</option>
+              <option value="silver">Silver</option>
             </select>
             <button type="button" class="cta secondary" id="art-add-btn">Add</button>
           </div>
@@ -1038,11 +1369,105 @@
             <button type="button" class="cta secondary" id="svg-api-search-btn">Search</button>
           </div>
           <div id="svg-api-results" class="svg-api-results"></div>
-          <p class="option-hint">Position (x, y) and width/size in % of image. Adjust then redraws.</p>
+          <p class="option-hint">Position (x, y) and width/size in % of image.</p>
           <div id="art-list" class="art-list"></div>
         </div>
       </div>
+          </div>
+        </div>
+        <div class="preview-column">
+      <div id="gallery-main-wrap" style="position: relative;">
+        <div id="mapping-overlay" aria-live="polite">
+          <p class="instruction step" id="mapping-step-msg">Click on the crystal where Line 1 should go</p>
+          <p class="instruction">(x, y are saved as 0–1; center of engraving area)</p>
+          <button type="button" class="cta secondary" id="mapping-cancel" style="margin-top: 0.75rem;">Cancel</button>
+        </div>
+        <div id="preview-canvas-wrap" style="position: relative; display: none;">
+          <div id="preview-drop-zone" aria-label="Drop zone for design elements"></div>
+          <canvas id="preview-canvas" aria-label="Crystal with your engraving" hidden></canvas>
+          <div id="preview-image-art-overlay" aria-hidden="true" style="position: absolute; top: 0; left: 0; pointer-events: none; overflow: hidden;"></div>
+        </div>
+        <p id="gallery-placeholder" class="gallery-placeholder">Add your crystal images to the <strong>cristals</strong> folder, then list their filenames in the <code>crystalImages</code> array in index.html.</p>
+      </div>
+      <div class="zoom-controls-wrap" id="zoom-controls-wrap" hidden>
+        <button type="button" id="zoom-in-btn">Zoom in</button>
+        <button type="button" id="zoom-out-btn" disabled>Zoom out</button>
+      </div>
+      <div id="gallery-thumbs" class="gallery-thumbs" hidden></div>
+        </div>
+      </div>
+    </section>
+    <section class="options-section">
+      <h1 class="product-title" id="product-title">Radiant Ellipse Crystal</h1>
+      <p class="product-subtitle">Award trophy — personalize with your message</p>
+      <div class="product-price-row">
+        <p class="price" id="product-base-price"><span class="currency">$</span><span id="product-base-price-value">49.99</span></p>
+        <span class="price-qty-label">Qty:</span>
+        <div class="quantity-controls">
+          <button type="button" id="qty-minus" aria-label="Decrease quantity">−</button>
+          <input type="number" id="qty" value="1" min="1" max="99" aria-label="Quantity">
+          <button type="button" id="qty-plus" aria-label="Increase quantity">+</button>
+        </div>
+      </div>
+      <p class="customize-cta">Drag elements from the left onto the preview; edit text and position in the left column.</p>
 
+      <div class="editor-cart" id="editor-cart">
+        <div class="editor-cart-title">Your order</div>
+        <div class="editor-cart-rows">
+          <div class="editor-cart-row" id="cart-row-crystal"><span class="cart-label">Crystal</span><span class="cart-value" id="cart-crystal"></span></div>
+          <div class="editor-cart-row" id="cart-row-included"><span class="cart-label">Included</span><span class="cart-value">3 lines, 1 art</span></div>
+          <div class="editor-cart-row cart-row-extra" id="cart-row-template" hidden><span class="cart-label">Template</span><span class="cart-value" id="cart-template-value"></span></div>
+          <div class="editor-cart-row cart-row-extra" id="cart-row-extra-art" hidden><span class="cart-label">Extra art</span><span class="cart-value" id="cart-extra-art"></span></div>
+          <div class="editor-cart-row cart-row-extra" id="cart-row-extra-chars" hidden><span class="cart-label">Extra letters</span><span class="cart-value" id="cart-extra-chars"></span></div>
+          <div class="editor-cart-row"><span class="cart-label">Quantity</span><span class="cart-value" id="cart-qty"></span></div>
+        </div>
+        <div class="editor-cart-total">
+          <span class="cart-total-label">Subtotal</span>
+          <span class="cart-total-value" id="cart-total-value">$0</span>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <span class="option-label">Graphic</span>
+        <div class="creation-mode-tabs" role="tablist" aria-label="Creation mode">
+          <button type="button" class="creation-tab active" role="tab" id="creation-tab-manual" aria-selected="true" aria-controls="creation-panel-manual" data-mode="manual">Manual</button>
+          <button type="button" class="creation-tab" role="tab" id="creation-tab-ai" aria-selected="false" aria-controls="creation-panel-ai" data-mode="ai">AI creation</button>
+        </div>
+        <div id="creation-panel-manual" class="creation-panel active" role="tabpanel" aria-labelledby="creation-tab-manual">
+          <p class="option-hint">Choose a preset. <button type="button" class="link-btn" id="open-template-manager">Manage templates</button> · <button type="button" class="link-btn" id="save-design-btn">Save design</button></p>
+          <p class="option-hint save-design-hint" id="save-design-hint">Save design exports one JSON file per design. Put each file in <code>cristals/templates/saved/</code> and add its filename to <code>cristals/templates/saved/index.json</code> to use it as a preset.</p>
+          <div class="template-grid" id="template-grid" role="group" aria-label="Choose template"></div>
+        </div>
+        <div id="creation-panel-ai" class="creation-panel" role="tabpanel" aria-labelledby="creation-tab-ai" hidden>
+          <span class="option-label">Generate design with AI (demo)</span>
+          <p class="option-hint">Describe the award (e.g. "Best actor, Walter White, 2026, with gold lines and a star"). Uses Google Gemini (free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">AI Studio</a>).</p>
+          <div class="ai-generate-row" style="align-items: center;">
+            <label for="ai-model" class="option-hint" style="margin: 0; white-space: nowrap;">Model</label>
+            <select id="ai-model" aria-label="Gemini model" style="padding: 0.35rem 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font: inherit;">
+              <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+              <option value="gemini-2.0-flash-001">Gemini 2.0 Flash 001</option>
+              <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
+              <option value="gemini-2.0-flash-lite-001">Gemini 2.0 Flash-Lite 001</option>
+              <option value="gemma-3-4b-it">Gemma 3 4B</option>
+              <option value="gemma-3-1b-it">Gemma 3 1B</option>
+              <option value="gemma-3-12b-it">Gemma 3 12B</option>
+            </select>
+            <input type="text" id="ai-design-prompt" placeholder="e.g. Award for best chef, name Marco Rossi, date 2026" aria-label="Describe your design" style="flex: 1; min-width: 8rem; padding: 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font: inherit;">
+            <button type="button" class="cta" id="ai-generate-btn">Generate</button>
+          </div>
+          <p class="option-hint ai-generate-status" id="ai-generate-status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="bottom-edit-bar" id="bottom-edit-bar">
+        <button type="button" class="bottom-edit-tab-btn" id="bottom-edit-tab-btn" aria-expanded="false" aria-controls="bottom-edit-panel">
+          Place and edit · Confirm design
+          <span class="tab-chevron" aria-hidden="true">▼</span>
+        </button>
+        <div class="bottom-edit-panel" id="bottom-edit-panel" role="region" aria-label="Confirm design">
       <div class="confirm-design" id="confirm-design">
         <h3>Confirm your design</h3>
         <p class="confirm-note">Check each item to confirm. Your design will be sent as a PNG and two confirmation emails will be sent.</p>
@@ -1068,8 +1493,8 @@
       <button type="button" class="cta secondary map-btn" id="map-positions" style="display:none;">Map text positions</button>
       <div id="mapping-result"></div>
       <div id="mapping-result-actions"></div>
-    </section>
-  </div>
+        </div>
+      </div>
   </div>
   <div id="step-plan-production" class="step-screen">
     <h2>Plan your production and track your order</h2>
@@ -1195,6 +1620,8 @@
       var SVG_API_BASE = 'https://api.svgapi.com';
       var SVG_API_KEY = 'Ty5WcDa63E';
       var SVG_CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+      var GEMINI_API_KEY = 'AIzaSyC0YVi1OcVhdBQbjhQKg3oFV-VLD1YjNi8';
+      var GEMINI_MODEL = 'gemini-2.5-flash';
       var currentStep = 0;
       var currentSlide = 0;
       var totalSlides = 3;
@@ -1247,6 +1674,7 @@
         if (step === 0) {
           var introV = document.getElementById('intro-video');
           if (introV) { introV.pause(); introV.currentTime = 0; }
+          startIntroSequence();
         } else if (step === 1) {
           updateCarousel();
           playSlideVideo(currentSlide);
@@ -1293,6 +1721,75 @@
         });
       }
       var introPlayed = false;
+      var introLoadingDone = false;
+      var introLoadingTimer = null;
+      var INTRO_LOGO_DELAY = 1500;
+      var INTRO_LOADING_DURATION = 2500;
+      var INTRO_LOADING_STAGES = [
+        { pct: 0, label: 'Loading editor' },
+        { pct: 25, label: 'AI brain' },
+        { pct: 50, label: 'Art commands' },
+        { pct: 75, label: 'Complete' }
+      ];
+      function resetIntroLoading() {
+        introLoadingDone = false;
+        if (introLoadingTimer) clearInterval(introLoadingTimer);
+        introLoadingTimer = null;
+        var bar = document.getElementById('intro-loading-bar-fill');
+        var pctEl = document.getElementById('intro-loading-pct');
+        var labelEl = document.getElementById('intro-loading-label');
+        var wrap = document.getElementById('intro-loading');
+        var btn = document.getElementById('start-btn');
+        if (bar) bar.style.width = '0%';
+        if (pctEl) pctEl.textContent = '0%';
+        if (labelEl) labelEl.textContent = 'Loading editor';
+        if (wrap) wrap.classList.remove('visible');
+        if (btn) btn.classList.remove('visible');
+      }
+      function runIntroLoading() {
+        if (introLoadingDone) return;
+        var wrap = document.getElementById('intro-loading');
+        var bar = document.getElementById('intro-loading-bar-fill');
+        var pctEl = document.getElementById('intro-loading-pct');
+        var labelEl = document.getElementById('intro-loading-label');
+        var btn = document.getElementById('start-btn');
+        if (!wrap || !bar || !pctEl || !labelEl || !btn) return;
+        wrap.classList.add('visible');
+        var start = Date.now();
+        if (introLoadingTimer) clearInterval(introLoadingTimer);
+        introLoadingTimer = setInterval(function () {
+          var elapsed = Date.now() - start;
+          var pct = Math.min(100, (elapsed / INTRO_LOADING_DURATION) * 100);
+          bar.style.width = pct.toFixed(1) + '%';
+          pctEl.textContent = Math.round(pct) + '%';
+          var stage = INTRO_LOADING_STAGES[0];
+          for (var i = INTRO_LOADING_STAGES.length - 1; i >= 0; i--) {
+            if (pct >= INTRO_LOADING_STAGES[i].pct) {
+              stage = INTRO_LOADING_STAGES[i];
+              break;
+            }
+          }
+          labelEl.textContent = stage.label;
+          if (pct >= 100) {
+            clearInterval(introLoadingTimer);
+            introLoadingTimer = null;
+            introLoadingDone = true;
+            btn.classList.add('visible');
+          }
+        }, 50);
+      }
+      function startIntroSequence() {
+        resetIntroLoading();
+        var introV = document.getElementById('intro-video');
+        if (introV && currentStep === 0 && !introPlayed) {
+          introV.currentTime = 0;
+          introV.playbackRate = 1;
+          introV.play().catch(function () {});
+        }
+        setTimeout(function () {
+          if (currentStep === 0 && !introPlayed) runIntroLoading();
+        }, INTRO_LOGO_DELAY);
+      }
       document.querySelectorAll('.top-step').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var s = parseInt(this.getAttribute('data-step'), 10);
@@ -1325,6 +1822,7 @@
           }, { once: true });
         };
       });
+      startIntroSequence();
       document.getElementById('carousel-prev').addEventListener('click', function () {
         currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
         updateCarousel();
@@ -1421,12 +1919,12 @@
           function next() {
             if (i >= files.length) { done(); return; }
             var name = files[i];
-            if (typeof name !== 'string' || !/^[\w\-\.]+\.json$/i.test(name)) {
+            if (typeof name !== 'string' || !name || !/\.json$/i.test(name)) {
               i++;
               next();
               return;
             }
-            fetchOne('cristals/templates/saved/' + name).then(function (data) {
+            fetchOne('cristals/templates/saved/' + encodeURIComponent(name)).then(function (data) {
               mergeTemplates(data);
               i++;
               next();
@@ -1506,12 +2004,37 @@
       var mappingStep = 0;
       var mappingPositions = {};
       var focusedLine = 0;
+      var placementSelectedBox = null;
+      var placementSelectedArtIndex = null;
+      var placementDragMode = null;
+      var placementDragStart = {};
+      var PLACEMENT_HANDLE_SIZE = 10;
+      var PLACEMENT_ART_HIT_RADIUS = 0.04;
+      var drawSurfaceMode = false;
+
+      function getSurface(name) {
+        if (!name) return [];
+        var entry = crystalTextPositions[name];
+        return (entry && Array.isArray(entry.surface)) ? entry.surface : [];
+      }
+      function setSurface(name, points) {
+        if (!name) return;
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
+        crystalTextPositions[name].surface = points.map(function (p) { return { x: p.x, y: p.y }; });
+      }
+      function pathFromSurface(ctx, points, w, h) {
+        if (!points || points.length < 2) return;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x * w, points[0].y * h);
+        for (var i = 1; i < points.length; i++) ctx.lineTo(points[i].x * w, points[i].y * h);
+        ctx.closePath();
+      }
 
       function defaultPositions() {
         return {
           line1: { x: 0.5, y: 0.38 },
-          line2: { x: 0.5, y: 0.52 },
-          line3: { x: 0.5, y: 0.66 }
+          line2: { x: 0.5, y: 0.56 },
+          line3: { x: 0.5, y: 0.72 }
         };
       }
 
@@ -1521,7 +2044,7 @@
         return defaultPositions();
       }
 
-      var defaultBoxPerLine = { line1: { w: 0.18, h: 0.2 }, line2: { w: 0.18, h: 0.2 }, line3: { w: 0.18, h: 0.2 } };
+      var defaultBoxPerLine = { line1: { w: 0.18, h: 0.2 }, line2: { w: 0.15, h: 0.2 }, line3: { w: 0.13, h: 0.24 } };
       var lineKeys = ['line1', 'line2', 'line3'];
       function getLineBoxSize(name, lineKey) {
         var pos = getPositions(name);
@@ -1538,7 +2061,7 @@
         return align;
       }
       function setAlign(name, lineKey, align) {
-        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
         var line = crystalTextPositions[name][lineKey];
         if (!line || typeof line.x !== 'number') crystalTextPositions[name][lineKey] = { x: defaultPositions()[lineKey].x, y: defaultPositions()[lineKey].y };
         crystalTextPositions[name][lineKey].align = align;
@@ -1579,7 +2102,36 @@
         if (lineEntry && typeof lineEntry.slant === 'number') return lineEntry.slant;
         return 0;
       }
-      var engravingFonts = ['Engraving CC', 'Engraver Normal', 'Engraver Light', 'Engraver Italic', 'Engraver Bold', 'Engraver Bold Italic', 'Academy Engraved', 'BankGothic Bold', 'Boldpact', 'Grammara', 'DM Serif Display', 'Playfair Display', 'Cormorant Garamond', 'Cinzel', 'Lora', 'Merriweather', 'Libre Baskerville', 'Crimson Text', 'Georgia'];
+      var localFonts = ['Engraving CC', 'Engraver Normal', 'Engraver Light', 'Engraver Italic', 'Engraver Bold', 'Engraver Bold Italic', 'Academy Engraved', 'BankGothic Bold', 'Boldpact', 'Grammara', 'Georgia'];
+      var bunnyFonts = ['DM Serif Display', 'Playfair Display', 'Cormorant Garamond', 'Cinzel', 'Lora', 'Merriweather', 'Libre Baskerville', 'Crimson Text', 'Tangerine', 'Great Vibes', 'Dancing Script', 'Pacifico', 'Satisfy', 'Abril Fatface', 'Bebas Neue', 'Oswald', 'Anton', 'Bodoni Moda', 'Castoro', 'Fraunces', 'Literata', 'Source Serif 4', 'EB Garamond', 'Caveat', 'Sacramento', 'Allura', 'Rouge Script', 'Italiana', 'Philosopher', 'Josefin Slab'];
+      var engravingFonts = localFonts.concat(bunnyFonts);
+      var BUNNY_CSS_BASE = 'https://fonts.bunny.net/css';
+      var bunnyFontsLoaded = false;
+      function loadBunnyFontsForPreview() {
+        if (bunnyFontsLoaded) return;
+        bunnyFontsLoaded = true;
+        var families = bunnyFonts.map(function (f) { return f.replace(/\s+/g, '+'); }).join('|');
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = BUNNY_CSS_BASE + '?family=' + families + '&display=swap';
+        document.head.appendChild(link);
+      }
+      function populateFontSelects() {
+        [1, 2, 3].forEach(function (i) {
+          var sel = document.getElementById('font-line' + i);
+          if (!sel) return;
+          sel.innerHTML = '';
+          engravingFonts.forEach(function (f) {
+            var opt = document.createElement('option');
+            opt.value = f;
+            opt.textContent = f;
+            sel.appendChild(opt);
+          });
+        });
+      }
+      populateFontSelects();
+      loadBunnyFontsForPreview();
+      setTimeout(function () { renderFontPreviewGrid(''); }, 0);
       function getFont(name, lineKey) {
         var pos = getPositions(name);
         var lineEntry = pos[lineKey];
@@ -1589,7 +2141,7 @@
         return 'DM Serif Display';
       }
       function setFont(name, lineKey, font) {
-        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
         var line = crystalTextPositions[name][lineKey];
         if (!line || typeof line.x !== 'number') crystalTextPositions[name][lineKey] = { x: defaultPositions()[lineKey].x, y: defaultPositions()[lineKey].y };
         crystalTextPositions[name][lineKey].font = font;
@@ -1608,7 +2160,7 @@
         return 100;
       }
       function setFontSizePercent(name, lineKey, percent) {
-        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
         var line = crystalTextPositions[name][lineKey];
         if (!line || typeof line.x !== 'number') crystalTextPositions[name][lineKey] = { x: defaultPositions()[lineKey].x, y: defaultPositions()[lineKey].y };
         crystalTextPositions[name][lineKey].fontSizePercent = Math.max(10, Math.min(150, percent));
@@ -1622,14 +2174,14 @@
         });
       }
       function setLineBoxSize(name, lineKey, wPercent, hPercent) {
-        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
         var line = crystalTextPositions[name][lineKey];
         if (!line || typeof line.x !== 'number') crystalTextPositions[name][lineKey] = line = { x: defaultPositions()[lineKey].x, y: defaultPositions()[lineKey].y };
         line.boxW = wPercent / 100;
         line.boxH = hPercent / 100;
       }
       function setLinePosition(name, lineKey, xPercent, yPercent) {
-        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
         var line = crystalTextPositions[name][lineKey];
         if (!line) crystalTextPositions[name][lineKey] = line = { x: 0.5, y: defaultPositions()[lineKey].y };
         line.x = Math.max(0, Math.min(1, xPercent / 100));
@@ -1662,6 +2214,107 @@
           });
         });
       }
+      function placementCanvasToNormalized(e) {
+        var rect = canvas.getBoundingClientRect();
+        return { nx: (e.clientX - rect.left) / rect.width, ny: (e.clientY - rect.top) / rect.height };
+      }
+      function placementGetBoxBounds(key, w, h) {
+        var p = getPositions(currentImageName)[key] || defaultPositions()[key];
+        var size = getLineBoxSize(currentImageName, key);
+        var boxW = w * size.boxW, boxH = h * size.boxH;
+        var cx = (p.x != null ? p.x : 0.5) * w, cy = (p.y != null ? p.y : 0.5) * h;
+        return { left: cx - boxW / 2, top: cy - boxH / 2, right: cx + boxW / 2, bottom: cy + boxH / 2, cx: cx, cy: cy, boxW: boxW, boxH: boxH };
+      }
+      function placementGetArtBounds(art, w, h) {
+        var ax = (art.x != null ? art.x : 0.5) * w, ay = (art.y != null ? art.y : 0.5) * h;
+        var width = (art.width != null ? art.width : 0.4) * w;
+        var size = (art.size != null ? art.size : 0.03) * Math.min(w, h);
+        var isLine = art.type === 'line' || art.type === 'doubleLine' || art.type === 'dashes';
+        if (isLine) {
+          return { type: 'rect', left: ax - width / 2, top: ay - size, right: ax + width / 2, bottom: ay + size, ax: ax, ay: ay, width: width, size: size };
+        }
+        var r = (art.type === 'image' ? (art.size != null ? art.size : 0.15) * Math.min(w, h) : size);
+        return { type: 'circle', ax: ax, ay: ay, radius: r, size: size };
+      }
+      function placementGetArtResizeHandle(art, w, h) {
+        var b = placementGetArtBounds(art, w, h);
+        if (b.type === 'rect') return { x: b.right, y: b.ay };
+        return { x: b.ax, y: b.ay + b.radius };
+      }
+      function placementHitTest(nx, ny, w, h) {
+        var keys = ['line1', 'line2', 'line3'];
+        if (placementSelectedBox) {
+          var b = placementGetBoxBounds(placementSelectedBox, w, h);
+          var px = nx * w, py = ny * h;
+          var hs = PLACEMENT_HANDLE_SIZE;
+          if (Math.abs(px - b.left) <= hs && Math.abs(py - b.top) <= hs) return { type: 'handle', corner: 'tl' };
+          if (Math.abs(px - b.right) <= hs && Math.abs(py - b.top) <= hs) return { type: 'handle', corner: 'tr' };
+          if (Math.abs(px - b.left) <= hs && Math.abs(py - b.bottom) <= hs) return { type: 'handle', corner: 'bl' };
+          if (Math.abs(px - b.right) <= hs && Math.abs(py - b.bottom) <= hs) return { type: 'handle', corner: 'br' };
+        }
+        var arts = getArts(currentImageName);
+        if (placementSelectedArtIndex != null && arts[placementSelectedArtIndex]) {
+          var selArt = arts[placementSelectedArtIndex];
+          var handle = placementGetArtResizeHandle(selArt, w, h);
+          var px = nx * w, py = ny * h;
+          var hs = PLACEMENT_HANDLE_SIZE;
+          if (Math.abs(px - handle.x) <= hs && Math.abs(py - handle.y) <= hs) return { type: 'art-resize-handle', index: placementSelectedArtIndex };
+        }
+        for (var i = keys.length - 1; i >= 0; i--) {
+          var key = keys[i];
+          var b = placementGetBoxBounds(key, w, h);
+          var px = nx * w, py = ny * h;
+          if (px >= b.left && px <= b.right && py >= b.top && py <= b.bottom) return { type: 'box', key: key };
+        }
+        for (var j = arts.length - 1; j >= 0; j--) {
+          var a = arts[j];
+          var b = placementGetArtBounds(a, w, h);
+          var px = nx * w, py = ny * h;
+          if (b.type === 'circle') {
+            var dist = Math.sqrt((px - b.ax) * (px - b.ax) + (py - b.ay) * (py - b.ay));
+            if (dist <= b.radius + PLACEMENT_HANDLE_SIZE) return { type: 'art', index: j };
+          } else {
+            if (px >= b.left - 5 && px <= b.right + 5 && py >= b.top - 5 && py <= b.bottom + 5) return { type: 'art', index: j };
+          }
+        }
+        return null;
+      }
+      function placementDrawHandles(ctx, w, h) {
+        var hs = PLACEMENT_HANDLE_SIZE;
+        ctx.fillStyle = 'rgba(201, 169, 98, 0.9)';
+        ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+        ctx.lineWidth = 2;
+        if (placementSelectedBox) {
+          var b = placementGetBoxBounds(placementSelectedBox, w, h);
+          [[b.left, b.top], [b.right, b.top], [b.left, b.bottom], [b.right, b.bottom]].forEach(function (pt) {
+            ctx.fillRect(pt[0] - hs / 2, pt[1] - hs / 2, hs, hs);
+            ctx.strokeRect(pt[0] - hs / 2, pt[1] - hs / 2, hs, hs);
+          });
+        }
+        if (placementSelectedArtIndex != null) {
+          var arts = getArts(currentImageName);
+          var a = arts[placementSelectedArtIndex];
+          if (a) {
+            var bounds = placementGetArtBounds(a, w, h);
+            ctx.strokeStyle = 'rgba(201, 169, 98, 0.95)';
+            ctx.setLineDash([5, 4]);
+            ctx.lineWidth = 2;
+            if (bounds.type === 'circle') {
+              ctx.beginPath();
+              ctx.arc(bounds.ax, bounds.ay, bounds.radius + 3, 0, Math.PI * 2);
+              ctx.stroke();
+            } else {
+              ctx.strokeRect(bounds.left - 3, bounds.top - 3, bounds.right - bounds.left + 6, bounds.bottom - bounds.top + 6);
+            }
+            ctx.setLineDash([]);
+            var handle = placementGetArtResizeHandle(a, w, h);
+            ctx.fillStyle = 'rgba(201, 169, 98, 0.9)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+            ctx.fillRect(handle.x - hs / 2, handle.y - hs / 2, hs, hs);
+            ctx.strokeRect(handle.x - hs / 2, handle.y - hs / 2, hs, hs);
+          }
+        }
+      }
 
       var artTypeNames = { line: 'Line', doubleLine: 'Double line', star: 'Star', diamond: 'Diamond', dot: 'Dot', dashes: 'Dashes', image: 'Image' };
       var artImagesList = [];
@@ -1686,7 +2339,7 @@
         return (entry && Array.isArray(entry.arts)) ? entry.arts : [];
       }
       function setArts(name, arts) {
-        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        if (!crystalTextPositions[name]) crystalTextPositions[name] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
         crystalTextPositions[name].arts = arts;
       }
       function addArt(name, art) {
@@ -1704,7 +2357,9 @@
         if (arts[index]) Object.assign(arts[index], updates);
         setArts(name, arts);
       }
-      var artColors = { white: 'rgba(255,255,255,0.9)', blue: 'rgba(60,120,220,0.95)', black: 'rgba(0,0,0,0.85)' };
+      var artColors = { white: 'rgba(255,255,255,0.9)', black: 'rgba(0,0,0,0.85)', gold: 'rgba(201,169,98,0.95)', blue: 'rgba(60,120,220,0.95)', red: 'rgba(200,70,60,0.95)', silver: 'rgba(192,192,192,0.9)' };
+      var artImageFilters = { white: 'brightness(0) invert(1)', black: 'none', gold: 'brightness(0) saturate(100%) invert(77%) sepia(28%) saturate(1200%) hue-rotate(5deg)', blue: 'brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(206deg)', red: 'brightness(0) saturate(100%) invert(25%) sepia(90%) saturate(2000%) hue-rotate(350deg)', silver: 'brightness(0) saturate(100%) invert(85%)' };
+      function getImageArtFilter(color) { return artImageFilters[color] || artImageFilters.white; }
       function drawOneArt(ctx, art, w, h) {
         var x = (art.x != null ? art.x : 0.5) * w;
         var y = (art.y != null ? art.y : 0.5) * h;
@@ -1769,6 +2424,13 @@
         overlay.style.width = w + 'px';
         overlay.style.height = h + 'px';
         overlay.style.display = canvasEl.hidden ? 'none' : 'block';
+        var surf = getSurface(currentImageName);
+        if (surf.length >= 3) {
+          var poly = surf.map(function (p) { return (p.x * 100) + '% ' + (p.y * 100) + '%'; }).join(', ');
+          overlay.style.clipPath = 'polygon(' + poly + ')';
+        } else {
+          overlay.style.clipPath = '';
+        }
         overlay.innerHTML = '';
         var arts = getArts(currentImageName);
         arts.forEach(function (art) {
@@ -1785,6 +2447,7 @@
           img.style.width = imgSize + 'px';
           img.style.height = imgSize + 'px';
           img.style.objectFit = 'contain';
+          img.style.filter = getImageArtFilter(art.color || 'white');
           img.onload = function () {
             var iw = img.naturalWidth || 1;
             var ih = img.naturalHeight || 1;
@@ -1813,12 +2476,11 @@
           var size = art.type === 'image' ? Math.round((art.size != null ? art.size : 0.15) * 100) : Math.round((art.size != null ? art.size : 0.03) * 100);
           var sizeMin = art.type === 'image' ? 5 : 1;
           var sizeMax = art.type === 'image' ? 50 : 20;
-          var color = (art.color === 'blue' || art.color === 'black') ? art.color : 'white';
-          var colorBlock = (art.type === 'image') ? '' : ('<label>Color <select data-art-idx="' + idx + '" data-art-field="color">' +
-            '<option value="white"' + (color === 'white' ? ' selected' : '') + '>White</option>' +
-            '<option value="blue"' + (color === 'blue' ? ' selected' : '') + '>Blue</option>' +
-            '<option value="black"' + (color === 'black' ? ' selected' : '') + '>Black</option></select></label>');
-          div.innerHTML = '<span class="art-type-name">' + typeName + '</span>' +
+          var color = art.color && artImageFilters[art.color] ? art.color : (art.color === 'blue' || art.color === 'black' ? art.color : 'white');
+          if (!artImageFilters[color]) color = 'white';
+          var colorOpts = '<option value="white"' + (color === 'white' ? ' selected' : '') + '>White</option><option value="black"' + (color === 'black' ? ' selected' : '') + '>Black</option><option value="gold"' + (color === 'gold' ? ' selected' : '') + '>Gold</option><option value="blue"' + (color === 'blue' ? ' selected' : '') + '>Blue</option><option value="red"' + (color === 'red' ? ' selected' : '') + '>Red</option><option value="silver"' + (color === 'silver' ? ' selected' : '') + '>Silver</option>';
+          var colorBlock = '<label>Color <select data-art-idx="' + idx + '" data-art-field="color">' + colorOpts + '</select></label>';
+          div.innerHTML = '<span class="art-type-name">Art ' + (idx + 1) + ' — ' + typeName + '</span>' +
             '<label>X <input type="number" min="0" max="100" value="' + x + '" data-art-idx="' + idx + '" data-art-field="x"> %</label>' +
             '<label>Y <input type="number" min="0" max="100" value="' + y + '" data-art-idx="' + idx + '" data-art-field="y"> %</label>' +
             (art.type === 'line' || art.type === 'doubleLine' || art.type === 'dashes' ? '<label>W <input type="number" min="5" max="100" value="' + width + '" data-art-idx="' + idx + '" data-art-field="width"> %</label>' : '<label>Size <input type="number" min="' + sizeMin + '" max="' + sizeMax + '" value="' + size + '" data-art-idx="' + idx + '" data-art-field="size"> %</label>') +
@@ -1867,13 +2529,44 @@
         var h = currentImage.naturalHeight;
         canvas.width = w;
         canvas.height = h;
+        canvas.style.aspectRatio = w + ' / ' + h;
         ctx.drawImage(currentImage, 0, 0);
+        var surface = getSurface(currentImageName);
+        var useSurfaceClip = surface.length >= 3 && !drawSurfaceMode;
+        if (useSurfaceClip) {
+          ctx.save();
+          pathFromSurface(ctx, surface, w, h);
+          ctx.clip();
+        }
         var pos = getPositions(currentImageName);
         var line1 = (document.getElementById('line1').value || '').trim();
         var line2 = (document.getElementById('line2').value || '').trim();
         var line3 = (document.getElementById('line3').value || '').trim();
         var lines = [line1, line2, line3];
         var keys = ['line1', 'line2', 'line3'];
+        var unionLeft = w, unionTop = h, unionRight = 0, unionBottom = 0;
+        for (var i = 0; i < 3; i++) {
+          var p = pos[keys[i]] || defaultPositions()[keys[i]];
+          var cx = p.x * w;
+          var cy = p.y * h;
+          var size = getLineBoxSize(currentImageName, keys[i]);
+          var boxW = w * size.boxW;
+          var boxH = h * size.boxH;
+          var left = cx - boxW / 2, top = cy - boxH / 2;
+          unionLeft = Math.min(unionLeft, left);
+          unionTop = Math.min(unionTop, top);
+          unionRight = Math.max(unionRight, left + boxW);
+          unionBottom = Math.max(unionBottom, top + boxH);
+        }
+        var pad = 1;
+        var clipX = Math.max(0, unionLeft - pad);
+        var clipY = Math.max(0, unionTop - pad);
+        var clipW = Math.min(w - clipX, unionRight - unionLeft + 2 * pad);
+        var clipH = Math.min(h - clipY, unionBottom - unionTop + 2 * pad);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(clipX, clipY, clipW, clipH);
+        ctx.clip();
         for (var i = 0; i < 3; i++) {
           var p = pos[keys[i]] || defaultPositions()[keys[i]];
           var cx = p.x * w;
@@ -1942,8 +2635,27 @@
           }
           ctx.restore();
         }
+        ctx.restore();
         var arts = getArts(currentImageName);
         arts.forEach(function (art) { drawOneArt(ctx, art, w, h); });
+        if (useSurfaceClip) ctx.restore();
+        if (drawSurfaceMode && surface.length >= 2) {
+          pathFromSurface(ctx, surface, w, h);
+          ctx.strokeStyle = 'rgba(201, 169, 98, 0.95)';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([4, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = 'rgba(201, 169, 98, 0.08)';
+          ctx.fill();
+        } else if (useSurfaceClip && surface.length >= 3) {
+          pathFromSurface(ctx, surface, w, h);
+          ctx.strokeStyle = 'rgba(201, 169, 98, 0.7)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([8, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
         if (mappingStep > 0) {
           var r = Math.min(w, h) * 0.02;
           ['line1', 'line2', 'line3'].forEach(function (key, i) {
@@ -1960,17 +2672,44 @@
             ctx.fill();
           });
         }
+        if ((placementSelectedBox || placementSelectedArtIndex != null) && mappingStep === 0) placementDrawHandles(ctx, w, h);
         updatePreviewImageArtOverlay(w, h);
       }
 
       function drawArtworkOnly(ctx, w, h) {
         if (!currentImageName) return;
+        var surf = getSurface(currentImageName);
+        if (surf.length >= 3) {
+          ctx.save();
+          pathFromSurface(ctx, surf, w, h);
+          ctx.clip();
+        }
         var pos = getPositions(currentImageName);
         var line1 = (document.getElementById('line1').value || '').trim();
         var line2 = (document.getElementById('line2').value || '').trim();
         var line3 = (document.getElementById('line3').value || '').trim();
         var lines = [line1, line2, line3];
         var keys = ['line1', 'line2', 'line3'];
+        var unionLeft = w, unionTop = h, unionRight = 0, unionBottom = 0;
+        for (var u = 0; u < 3; u++) {
+          var pu = pos[keys[u]] || defaultPositions()[keys[u]];
+          var su = getLineBoxSize(currentImageName, keys[u]);
+          var bw = w * su.boxW, bh = h * su.boxH;
+          var l = pu.x * w - bw / 2, t = pu.y * h - bh / 2;
+          unionLeft = Math.min(unionLeft, l);
+          unionTop = Math.min(unionTop, t);
+          unionRight = Math.max(unionRight, l + bw);
+          unionBottom = Math.max(unionBottom, t + bh);
+        }
+        var pad = 1;
+        var clipX = Math.max(0, unionLeft - pad);
+        var clipY = Math.max(0, unionTop - pad);
+        var clipW = Math.min(w - clipX, unionRight - unionLeft + 2 * pad);
+        var clipH = Math.min(h - clipY, unionBottom - unionTop + 2 * pad);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(clipX, clipY, clipW, clipH);
+        ctx.clip();
         var padding = 2;
         for (var i = 0; i < 3; i++) {
           var text = lines[i];
@@ -2025,8 +2764,10 @@
           }
           ctx.restore();
         }
+        ctx.restore();
         var arts = getArts(currentImageName);
         arts.forEach(function (art) { drawOneArt(ctx, art, w, h); });
+        if (surf.length >= 3) ctx.restore();
         var borderW = 300;
         var borderH = 400;
         var bx = (w - borderW) / 2;
@@ -2040,7 +2781,13 @@
       var EDITOR_ZOOM = 1.85;
       var isZoomedToEdit = false;
       var galleryWrapEl = document.getElementById('gallery-main-wrap');
-      var startEditWrap = document.getElementById('start-edit-wrap');
+      var zoomControlsWrap = document.getElementById('zoom-controls-wrap');
+      function updateZoomButtons() {
+        var zin = document.getElementById('zoom-in-btn');
+        var zout = document.getElementById('zoom-out-btn');
+        if (zin) zin.disabled = isZoomedToEdit;
+        if (zout) zout.disabled = !isZoomedToEdit;
+      }
       function stripTransformInline(el) {
         if (!el) return;
         el.style.removeProperty('transform');
@@ -2057,11 +2804,13 @@
         }
         stripTransformInline(canvas);
         if (mainEl) stripTransformInline(mainEl);
+        updateZoomButtons();
       }
       function applyEngravingZoom() {
         if (!currentImageName) return;
         isZoomedToEdit = true;
         if (galleryWrapEl) galleryWrapEl.classList.add('zoomed');
+        updateZoomButtons();
         var pos = getPositions(currentImageName);
         var y1 = (pos.line1 && typeof pos.line1.y === 'number') ? pos.line1.y : 0.38;
         var y2 = (pos.line2 && typeof pos.line2.y === 'number') ? pos.line2.y : 0.52;
@@ -2073,8 +2822,12 @@
           galleryWrapEl.style.setProperty('--edit-zoom-scale', String(EDITOR_ZOOM));
         }
       }
-      document.getElementById('start-edit-btn').addEventListener('click', function () {
+      document.getElementById('zoom-in-btn').addEventListener('click', function () {
         applyEngravingZoom();
+      });
+      document.getElementById('zoom-out-btn').addEventListener('click', function () {
+        clearEngravingZoom();
+        drawPreview();
       });
       function setMainImage(name) {
         if (currentImageName === name && currentImage) {
@@ -2089,7 +2842,7 @@
           if (mainEl) mainEl.hidden = true;
           canvas.hidden = false;
           var canvasWrap = document.getElementById('preview-canvas-wrap');
-          if (canvasWrap) canvasWrap.style.display = 'inline-block';
+          if (canvasWrap) canvasWrap.style.display = 'flex';
           updateBoxSizeInputs();
           updateAlignButtons();
           updateFontSelect();
@@ -2098,7 +2851,7 @@
           renderArtList();
           drawPreview();
           clearEngravingZoom();
-          if (startEditWrap) startEditWrap.hidden = false;
+          if (zoomControlsWrap) zoomControlsWrap.hidden = false;
           if (typeof updateCart === 'function') updateCart();
         };
         currentImage.onerror = function () {
@@ -2107,7 +2860,7 @@
           if (canvasWrap) canvasWrap.style.display = 'none';
           if (mainEl) { mainEl.hidden = false; mainEl.src = src; }
           placeholderEl.hidden = false;
-          if (startEditWrap) startEditWrap.hidden = true;
+          if (zoomControlsWrap) zoomControlsWrap.hidden = true;
           clearEngravingZoom();
         };
         currentImage.src = src;
@@ -2132,7 +2885,150 @@
         buildEditorGallery(crystalImages[0]);
       }
 
+      canvas.addEventListener('mousedown', function (e) {
+        if (mappingStep !== 0 || !currentImageName || !currentImage) return;
+        var w = currentImage.naturalWidth;
+        var h = currentImage.naturalHeight;
+        var coord = placementCanvasToNormalized(e);
+        var hit = placementHitTest(coord.nx, coord.ny, w, h);
+        if (!hit) {
+          placementSelectedBox = null;
+          placementSelectedArtIndex = null;
+          drawPreview();
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        if (hit.type === 'art-resize-handle') {
+          var arts = getArts(currentImageName);
+          var art = arts[hit.index];
+          placementDragMode = 'art-resize';
+          placementDragStart = {
+            index: hit.index,
+            startSize: art.size != null ? art.size : (art.type === 'image' ? 0.15 : 0.03),
+            startWidth: art.width != null ? art.width : 0.4,
+            startNx: coord.nx,
+            startNy: coord.ny,
+            artX: art.x != null ? art.x : 0.5,
+            artY: art.y != null ? art.y : 0.5
+          };
+          e.preventDefault();
+          e.stopPropagation();
+          drawPreview();
+          return;
+        }
+        if (hit.type === 'handle') {
+          var b = placementGetBoxBounds(placementSelectedBox, w, h);
+          placementDragMode = 'resize-' + hit.corner;
+          placementDragStart = { nx: coord.nx, ny: coord.ny, left: b.left / w, right: b.right / w, top: b.top / h, bottom: b.bottom / h, key: placementSelectedBox };
+        } else if (hit.type === 'box') {
+          placementSelectedBox = hit.key;
+          placementSelectedArtIndex = null;
+          var b = placementGetBoxBounds(hit.key, w, h);
+          placementDragMode = 'move';
+          placementDragStart = { nx: coord.nx, ny: coord.ny, startCX: b.cx / w, startCY: b.cy / h, key: hit.key };
+          drawPreview();
+        } else if (hit.type === 'art') {
+          placementSelectedBox = null;
+          placementSelectedArtIndex = hit.index;
+          var arts = getArts(currentImageName);
+          var a = arts[hit.index];
+          placementDragMode = 'art-move';
+          placementDragStart = { nx: coord.nx, ny: coord.ny, startX: a.x != null ? a.x : 0.5, startY: a.y != null ? a.y : 0.5, index: hit.index };
+          drawPreview();
+        }
+      });
+      canvas.addEventListener('mousemove', function (e) {
+        if (!placementDragMode || !currentImageName || !currentImage) return;
+        var w = currentImage.naturalWidth;
+        var h = currentImage.naturalHeight;
+        var coord = placementCanvasToNormalized(e);
+        var nx = Math.max(0, Math.min(1, coord.nx));
+        var ny = Math.max(0, Math.min(1, coord.ny));
+        if (placementDragMode === 'move') {
+          var dx = nx - placementDragStart.nx;
+          var dy = ny - placementDragStart.ny;
+          var newCX = Math.max(0.1, Math.min(0.9, placementDragStart.startCX + dx));
+          var newCY = Math.max(0.1, Math.min(0.9, placementDragStart.startCY + dy));
+          setLinePosition(currentImageName, placementDragStart.key, newCX * 100, newCY * 100);
+          updatePositionInputs();
+        } else if (placementDragMode.indexOf('resize-') === 0) {
+          var key = placementDragStart.key || placementSelectedBox;
+          var corner = placementDragMode.replace('resize-', '');
+          var left = placementDragStart.left, right = placementDragStart.right, top = placementDragStart.top, bottom = placementDragStart.bottom;
+          if (corner === 'tl') { left = nx; top = ny; }
+          else if (corner === 'tr') { right = nx; top = ny; }
+          else if (corner === 'bl') { left = nx; bottom = ny; }
+          else { right = nx; bottom = ny; }
+          var newW = Math.max(0.05, right - left);
+          var newH = Math.max(0.05, bottom - top);
+          var newCX = (left + right) / 2;
+          var newCY = (top + bottom) / 2;
+          setLinePosition(currentImageName, key, newCX * 100, newCY * 100);
+          setLineBoxSize(currentImageName, key, newW * 100, newH * 100);
+          updatePositionInputs();
+          updateBoxSizeInputs();
+        } else if (placementDragMode === 'art-move') {
+          var dx = nx - placementDragStart.nx;
+          var dy = ny - placementDragStart.ny;
+          var arts = getArts(currentImageName).slice();
+          var a = arts[placementDragStart.index];
+          a.x = Math.max(0.1, Math.min(0.9, placementDragStart.startX + dx));
+          a.y = Math.max(0.1, Math.min(0.9, placementDragStart.startY + dy));
+          arts[placementDragStart.index] = a;
+          setArts(currentImageName, arts);
+        } else if (placementDragMode === 'art-resize') {
+          var arts = getArts(currentImageName).slice();
+          var a = arts[placementDragStart.index];
+          var ax = placementDragStart.artX;
+          var ay = placementDragStart.artY;
+          var isLine = a.type === 'line' || a.type === 'doubleLine' || a.type === 'dashes';
+          if (isLine) {
+            a.width = Math.max(0.05, Math.min(0.5, 2 * Math.abs(nx - ax)));
+            var sizeDelta = (ny - placementDragStart.startNy) * 0.8;
+            a.size = Math.max(0.01, Math.min(0.1, placementDragStart.startSize + sizeDelta));
+          } else {
+            var dist = Math.sqrt((nx - ax) * (nx - ax) + (ny - ay) * (ny - ay));
+            a.size = Math.max(0.01, Math.min(0.3, dist * 1.5));
+          }
+          arts[placementDragStart.index] = a;
+          setArts(currentImageName, arts);
+        }
+        drawPreview();
+      });
+      canvas.addEventListener('mouseup', function (e) {
+        if (placementDragMode) {
+          placementDragMode = null;
+          if (typeof updateCart === 'function') updateCart();
+        }
+      });
+      canvas.addEventListener('mouseleave', function (e) {
+        if (placementDragMode) {
+          placementDragMode = null;
+          if (typeof updateCart === 'function') updateCart();
+        }
+      });
       canvas.addEventListener('click', function (e) {
+        if (drawSurfaceMode && currentImageName) {
+          var rect = canvas.getBoundingClientRect();
+          var visX = (e.clientX - rect.left) / rect.width;
+          var visY = (e.clientY - rect.top) / rect.height;
+          var x = visX;
+          var y = visY;
+          if (isZoomedToEdit) {
+            var pos = getPositions(currentImageName);
+            var cy = ((pos.line1 && pos.line1.y) || 0.38) + ((pos.line2 && pos.line2.y) || 0.52) + ((pos.line3 && pos.line3.y) || 0.66);
+            cy /= 3;
+            var z = EDITOR_ZOOM;
+            x = 0.5 - 0.5 / z + visX / z;
+            y = cy - 0.5 / z + visY / z;
+          }
+          var pts = getSurface(currentImageName).slice();
+          pts.push({ x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 });
+          setSurface(currentImageName, pts);
+          drawPreview();
+          return;
+        }
         if (mappingStep < 1 || mappingStep > 3) return;
         var rect = canvas.getBoundingClientRect();
         var visX = (e.clientX - rect.left) / rect.width;
@@ -2208,6 +3104,30 @@
         document.getElementById('mapping-overlay').classList.remove('active');
         drawPreview();
       });
+
+      document.getElementById('draw-surface-btn').addEventListener('click', function () {
+        if (!currentImageName) return;
+        drawSurfaceMode = true;
+        if (!crystalTextPositions[currentImageName]) crystalTextPositions[currentImageName] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
+        if (!Array.isArray(crystalTextPositions[currentImageName].surface)) crystalTextPositions[currentImageName].surface = [];
+        var el = document.getElementById('surface-overlay');
+        if (el) { el.hidden = false; el.removeAttribute('aria-hidden'); }
+        drawPreview();
+      });
+      document.getElementById('surface-finish-btn').addEventListener('click', function () {
+        drawSurfaceMode = false;
+        var el = document.getElementById('surface-overlay');
+        if (el) { el.hidden = true; el.setAttribute('aria-hidden', 'true'); }
+        drawPreview();
+      });
+      document.getElementById('surface-cancel-btn').addEventListener('click', function () {
+        drawSurfaceMode = false;
+        setSurface(currentImageName, []);
+        var el = document.getElementById('surface-overlay');
+        if (el) { el.hidden = true; el.setAttribute('aria-hidden', 'true'); }
+        drawPreview();
+      });
+
 
       [1, 2, 3].forEach(function (i) {
         var key = 'line' + i;
@@ -2310,6 +3230,58 @@
           });
         }
       });
+      var activeFontLine = 1;
+      function renderFontPreviewGrid(filter) {
+        var grid = document.getElementById('font-preview-grid');
+        if (!grid) return;
+        var term = (filter || '').toLowerCase().trim();
+        var list = bunnyFonts.filter(function (f) { return !term || f.toLowerCase().indexOf(term) >= 0; });
+        grid.innerHTML = '';
+        list.forEach(function (fontName) {
+          var card = document.createElement('div');
+          card.className = 'font-preview-card';
+          card.setAttribute('data-font-name', fontName);
+          card.title = 'Apply ' + fontName + ' to Line ' + activeFontLine;
+          var sample = document.createElement('span');
+          sample.className = 'font-preview-sample';
+          sample.style.fontFamily = "'" + fontName.replace(/'/g, "\\'") + "', serif";
+          sample.textContent = 'Aa ' + fontName;
+          card.appendChild(sample);
+          card.addEventListener('click', function () {
+            if (!currentImageName) return;
+            var name = this.getAttribute('data-font-name');
+            var key = 'line' + activeFontLine;
+            setFont(currentImageName, key, name);
+            var sel = document.getElementById('font-line' + activeFontLine);
+            if (sel) sel.value = name;
+            drawPreview();
+          });
+          grid.appendChild(card);
+        });
+      }
+      document.querySelectorAll('.creation-tab').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var mode = this.getAttribute('data-mode');
+          if (!mode) return;
+          document.querySelectorAll('.creation-tab').forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+          this.classList.add('active');
+          this.setAttribute('aria-selected', 'true');
+          document.querySelectorAll('.creation-panel').forEach(function (p) { p.classList.remove('active'); p.hidden = true; });
+          var panel = document.getElementById('creation-panel-' + mode);
+          if (panel) { panel.classList.add('active'); panel.hidden = false; }
+        });
+      });
+      (function () {
+        var tabBtn = document.getElementById('bottom-edit-tab-btn');
+        var panel = document.getElementById('bottom-edit-panel');
+        if (tabBtn && panel) {
+          tabBtn.addEventListener('click', function () {
+            var open = panel.classList.toggle('open');
+            tabBtn.classList.toggle('active', open);
+            tabBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          });
+        }
+      })();
       document.querySelectorAll('.line-tab').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var lineNum = this.getAttribute('data-line');
@@ -2320,9 +3292,25 @@
           document.querySelectorAll('.line-panel').forEach(function (p) { p.classList.remove('active'); p.hidden = true; });
           var panel = document.getElementById(lineNum === 'art' ? 'panel-art' : 'panel-' + lineNum);
           if (panel) { panel.classList.add('active'); panel.hidden = false; }
+          var wrap = document.getElementById('bunny-fonts-preview-wrap');
+          if (wrap) {
+            if (lineNum === '1' || lineNum === '2' || lineNum === '3') {
+              activeFontLine = parseInt(lineNum, 10);
+              loadBunnyFontsForPreview();
+              renderFontPreviewGrid(document.getElementById('font-preview-search') && document.getElementById('font-preview-search').value);
+              wrap.hidden = false;
+            } else {
+              wrap.hidden = true;
+            }
+          }
           if (lineNum === 'art') loadArtImages();
         });
       });
+      var fontSearchEl = document.getElementById('font-preview-search');
+      if (fontSearchEl) {
+        fontSearchEl.addEventListener('input', function () { renderFontPreviewGrid(this.value); });
+        fontSearchEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.preventDefault(); });
+      }
       document.getElementById('art-add-btn').addEventListener('click', function () {
         if (!currentImageName) return;
         var type = document.getElementById('art-type').value;
@@ -2343,7 +3331,8 @@
           return;
         }
         var imageName = (sel.selectedIndex >= 0 && sel.options[sel.selectedIndex]) ? sel.options[sel.selectedIndex].textContent : 'Image';
-        var art = { type: 'image', src: src, imageName: imageName, x: 0.5, y: 0.45, size: 0.15 };
+        var color = (document.getElementById('art-color-new') && document.getElementById('art-color-new').value) || 'white';
+        var art = { type: 'image', src: src, imageName: imageName, x: 0.5, y: 0.45, size: 0.15, color: color };
         addArt(currentImageName, art);
         renderArtList();
         drawPreview();
@@ -2368,13 +3357,15 @@
         if (line2El) line2El.value = preset.line2 || '';
         if (line3El) line3El.value = preset.line3 || '';
         if (currentImageName) {
-          if (!crystalTextPositions[currentImageName]) crystalTextPositions[currentImageName] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+          if (!crystalTextPositions[currentImageName]) crystalTextPositions[currentImageName] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
           var defPos = defaultPositions();
           ['line1', 'line2', 'line3'].forEach(function (key) {
             var pos = (preset.positions && preset.positions[key]) ? preset.positions[key] : { x: 0.5, y: defPos[key].y };
             var entry = { x: pos.x != null ? pos.x : 0.5, y: pos.y != null ? pos.y : defPos[key].y, align: preset.align || 'center' };
             if (typeof pos.font === 'string' && engravingFonts.indexOf(pos.font) >= 0) entry.font = pos.font;
             if (typeof pos.fontSizePercent === 'number') entry.fontSizePercent = Math.max(10, Math.min(150, pos.fontSizePercent));
+            if (typeof pos.boxW === 'number') entry.boxW = pos.boxW;
+            if (typeof pos.boxH === 'number') entry.boxH = pos.boxH;
             crystalTextPositions[currentImageName][key] = entry;
           });
           updatePositionInputs();
@@ -2397,8 +3388,213 @@
         drawPreview();
         if (typeof updateCart === 'function') updateCart();
       }
+      function applyDesignFromObject(preset) {
+        if (!preset || typeof preset !== 'object') return;
+        var line1El = document.getElementById('line1');
+        var line2El = document.getElementById('line2');
+        var line3El = document.getElementById('line3');
+        if (line1El) line1El.value = preset.line1 || '';
+        if (line2El) line2El.value = preset.line2 || '';
+        if (line3El) line3El.value = preset.line3 || '';
+        if (currentImageName) {
+          if (!crystalTextPositions[currentImageName]) crystalTextPositions[currentImageName] = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
+          var defPos = defaultPositions();
+          ['line1', 'line2', 'line3'].forEach(function (key) {
+            var pos = (preset.positions && preset.positions[key]) ? preset.positions[key] : { x: 0.5, y: defPos[key].y };
+            var entry = { x: pos.x != null ? pos.x : 0.5, y: pos.y != null ? pos.y : defPos[key].y, align: preset.align || 'center' };
+            if (typeof pos.font === 'string' && engravingFonts.indexOf(pos.font) >= 0) entry.font = pos.font;
+            if (typeof pos.fontSizePercent === 'number') entry.fontSizePercent = Math.max(10, Math.min(150, pos.fontSizePercent));
+            if (typeof pos.boxW === 'number') entry.boxW = pos.boxW;
+            if (typeof pos.boxH === 'number') entry.boxH = pos.boxH;
+            crystalTextPositions[currentImageName][key] = entry;
+          });
+          updatePositionInputs();
+          updateBoxSizeInputs();
+          updateAlignButtons();
+          updateFontSelect();
+          updateSizeInputs();
+        }
+        if (currentImageName && preset.arts && preset.arts.length) {
+          setArts(currentImageName, preset.arts.slice());
+        } else if (currentImageName) {
+          setArts(currentImageName, preset.arts && preset.arts.length ? preset.arts.slice() : []);
+        }
+        ['count1', 'count2', 'count3'].forEach(function (id, i) {
+          var el = document.getElementById(id);
+          var len = (preset['line' + (i + 1)] || '').length;
+          if (el) el.textContent = len + ' / 60';
+        });
+        renderArtList();
+        drawPreview();
+        if (typeof updateCart === 'function') updateCart();
+      }
+      function sanitizePresetForCrystal(preset) {
+        if (!preset || typeof preset !== 'object') return preset;
+        var out = { line1: preset.line1, line2: preset.line2, line3: preset.line3, align: preset.align || 'center', positions: preset.positions ? JSON.parse(JSON.stringify(preset.positions)) : undefined, arts: Array.isArray(preset.arts) ? preset.arts.slice() : [] };
+        var maxLen = { line1: 22, line2: 20, line3: 12 };
+        ['line1', 'line2', 'line3'].forEach(function (k) {
+          if (typeof out[k] === 'string' && out[k].length > maxLen[k]) out[k] = out[k].substring(0, maxLen[k]);
+        });
+        if (!out.positions) out.positions = {};
+        var boxByLine = { line1: { boxW: 0.2, boxH: 0.2 }, line2: { boxW: 0.17, boxH: 0.2 }, line3: { boxW: 0.15, boxH: 0.24 } };
+        ['line1', 'line2', 'line3'].forEach(function (k) {
+          if (!out.positions[k]) out.positions[k] = {};
+          if (typeof out.positions[k].fontSizePercent === 'number') {
+            out.positions[k].fontSizePercent = Math.max(50, Math.min(75, out.positions[k].fontSizePercent));
+          }
+          out.positions[k].boxW = boxByLine[k].boxW;
+          out.positions[k].boxH = boxByLine[k].boxH;
+        });
+        out.arts = out.arts.map(function (a) {
+          var x = typeof a.x === 'number' ? Math.max(0.15, Math.min(0.85, a.x)) : 0.5;
+          var y = typeof a.y === 'number' ? Math.max(0.25, Math.min(0.82, a.y)) : 0.5;
+          return { type: a.type || 'line', x: x, y: y, width: a.width != null ? a.width : 0.2, size: a.size != null ? a.size : 0.03, color: a.color || 'white' };
+        });
+        return out;
+      }
+      var GEMINI_DESIGN_SYSTEM = 'You generate a single award/crystal engraving design as valid JSON only, no markdown. Be HIGHLY CREATIVE and make each design clearly different: vary alignment (left/center/right), mix fonts between lines, use unexpected font pairings, and create distinct layouts. CRITICAL: Engraving area is small. Keep line1 to at most 22 characters, line2 to 20, line3 to 14. Use fontSizePercent 55-82. Schema: { "line1": string, "line2": string, "line3": string, "align": "left"|"center"|"right", "positions": { "line1": { "x": 0.5, "y": 0.35-0.42, "font": string, "fontSizePercent": 55-82 }, "line2": { "x": 0.5, "y": 0.52-0.58 }, "line3": { "x": 0.5, "y": 0.68-0.76 } }, "arts": [ ... ], "iconSearchTerm": "optional single English search term for an icon e.g. trophy, star, medal, chef hat, award, ribbon" }. Font: you MUST use ONLY fonts from this exact list (use different fonts per line for variety): ' + (typeof engravingFonts !== 'undefined' ? engravingFonts.join(', ') : 'DM Serif Display, Lora, Georgia') + '. Include 5-8 decorative art elements: mix "line", "doubleLine", "star", "diamond", "dot", "dashes". Vary colors: gold, white, silver, blue, red, black. Each art: { "type", "x": 0.25-0.75, "y": 0.3-0.78, "width": 0.08-0.25, "size": 0.02-0.05, "color": "white"|"black"|"gold"|"blue"|"red"|"silver" }. If the award theme suggests an icon (trophy, star, food, music, etc.), set "iconSearchTerm" to one short search phrase so we can fetch that icon. Return only the JSON object.';
+      function callGeminiGenerateDesign(userPrompt, onStatus) {
+        onStatus = onStatus || function () {};
+        if (!GEMINI_API_KEY || !GEMINI_API_KEY.trim()) {
+          onStatus('Add a Gemini API key (free at aistudio.google.com/apikey) and set GEMINI_API_KEY in the script.');
+          return Promise.reject(new Error('No API key'));
+        }
+        if (!currentImageName) {
+          onStatus('Select a crystal first.');
+          return Promise.reject(new Error('No crystal'));
+        }
+        var modelEl = document.getElementById('ai-model');
+        var model = (modelEl && modelEl.value) ? modelEl.value.trim() : GEMINI_MODEL;
+        var styleHints = ['elegant classic', 'modern minimal', 'ornate decorative', 'playful bold', 'formal luxury', 'artistic eclectic', 'retro vintage', 'clean geometric'];
+        var styleHint = styleHints[Math.floor(Math.random() * styleHints.length)];
+        var promptWithVariation = 'Create a completely unique design this time. Style direction: ' + styleHint + '. ' + userPrompt;
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(GEMINI_API_KEY.trim());
+        var body = {
+          systemInstruction: { parts: [{ text: GEMINI_DESIGN_SYSTEM }] },
+          contents: [{ role: 'user', parts: [{ text: promptWithVariation }] }],
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.9 }
+        };
+        onStatus('Generating…');
+        return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.error && data.error.message) {
+              onStatus('API: ' + data.error.message);
+              throw new Error(data.error.message);
+            }
+            var text = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) ? data.candidates[0].content.parts[0].text : '';
+            if (!text || !text.trim()) {
+              onStatus('No design in response.');
+              throw new Error('Empty response');
+            }
+            text = text.trim().replace(/^```json\s*/i, '').replace(/\s*```\s*$/, '').trim();
+            var preset = void 0;
+            try { preset = JSON.parse(text); } catch (e) {
+              onStatus('Invalid JSON: ' + (e.message || 'parse error'));
+              throw e;
+            }
+            var iconSearchTerm = (preset && preset.iconSearchTerm && String(preset.iconSearchTerm).trim()) ? String(preset.iconSearchTerm).trim() : '';
+            preset = normalizeTemplate(preset);
+            preset = sanitizePresetForCrystal(preset);
+            applyDesignFromObject(preset);
+            if (iconSearchTerm && SVG_API_KEY) {
+              onStatus('Adding icon…');
+              return searchSvgApi(iconSearchTerm).then(function (data) {
+                var icons = (data && data.icons) ? data.icons : [];
+                if (icons.length && icons[0] && currentImageName) {
+                  var url = icons[0].url;
+                  var title = icons[0].title || icons[0].slug || iconSearchTerm;
+                  var proxyUrl = SVG_CORS_PROXY ? (SVG_CORS_PROXY + encodeURIComponent(url)) : url;
+                  return fetch(proxyUrl).then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('fetch failed')); }).then(function (svgText) {
+                    if (!svgText || svgText.length < 10) return Promise.reject(new Error('empty'));
+                    var dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgText);
+                    addArt(currentImageName, { type: 'image', src: dataUrl, originalUrl: url, imageName: title, x: 0.5, y: 0.48, size: 0.12, color: 'white' });
+                    renderArtList();
+                    drawPreview();
+                    if (typeof updateCart === 'function') updateCart();
+                    onStatus('Design applied with icon.');
+                  }).catch(function () {
+                    onStatus('Design applied (icon not loaded).');
+                  });
+                }
+                onStatus('Design applied.');
+              }).catch(function () { onStatus('Design applied.'); });
+            }
+            onStatus('Design applied.');
+          })
+          .catch(function (err) {
+            var msg = (err && err.message) ? err.message : 'Request failed';
+            if (err && err.error && err.error.message) msg = err.error.message;
+            onStatus('Error: ' + msg);
+            throw err;
+          });
+      }
       loadTemplates(function () { renderTemplateGrid(); });
       loadArtImages();
+
+      function getPreviewDropPosition(e) {
+        var canvasEl = document.getElementById('preview-canvas');
+        if (!canvasEl) return null;
+        var cr = canvasEl.getBoundingClientRect();
+        if (cr.width < 1 || cr.height < 1) return null;
+        var nx = (e.clientX - cr.left) / cr.width;
+        var ny = (e.clientY - cr.top) / cr.height;
+        return { nx: Math.max(0, Math.min(1, nx)), ny: Math.max(0, Math.min(1, ny)) };
+      }
+      document.querySelectorAll('.palette-item').forEach(function (el) {
+        el.addEventListener('dragstart', function (e) {
+          if (!currentImageName) { e.preventDefault(); return; }
+          e.dataTransfer.setData('application/json', JSON.stringify({
+            type: el.getAttribute('data-palette-type'),
+            line: el.getAttribute('data-line') || ''
+          }));
+          e.dataTransfer.effectAllowed = 'copy';
+          var dz = document.getElementById('preview-drop-zone');
+          if (dz) dz.classList.add('drag-over');
+        });
+        el.addEventListener('dragend', function () {
+          var dz = document.getElementById('preview-drop-zone');
+          if (dz) dz.classList.remove('drag-over');
+        });
+      });
+      (function () {
+        var dropZone = document.getElementById('preview-drop-zone');
+        if (!dropZone) return;
+        dropZone.addEventListener('dragover', function (e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+        });
+        dropZone.addEventListener('dragleave', function (e) {
+          if (!e.relatedTarget || !dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over');
+        });
+        dropZone.addEventListener('drop', function (e) {
+          e.preventDefault();
+          dropZone.classList.remove('drag-over');
+          if (!currentImageName) return;
+          var data;
+          try { data = JSON.parse(e.dataTransfer.getData('application/json')); } catch (err) { return; }
+          var pos = getPreviewDropPosition(e);
+          if (!pos) return;
+          if (data.type === 'text' && (data.line === '1' || data.line === '2' || data.line === '3')) {
+            setLinePosition(currentImageName, 'line' + data.line, pos.nx * 100, pos.ny * 100);
+            updatePositionInputs();
+            var tab = document.getElementById('tab-btn-' + data.line);
+            if (tab) tab.click();
+          } else if (data.type === 'line') {
+            addArt(currentImageName, { type: 'line', x: pos.nx, y: pos.ny, width: 0.2, size: 0.03, color: 'white' });
+            renderArtList();
+            var artTab = document.querySelector('.line-tab[data-line="art"]');
+            if (artTab) artTab.click();
+          } else if (data.type === 'symbol') {
+            addArt(currentImageName, { type: 'star', x: pos.nx, y: pos.ny, width: 0.4, size: 0.04, color: 'white' });
+            renderArtList();
+            var artTab = document.querySelector('.line-tab[data-line="art"]');
+            if (artTab) artTab.click();
+          }
+          drawPreview();
+          if (typeof updateCart === 'function') updateCart();
+        });
+      })();
 
       function searchSvgApi(term, start) {
         start = start || 0;
@@ -2436,7 +3632,8 @@
               div.style.opacity = '';
             }
             function done(dataUrl) {
-              addArt(currentImageName, { type: 'image', src: dataUrl, originalUrl: url, imageName: title, x: 0.5, y: 0.45, size: 0.15 });
+              var color = (document.getElementById('art-color-new') && document.getElementById('art-color-new').value) || 'white';
+              addArt(currentImageName, { type: 'image', src: dataUrl, originalUrl: url, imageName: title, x: 0.5, y: 0.45, size: 0.15, color: color });
               renderArtList();
               drawPreview();
               setTimeout(function () { drawPreview(); }, 100);
@@ -2444,7 +3641,8 @@
               cleanup();
             }
             function fail() {
-              addArt(currentImageName, { type: 'image', src: url, originalUrl: url, imageName: title, x: 0.5, y: 0.45, size: 0.15 });
+              var color = (document.getElementById('art-color-new') && document.getElementById('art-color-new').value) || 'white';
+              addArt(currentImageName, { type: 'image', src: url, originalUrl: url, imageName: title, x: 0.5, y: 0.45, size: 0.15, color: color });
               renderArtList();
               drawPreview();
               cleanup();
@@ -2585,6 +3783,23 @@
         document.getElementById('template-manager-overlay').classList.remove('open');
         document.getElementById('template-manager-overlay').setAttribute('aria-hidden', 'true');
       });
+      document.getElementById('ai-generate-btn').addEventListener('click', function () {
+        var promptEl = document.getElementById('ai-design-prompt');
+        var statusEl = document.getElementById('ai-generate-status');
+        var btnEl = document.getElementById('ai-generate-btn');
+        var prompt = (promptEl && promptEl.value) ? promptEl.value.trim() : '';
+        if (!prompt) { if (statusEl) statusEl.textContent = 'Enter a short description.'; return; }
+        if (!currentImageName) { if (statusEl) statusEl.textContent = 'Select a crystal first.'; return; }
+        if (btnEl) { btnEl.disabled = true; }
+        if (statusEl) statusEl.textContent = '';
+        callGeminiGenerateDesign(prompt, function (msg) {
+          if (statusEl) statusEl.textContent = msg;
+        }).finally(function () {
+          if (btnEl) btnEl.disabled = false;
+        });
+      });
+      var aiPromptInput = document.getElementById('ai-design-prompt');
+      if (aiPromptInput) aiPromptInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') document.getElementById('ai-generate-btn').click(); });
       document.getElementById('save-design-btn').addEventListener('click', function () {
         if (!currentImageName) {
           alert('Please select a crystal and load the editor first.');
@@ -2602,7 +3817,7 @@
         }
         var pos = getPositions(currentImageName);
         var lineKeys = ['line1', 'line2', 'line3'];
-        var defaultPos = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.52 }, line3: { x: 0.5, y: 0.66 } };
+        var defaultPos = { line1: { x: 0.5, y: 0.38 }, line2: { x: 0.5, y: 0.56 }, line3: { x: 0.5, y: 0.72 } };
         var positionsExport = {};
         lineKeys.forEach(function (key) {
           var p = pos[key] && typeof pos[key].x === 'number' ? { x: pos[key].x, y: pos[key].y } : defaultPos[key];
