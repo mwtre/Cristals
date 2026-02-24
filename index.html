@@ -1027,6 +1027,160 @@
     }
 
     #step-checkout { padding: 1.5rem; padding-top: 4.5rem; max-width: 560px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
+    #step-innovation {
+      position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+      padding: 0; padding-top: 4.5rem; box-sizing: border-box;
+      background: var(--bg);
+    }
+    #step-innovation .innovation-hero {
+      min-height: 42vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 3rem 2rem 4rem; position: relative; width: 100%;
+      background: linear-gradient(180deg, rgba(26,26,26,0.6) 0%, transparent 100%);
+    }
+    #step-innovation .innovation-hero::after {
+      content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 80px; height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent); border-radius: 2px;
+    }
+    #step-innovation .innovation-badge {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    #step-innovation .innovation-title {
+      font-family: 'DM Serif Display', serif; font-weight: 400; font-size: clamp(1.85rem, 4vw, 2.5rem);
+      margin: 0 0 0.5rem 0; line-height: 1.2;
+    }
+    #step-innovation .innovation-subtitle {
+      font-size: clamp(0.95rem, 2vw, 1.1rem); color: rgba(201,169,98,0.95); margin-bottom: 0.75rem;
+    }
+    #step-innovation .innovation-meta { font-size: 0.85rem; color: var(--muted); }
+    #step-innovation .innovation-content { width: 100%; box-sizing: border-box; }
+    /* Full-width sections: each is a distinct block with optional media area */
+    #step-innovation .innovation-section {
+      width: 100%; padding: 3rem 2rem; box-sizing: border-box;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    #step-innovation .innovation-section:nth-child(even) { background: rgba(20,20,20,0.6); }
+    #step-innovation .innovation-section-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;
+    }
+    #step-innovation .innovation-section.media-right .innovation-section-inner {
+      grid-template-columns: 1fr 1fr;
+    }
+    #step-innovation .innovation-section.media-left .innovation-section-inner {
+      grid-template-columns: 1fr 1fr;
+    }
+    #step-innovation .innovation-section.media-left .innovation-body { order: 2; }
+    #step-innovation .innovation-section.media-left .innovation-media { order: 1; }
+    #step-innovation .innovation-section.innovation-section-row .innovation-section-inner {
+      grid-template-columns: 1fr 1fr; gap: 2.5rem;
+    }
+    #step-innovation .innovation-section.innovation-section-row .innovation-section-inner .innovation-body { max-width: 100%; }
+    @media (max-width: 700px) {
+      #step-innovation .innovation-section.innovation-section-row .innovation-section-inner { grid-template-columns: 1fr; }
+    }
+    #step-innovation .innovation-section-full .innovation-section-inner {
+      grid-template-columns: 1fr;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    #step-innovation .innovation-section.innovation-section-gallery .innovation-section-inner {
+      grid-template-columns: 1fr;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    #step-innovation .innovation-media {
+      min-height: 280px; border: 2px dashed var(--border); border-radius: 12px;
+      background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 0.85rem; text-align: center; padding: 1.5rem;
+      box-sizing: border-box;
+    }
+    #step-innovation .innovation-media:not(:empty) { border-style: solid; border-color: var(--border); }
+    #step-innovation .innovation-media img { width: 100%; height: auto; border-radius: 10px; display: block; }
+    #step-innovation .innovation-body { min-width: 0; }
+    #step-innovation .innovation-section h3 {
+      font-size: 1.15rem; font-weight: 600; margin: 0 0 1rem 0; color: var(--text);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    #step-innovation .innovation-section h3 .section-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 8px; background: rgba(201,169,98,0.15);
+      color: var(--accent); font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
+    }
+    #step-innovation .innovation-section p { margin: 0 0 0.65rem 0; font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.9); }
+    #step-innovation .innovation-section p:last-of-type { margin-bottom: 0; }
+    #step-innovation .innovation-section ul { margin: 0.5rem 0 1rem 1.5rem; padding: 0; }
+    #step-innovation .innovation-section li { margin-bottom: 0.4rem; font-size: 0.95rem; line-height: 1.55; color: rgba(255,255,255,0.88); }
+    #step-innovation .innovation-section .highlight { color: var(--accent); font-weight: 500; }
+    #step-innovation .innovation-phase {
+      background: rgba(0,0,0,0.25); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0 0.75rem;
+      border-left: 3px solid var(--accent);
+    }
+    #step-innovation .innovation-phase strong { color: var(--accent); font-size: 0.9rem; }
+    #step-innovation .innovation-phase.innovation-explainer a { color: var(--accent); text-decoration: none; }
+    #step-innovation .innovation-phase.innovation-explainer a:hover { text-decoration: underline; }
+    #step-innovation .innovation-media-caption { margin: 0.75rem 0 0; font-size: 0.8rem; color: var(--muted); }
+    #step-innovation .innovation-media-caption a { color: var(--accent); text-decoration: none; }
+    #step-innovation .innovation-media-caption a:hover { text-decoration: underline; }
+    /* Hardware gallery: details left/right alternating */
+    #step-innovation .innovation-gallery { width: 100%; max-width: 1280px; margin: 0 auto; }
+    #step-innovation .innovation-gallery-item {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start;
+      padding: 2rem 0; border-bottom: 1px solid var(--border);
+      min-height: 200px;
+    }
+    #step-innovation .innovation-gallery-item:last-child { border-bottom: none; }
+    #step-innovation .innovation-gallery-item.details-right { grid-template-columns: 1fr 1fr; }
+    #step-innovation .innovation-gallery-item.details-right .gallery-details { order: 2; }
+    #step-innovation .innovation-gallery-item.details-right .gallery-media { order: 1; }
+    #step-innovation .innovation-gallery-item .gallery-details { min-width: 0; }
+    #step-innovation .innovation-gallery-item .gallery-details h4 { font-size: 1.1rem; margin: 0 0 0.5rem 0; color: var(--accent); }
+    #step-innovation .innovation-gallery-item .gallery-details p { margin: 0 0 0.5rem 0; font-size: 0.92rem; line-height: 1.55; color: rgba(255,255,255,0.9); }
+    #step-innovation .innovation-gallery-item .gallery-details ul { margin: 0.35rem 0 0 1rem; padding: 0; font-size: 0.9rem; line-height: 1.5; }
+    #step-innovation .innovation-gallery-item .gallery-details a { color: var(--accent); text-decoration: none; }
+    #step-innovation .innovation-gallery-item .gallery-details a:hover { text-decoration: underline; }
+    #step-innovation .innovation-gallery-item .gallery-media {
+      min-height: 220px; border-radius: 12px; overflow: hidden;
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #step-innovation .innovation-gallery-item .gallery-media img { width: 100%; height: auto; display: block; }
+    #step-innovation .innovation-gallery-item .gallery-media-placeholder {
+      color: var(--muted); font-size: 0.85rem; text-align: center; padding: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      #step-innovation .innovation-gallery-item,
+      #step-innovation .innovation-gallery-item.details-right {
+        grid-template-columns: 1fr; gap: 1.25rem; padding: 1.5rem 0;
+      }
+      #step-innovation .innovation-gallery-item .gallery-details,
+      #step-innovation .innovation-gallery-item.details-right .gallery-details,
+      #step-innovation .innovation-gallery-item.details-right .gallery-media { order: unset; }
+    }
+    #step-innovation .innovation-tax-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-top: 1rem;
+    }
+    @media (max-width: 900px) {
+      #step-innovation .innovation-section-inner { grid-template-columns: 1fr; gap: 2rem; }
+      #step-innovation .innovation-section.innovation-section-row .innovation-section-inner { grid-template-columns: 1fr 1fr; }
+      #step-innovation .innovation-section.media-left .innovation-body,
+      #step-innovation .innovation-section.media-left .innovation-media { order: unset; }
+      #step-innovation .innovation-media { min-height: 200px; }
+      #step-innovation .innovation-section { padding: 2rem 1.5rem; }
+      #step-innovation .innovation-tax-grid { grid-template-columns: 1fr; }
+    }
+    #step-innovation .innovation-tax-card {
+      background: rgba(0,0,0,0.3); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border);
+    }
+    #step-innovation .innovation-tax-card h4 { font-size: 1rem; margin: 0 0 0.5rem 0; color: var(--accent); }
+    #step-innovation .innovation-tax-card p { font-size: 0.88rem; margin: 0; line-height: 1.5; }
+    #step-innovation .innovation-signature {
+      width: 100%; padding: 3rem 2rem; text-align: center; box-sizing: border-box;
+      background: var(--surface); border-top: 1px solid var(--border);
+      font-size: 0.95rem; color: var(--muted); line-height: 1.6;
+    }
+    #step-innovation .innovation-signature strong { color: var(--text); font-size: 1rem; }
     .checkout-wrap { width: 100%; }
     .checkout-title { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 1.75rem; margin: 0 0 0.35rem 0; }
     .checkout-subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
@@ -1091,6 +1245,7 @@
     <button type="button" class="top-step" data-step="2"><span class="step-index">3</span> Customize</button>
     <button type="button" class="top-step" data-step="3"><span class="step-index">4</span> Plan production</button>
     <button type="button" class="top-step" data-step="4"><span class="step-index">5</span> Checkout</button>
+    <button type="button" class="top-step" data-step="5"><span class="step-index">6</span> Innovation</button>
   </nav>
   <div id="step-intro" class="step-screen active">
     <div class="intro-video-wrap">
@@ -1597,6 +1752,203 @@
       </div>
     </div>
   </div>
+  <div id="step-innovation" class="step-screen">
+    <header class="innovation-hero">
+      <span class="innovation-badge">Project Pitch</span>
+      <h2 class="innovation-title">Crystal Remote Factory</h2>
+      <p class="innovation-subtitle">Automated &amp; AI-Enabled Custom Crystal Awards Production Line</p>
+      <p class="innovation-meta">Project Lead: Enzo C. · February 24, 2026</p>
+    </header>
+    <div class="innovation-content">
+      <section class="innovation-section innovation-section-row">
+        <div class="innovation-section-inner">
+          <div class="innovation-body">
+            <h3><span class="section-num">1</span> Project Vision – One-Liner</h3>
+            <p>Transform our 100% manual crystal awards production into a smart, remote-controllable factory:</p>
+            <ul>
+              <li>Customers design/upload remotely</li>
+              <li>AI assists with crystal pattern editing</li>
+              <li>Proprietary software controls robotic arms for precise etching/hatching</li>
+              <li>Automated gentle packing into boxes with protective foam</li>
+            </ul>
+            <p>→ <span class="highlight">Higher throughput · Lower labor &amp; breakage costs · New premium remote/custom revenue stream</span></p>
+          </div>
+          <div class="innovation-body">
+            <h3><span class="section-num">2</span> Why Now?</h3>
+            <ul>
+              <li>Growing demand for personalized crystal awards</li>
+              <li>Current manual line limits capacity, quality consistency and speed</li>
+              <li>High labor dependency → expensive &amp; error-prone (especially fragile handling)</li>
+              <li>Competitors are automating → risk of losing market share</li>
+              <li>Dutch government offers very strong tax incentives for exactly this kind of software + automation project</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="innovation-section media-right">
+        <div class="innovation-section-inner">
+          <div class="innovation-body">
+            <h3><span class="section-num">3</span> Phased Rollout – Low Risk, High Subsidy</h3>
+            <div class="innovation-phase">
+              <strong>Phase 1 (3–6 months) – Digital Factory Twin</strong> (our starting point)
+            </div>
+            <ul>
+              <li>Lightweight digital model / twin of the entire production line</li>
+              <li>Real-time tracking of every award (QR/barcode from raw blank to shipped box)</li>
+              <li>Live dashboard: see location, process status, bottlenecks, alerts</li>
+              <li>Basic remote control: pause/resume jobs, prioritize urgent customs</li>
+              <li>Data logging for quality &amp; future AI decisions</li>
+            </ul>
+            <p>→ Low cost (€5k–€15k sensors/scanners + dev hours) · Runs parallel to current manual line – no production stop · Immediate benefits: better visibility, fewer errors, data foundation · Perfect proof-of-concept before buying robots.</p>
+            <div class="innovation-phase">
+              <strong>Phase 2 (6–12+ months) – Physical Automation</strong>
+            </div>
+            <ul>
+              <li>Add collaborative robotic arm for handling, laser etching/hatching &amp; auto-packing</li>
+              <li>Gentle pick-and-place of fragile crystal awards into boxes with protective foam</li>
+              <li>Full integration with digital twin for seamless tracking &amp; control</li>
+              <li>Later: remote edit-control app + AI design assistance</li>
+            </ul>
+          </div>
+          <div class="innovation-media" aria-hidden="true"><img src="cristals/Mockup-Fabbrica-Digitale-4.0-Demo-2020_windows_570-web.png" alt="Digital Factory Twin – Phase 1 mockup"></div>
+        </div>
+      </section>
+
+      <section class="innovation-section innovation-section-gallery">
+        <div class="innovation-section-inner">
+          <div class="innovation-body">
+            <h3><span class="section-num">4</span> Recommended Automation Hardware (Phase 2 – Auto-Packing Focus)</h3>
+            <p>Best fit: <strong>Collaborative robot (cobot)</strong> – safe near people, flexible for custom shapes/sizes, easy to program. Top options: Universal Robots UR10e (12.5 kg, ~1300 mm, €35k–€55k NL); Fanuc CRX-30iA (30 kg, ±0.05 mm, €50k–€80k); <strong>OMRON TM12</strong> (12 kg, 1300 mm, built-in vision, TMFlow); local integrator Robertpack (Zwolle, NL) for custom cells with UR/Fanuc/OMRON + foam insertion.</p>
+            <p>All qualify for KIA tax deduction.</p>
+            <div class="innovation-gallery">
+              <div class="innovation-gallery-item details-left">
+                <div class="gallery-details">
+                  <h4>ES Cobot (Europa Systems)</h4>
+                  <p>Compact, energy-saving collaborative palletiser, 24h availability; no fencing or cages — safe to work alongside. Safety first, space saving (~half the space of traditional cells), intuitive tablet interface, install and start in 2 days, mobile platform.</p>
+                  <p><strong>Specs:</strong> Load up to 10 kg; 220/240V; 2907×1561 mm, H 1600 mm; 8–15 cartons/min. Uses OMRON TM12 in various configurations.</p>
+                  <p><a href="https://europasystems.com/products/collaborative-robot-es-cobot/" target="_blank" rel="noopener noreferrer">Europa Systems – ES Cobot →</a></p>
+                </div>
+                <div class="gallery-media">
+                  <img src="cristals/es-cobot.webp" alt="ES Cobot – collaborative robot by Europa Systems">
+                </div>
+              </div>
+              <div class="innovation-gallery-item details-right">
+                <div class="gallery-details">
+                  <h4>OMRON TM12</h4>
+                  <p>Heavy-duty collaborative robot for reliable assembly, packaging, and inspection. 1300 mm reach, 12 kg payload; integrated vision and graphical programming (TMFlow) for quick deployment and error-free changeovers. Flexible mounting for diverse factory layouts.</p>
+                  <ul>
+                    <li><strong>Specs:</strong> Payload 12 kg, reach 1300 mm, repeatability ±0.1 mm, speed 1.3 m/s</li>
+                    <li>IP54, ISO Class 3 cleanroom; food-grade grease; hand-guiding &amp; built-in buttons</li>
+                    <li>Built-in vision &amp; landmark; safety: ISO 10218-1, ISO 13849-1</li>
+                    <li>Applications: assembly, palletizing, packaging, pick &amp; place, machine tending</li>
+                  </ul>
+                  <p><a href="https://robotics.omron.com/products/collaborative-robots/tm-series/tm12/" target="_blank" rel="noopener noreferrer">OMRON Robotics – TM12 →</a></p>
+                </div>
+                <div class="gallery-media">
+                  <img src="cristals/omron.jpg" alt="OMRON TM12 collaborative robot" onerror="this.style.display='none'; this.nextElementSibling && (this.nextElementSibling.style.display='block');">
+                  <span class="gallery-media-placeholder" style="display:none;">Add image: cristals/omron.jpg</span>
+                </div>
+              </div>
+              <div class="innovation-gallery-item details-left">
+                <div class="gallery-details">
+                  <h4>BestPack (Ekadharma)</h4>
+                  <p>Upgrade your packaging with automatic and semi-automatic flap folder paired with box taper. Say goodbye to manual labor and hello to efficiency — perfect for streamlining your packaging process and saving time and effort.</p>
+                  <p>BestPack provides some of the best product packaging solutions through their automated box &amp; case sealing machines.</p>
+                  <ul>
+                    <li><strong>Heavy duty:</strong> Tape carton sealer built for speed and rugged dependability; quad-belt drive, effectively seals unstable cartons.</li>
+                    <li><strong>Uniform carton:</strong> Manually adjust height and width for each box size; adjustable bed height from 23.5″ to 30.0″.</li>
+                    <li><strong>Roll length:</strong> 1,000 yd., 1,500 yd., &amp; 2,000 yd. Exclusive 4 Roller Upper Side Compression.</li>
+                    <li><strong>Automatic / manual:</strong> Automatic &amp; semi-automatic flap folder included with box taper (by machine type); saves production time.</li>
+                  </ul>
+                  <p><a href="https://ekadharma.com/project/bestpack/" target="_blank" rel="noopener noreferrer">Ekadharma – BestPack →</a></p>
+                </div>
+                <div class="gallery-media">
+                  <img src="cristals/BEST%20PACK.jpg" alt="BestPack – automatic and semi-automatic flap folder and box taper">
+                </div>
+              </div>
+              <div class="innovation-gallery-item details-right">
+                <div class="gallery-details">
+                  <h4>CrystalBlast Nexus (IKONICS Imaging)</h4>
+                  <p>Next-generation automated sandcarving machine that combines sandcarving with automation. Produces precise, repeatable results for large production runs in a fraction of the time of manual sandcarving, with consistent quality across batches.</p>
+                  <ul>
+                    <li><strong>Automation:</strong> Programmable, customizable automated sandcarving processes</li>
+                    <li><strong>Size:</strong> Up to 24″×24″ carving area</li>
+                    <li><strong>Precision:</strong> Precise, repeatable, accurate; easy to operate, clean performance</li>
+                    <li>CleanFlo Technology for cleaner operation; designed with Media Blast &amp; Abrasive</li>
+                    <li>Standard 2-cartridge dust collector; upgrades for higher duty-cycle; custom acrylic glassware jigs available</li>
+                    <li>Built to order; works with IKONICS photoresist films for detailed sandcarved designs</li>
+                  </ul>
+                  <p><a href="https://ikonicsimaging.com/equipment/sandcarvers/" target="_blank" rel="noopener noreferrer">IKONICS Imaging – Sandcarvers →</a></p>
+                </div>
+                <div class="gallery-media">
+                  <img src="cristals/cristalsblast%20.jpg" alt="CrystalBlast Nexus – automated sandcarving by IKONICS Imaging">
+                </div>
+              </div>
+              <div class="innovation-gallery-item details-left">
+                <div class="gallery-details">
+                  <h4>Robotic Abrasive Sandblast Systems</h4>
+                  <p>Automated blasting cells for precision surface treatment and preparation. Multi-axis robotic arms control nozzle movement for consistent, repeatable blasting — ideal for crystal awards etching and industrial finishing.</p>
+                  <ul>
+                    <li><strong>Automation:</strong> Multi-axis robots (6–8 axes) for precise nozzle control; programmable blasting recipes; touchscreen controls; some systems with automatic 3D mapping</li>
+                    <li><strong>Capabilities:</strong> Various part sizes and shapes; multiple media (plastic, glass beads, ceramic grit, sand); multiple nozzles; parts up to 12–24″ typical</li>
+                    <li>Heavy-duty enclosures; integrated media recovery and recycling; dust filtration; motorized turntables or conveyors</li>
+                    <li>Reduces manual cost, consistent quality, faster delivery; suitable for aerospace, automotive, and precision manufacturing</li>
+                  </ul>
+                </div>
+                <div class="gallery-media">
+                  <img src="cristals/Robotic-Blasting-Cell-5-scaled.jpg" alt="Robotic blasting cell – automated abrasive sandblast system">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="innovation-section innovation-section-full">
+        <div class="innovation-section-inner">
+          <div class="innovation-body">
+            <h3><span class="section-num">5</span> Massive Tax Savings – Government Pays a Big Share (2026 rules)</h3>
+            <p style="margin-bottom: 0.5rem;">Total estimated recovery: <strong>50–70%+ of project costs</strong> (upfront cash + permanently lower profit tax).</p>
+            <div class="innovation-tax-grid">
+              <div class="innovation-tax-card">
+                <h4>A. KIA</h4>
+                <p>Investment deduction – hardware &amp; sensors. 28% extra deduction on €2,901–€71,683. Example €60k → ~€7,400 tax saving Year 1. Total 25–40% hardware cost recovered over time.</p>
+              </div>
+              <div class="innovation-tax-card">
+                <h4>B. WBSO</h4>
+                <p>R&amp;D payroll tax cash relief – software/AI/digital twin. 36% reduction on first €391,020 R&amp;D wages (50% if starter). 1,000–1,500 hours → €30k–€60k+ cash back on payroll taxes.</p>
+              </div>
+              <div class="innovation-tax-card">
+                <h4>C. Innovation Box</h4>
+                <p>Profits from self-developed IP taxed at only <strong>9%</strong> vs 19–25.8%. Example: €100k extra profit → <span class="highlight">€16,800 saved every year</span> ongoing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="innovation-section media-right">
+        <div class="innovation-section-inner">
+          <div class="innovation-body">
+            <h3><span class="section-num">6</span> Next Steps &amp; Ask</h3>
+            <ul>
+              <li>Approve as separate project: €10k–€15k Phase 1 budget + ring-fenced dev hours</li>
+              <li>Joint meeting with accountant / RVO advisor to confirm incentives</li>
+              <li>I prepare detailed Phase 1 spec, timeline &amp; WBSO application</li>
+              <li>Pilot decision within 1–2 months</li>
+            </ul>
+            <p>This project upgrades our company to smart/remote production while the Dutch government covers a large part of the cost through proven incentives.</p>
+          </div>
+          <div class="innovation-media" aria-hidden="true">Image / Infographic</div>
+        </div>
+      </section>
+
+      <footer class="innovation-signature">
+        Excited to lead the development &amp; production integration side — let's build this together!<br><strong>Enzo C.</strong><br>Production Specialist &amp; Developer
+      </footer>
+    </div>
+  </div>
 
   <div id="template-manager-overlay" class="template-manager-overlay" aria-hidden="true">
     <div class="template-manager-header">
@@ -1667,7 +2019,7 @@
       function showStep(step) {
         currentStep = step;
         document.querySelectorAll('.step-screen').forEach(function (el) { el.classList.remove('active'); });
-        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout'];
+        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation'];
         var el = document.getElementById(stepIds[step] || 'step-product');
         if (el) el.classList.add('active');
         updateTopNav(step);
