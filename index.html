@@ -1427,6 +1427,85 @@
     .tm-add-wrap { margin-top: 1rem; }
     .link-btn { background: none; border: none; color: var(--accent); font: inherit; font-size: inherit; cursor: pointer; text-decoration: underline; padding: 0; }
     .link-btn:hover { color: var(--accent-hover, #d4b872); }
+
+    /* Production Stats */
+    #step-production-stats { align-items: flex-start; padding: 2rem 1.5rem 3rem; }
+    .production-stats-inner { max-width: 1100px; margin: 0 auto; width: 100%; }
+    .production-stats-title { font-family: 'DM Serif Display', serif; font-size: 1.8rem; font-weight: 400; margin: 0 0 0.35rem 0; color: var(--text); }
+    .production-stats-subtitle { font-size: 1rem; color: var(--muted); margin: 0 0 1.5rem 0; }
+    .production-tasks-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.75rem; }
+    .task-pill {
+      padding: 0.4rem 0.85rem; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px; font-size: 0.85rem; color: var(--muted);
+    }
+    .production-workers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .worker-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .worker-card:hover { border-color: rgba(201,169,98,0.4); box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+    .worker-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, rgba(201,169,98,0.6) 100%);
+      color: var(--bg); font-weight: 700; font-size: 1.35rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .worker-name { font-size: 1.15rem; font-weight: 600; margin: 0 0 0.85rem 0; color: var(--text); }
+    .worker-log-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; }
+    .worker-log-form .log-task-select,
+    .worker-log-form .log-workorder-select {
+      flex: 1 1 100%; min-width: 0;
+      padding: 0.5rem 0.6rem; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 0.9rem;
+    }
+    .worker-log-form .worker-start-btn,
+    .worker-log-form .worker-stop-btn { padding: 0.5rem 1rem; font-size: 0.9rem; flex-shrink: 0; }
+    .worker-running-row .worker-running-task { font-size: 0.9rem; color: var(--accent); margin-right: 0.5rem; }
+    .worker-running-row .worker-elapsed { font-variant-numeric: tabular-nums; font-size: 1rem; font-weight: 600; margin-right: 0.75rem; color: var(--text); }
+    .worker-total { font-size: 0.9rem; color: var(--muted); margin: 0; }
+    .production-stats-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; }
+    .production-stats-summary .summary-title { font-size: 1.15rem; margin: 0 0 1rem 0; color: var(--accent); }
+    .summary-month-tabs-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .summary-month-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .production-export-btn { margin-left: auto; font-size: 0.9rem; }
+    .summary-month-tabs .month-tab {
+      padding: 0.45rem 0.9rem; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9rem; color: var(--text); cursor: pointer;
+    }
+    .summary-month-tabs .month-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .summary-tables-wrap { overflow-x: auto; margin-bottom: 1rem; }
+    .production-summary-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .production-summary-table th, .production-summary-table td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .production-summary-table th { color: var(--muted); font-weight: 600; }
+    .production-summary-table td { color: var(--text); }
+    .summary-grand-total { font-size: 1rem; font-weight: 600; color: var(--accent); margin: 0; }
+    .production-infographic {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;
+      margin-bottom: 1.5rem; padding: 1.25rem; background: rgba(0,0,0,0.2); border-radius: 12px;
+    }
+    @media (max-width: 900px) {
+      .production-infographic { grid-template-columns: 1fr; }
+    }
+    .infographic-chart { min-width: 0; }
+    .infographic-chart .chart-title { font-size: 1rem; margin: 0 0 0.75rem 0; color: var(--muted); font-weight: 600; }
+    .chart-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+    .chart-bar-row { display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; }
+    .chart-bar-row .chart-label { min-width: 6rem; color: var(--text); }
+    .chart-bar-row .chart-bar-wrap {
+      flex: 1; min-width: 0; height: 1.25rem; background: var(--border); border-radius: 6px; overflow: hidden;
+    }
+    .chart-bar-row .chart-bar-fill {
+      height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent) 0%, rgba(201,169,98,0.6) 100%);
+      transition: width 0.3s ease;
+    }
+    .chart-bar-row .chart-value { min-width: 3rem; text-align: right; color: var(--accent); font-weight: 500; }
   </style>
 </head>
 <body>
@@ -1437,6 +1516,7 @@
     <button type="button" class="top-step" data-step="3"><span class="step-index">4</span> Plan production</button>
     <button type="button" class="top-step" data-step="4"><span class="step-index">5</span> Checkout</button>
     <button type="button" class="top-step" data-step="5"><span class="step-index">6</span> Innovation</button>
+    <button type="button" class="top-step" data-step="6"><span class="step-index">7</span> Production Stats</button>
   </nav>
   <div id="step-intro" class="step-screen active">
     <div class="intro-video-wrap">
@@ -2274,6 +2354,163 @@
     </div>
   </div>
 
+  <div id="step-production-stats" class="step-screen">
+    <div class="production-stats-inner">
+      <h2 class="production-stats-title">Production Stats</h2>
+      <p class="production-stats-subtitle">Log time per task. Totals by worker and by month.</p>
+      <div class="production-tasks-row" aria-label="Task types">
+        <span class="task-pill">Receiving</span>
+        <span class="task-pill">QC</span>
+        <span class="task-pill">Inventory</span>
+        <span class="task-pill">Sandblasting</span>
+        <span class="task-pill">Digital printing</span>
+        <span class="task-pill">Kitting</span>
+        <span class="task-pill">Expedition</span>
+      </div>
+      <div class="production-workers-grid" id="production-workers-grid">
+        <div class="worker-card" data-worker-id="enzo">
+          <div class="worker-avatar" aria-hidden="true">E</div>
+          <h3 class="worker-name">Enzo</h3>
+          <div class="worker-start-row worker-log-form" id="worker-start-enzo">
+            <select id="log-task-enzo" class="log-task-select" aria-label="Task for Enzo">
+              <option value="">Select task…</option>
+              <option value="receiving">Receiving</option>
+              <option value="qc">QC</option>
+              <option value="inventory">Inventory</option>
+              <option value="sandblasting">Sandblasting</option>
+              <option value="digital-printing">Digital printing</option>
+              <option value="kitting">Kitting</option>
+              <option value="expedition">Expedition</option>
+            </select>
+            <select id="log-workorder-enzo" class="log-workorder-select" aria-label="Work order for Enzo">
+              <option value="">Work order…</option>
+              <option value="OOKLA">OOKLA</option>
+              <option value="SHOPIFY">SHOPIFY</option>
+              <option value="WE TRACK">WE TRACK</option>
+            </select>
+            <button type="button" class="cta worker-start-btn" data-worker-id="enzo">Start</button>
+          </div>
+          <div class="worker-running-row worker-log-form" id="worker-running-enzo" style="display: none;">
+            <span class="worker-running-task" id="worker-running-task-enzo"></span>
+            <span class="worker-elapsed" id="worker-elapsed-enzo">0:00</span>
+            <button type="button" class="cta secondary worker-stop-btn" data-worker-id="enzo">Stop</button>
+          </div>
+          <p class="worker-total" id="worker-total-enzo">Total: 0 min</p>
+        </div>
+        <div class="worker-card" data-worker-id="andre">
+          <div class="worker-avatar" aria-hidden="true">A</div>
+          <h3 class="worker-name">Andre</h3>
+          <div class="worker-start-row worker-log-form" id="worker-start-andre">
+            <select id="log-task-andre" class="log-task-select" aria-label="Task for Andre">
+              <option value="">Select task…</option>
+              <option value="receiving">Receiving</option>
+              <option value="qc">QC</option>
+              <option value="inventory">Inventory</option>
+              <option value="sandblasting">Sandblasting</option>
+              <option value="digital-printing">Digital printing</option>
+              <option value="kitting">Kitting</option>
+              <option value="expedition">Expedition</option>
+            </select>
+            <select id="log-workorder-andre" class="log-workorder-select" aria-label="Work order for Andre">
+              <option value="">Work order…</option>
+              <option value="OOKLA">OOKLA</option>
+              <option value="SHOPIFY">SHOPIFY</option>
+              <option value="WE TRACK">WE TRACK</option>
+            </select>
+            <button type="button" class="cta worker-start-btn" data-worker-id="andre">Start</button>
+          </div>
+          <div class="worker-running-row worker-log-form" id="worker-running-andre" style="display: none;">
+            <span class="worker-running-task" id="worker-running-task-andre"></span>
+            <span class="worker-elapsed" id="worker-elapsed-andre">0:00</span>
+            <button type="button" class="cta secondary worker-stop-btn" data-worker-id="andre">Stop</button>
+          </div>
+          <p class="worker-total" id="worker-total-andre">Total: 0 min</p>
+        </div>
+        <div class="worker-card" data-worker-id="enrique">
+          <div class="worker-avatar" aria-hidden="true">E</div>
+          <h3 class="worker-name">Enrique</h3>
+          <div class="worker-start-row worker-log-form" id="worker-start-enrique">
+            <select id="log-task-enrique" class="log-task-select" aria-label="Task for Enrique">
+              <option value="">Select task…</option>
+              <option value="receiving">Receiving</option>
+              <option value="qc">QC</option>
+              <option value="inventory">Inventory</option>
+              <option value="sandblasting">Sandblasting</option>
+              <option value="digital-printing">Digital printing</option>
+              <option value="kitting">Kitting</option>
+              <option value="expedition">Expedition</option>
+            </select>
+            <select id="log-workorder-enrique" class="log-workorder-select" aria-label="Work order for Enrique">
+              <option value="">Work order…</option>
+              <option value="OOKLA">OOKLA</option>
+              <option value="SHOPIFY">SHOPIFY</option>
+              <option value="WE TRACK">WE TRACK</option>
+            </select>
+            <button type="button" class="cta worker-start-btn" data-worker-id="enrique">Start</button>
+          </div>
+          <div class="worker-running-row worker-log-form" id="worker-running-enrique" style="display: none;">
+            <span class="worker-running-task" id="worker-running-task-enrique"></span>
+            <span class="worker-elapsed" id="worker-elapsed-enrique">0:00</span>
+            <button type="button" class="cta secondary worker-stop-btn" data-worker-id="enrique">Stop</button>
+          </div>
+          <p class="worker-total" id="worker-total-enrique">Total: 0 min</p>
+        </div>
+        <div class="worker-card" data-worker-id="scot">
+          <div class="worker-avatar" aria-hidden="true">S</div>
+          <h3 class="worker-name">Scoth</h3>
+          <div class="worker-start-row worker-log-form" id="worker-start-scot">
+            <select id="log-task-scot" class="log-task-select" aria-label="Task for Scoth">
+              <option value="">Select task…</option>
+              <option value="receiving">Receiving</option>
+              <option value="qc">QC</option>
+              <option value="inventory">Inventory</option>
+              <option value="sandblasting">Sandblasting</option>
+              <option value="digital-printing">Digital printing</option>
+              <option value="kitting">Kitting</option>
+              <option value="expedition">Expedition</option>
+            </select>
+            <select id="log-workorder-scot" class="log-workorder-select" aria-label="Work order for Scoth">
+              <option value="">Work order…</option>
+              <option value="OOKLA">OOKLA</option>
+              <option value="SHOPIFY">SHOPIFY</option>
+              <option value="WE TRACK">WE TRACK</option>
+            </select>
+            <button type="button" class="cta worker-start-btn" data-worker-id="scot">Start</button>
+          </div>
+          <div class="worker-running-row worker-log-form" id="worker-running-scot" style="display: none;">
+            <span class="worker-running-task" id="worker-running-task-scot"></span>
+            <span class="worker-elapsed" id="worker-elapsed-scot">0:00</span>
+            <button type="button" class="cta secondary worker-stop-btn" data-worker-id="scot">Stop</button>
+          </div>
+          <p class="worker-total" id="worker-total-scot">Total: 0 min</p>
+        </div>
+      </div>
+      <div class="production-stats-summary">
+        <h3 class="summary-title">Totals by month</h3>
+        <div class="summary-month-tabs-wrap">
+          <div class="summary-month-tabs" id="production-month-tabs" role="tablist"></div>
+          <button type="button" class="cta secondary production-export-btn" id="production-export-excel" aria-label="Export current month to Excel">Export to Excel</button>
+        </div>
+        <div class="production-infographic" id="production-infographic" aria-label="Production data charts">
+          <div class="infographic-chart" id="chart-by-month">
+            <h4 class="chart-title">Hours by month</h4>
+            <div class="chart-bars" id="chart-bars-by-month"></div>
+          </div>
+          <div class="infographic-chart" id="chart-by-task">
+            <h4 class="chart-title">Hours by task</h4>
+            <div class="chart-bars" id="chart-bars-by-task"></div>
+          </div>
+          <div class="infographic-chart" id="chart-by-workorder">
+            <h4 class="chart-title">Hours by work order</h4>
+            <div class="chart-bars" id="chart-bars-by-workorder"></div>
+          </div>
+        </div>
+        <div class="summary-tables-wrap" id="production-summary-tables"></div>
+        <p class="summary-grand-total" id="production-grand-total">Total (all time): 0 h</p>
+      </div>
+    </div>
+  </div>
+
   <div id="template-manager-overlay" class="template-manager-overlay" aria-hidden="true">
     <div class="template-manager-header">
       <h2>Manage templates</h2>
@@ -2343,7 +2580,7 @@
       function showStep(step) {
         currentStep = step;
         document.querySelectorAll('.step-screen').forEach(function (el) { el.classList.remove('active'); });
-        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation'];
+        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation', 'step-production-stats'];
         var el = document.getElementById(stepIds[step] || 'step-product');
         if (el) el.classList.add('active');
         updateTopNav(step);
@@ -2365,6 +2602,8 @@
           if (typeof renderProductionCalendar === 'function') renderProductionCalendar();
         } else if (step === 4 && typeof updateCheckoutPage === 'function') {
           updateCheckoutPage();
+        } else if (step === 6 && typeof refreshProductionStats === 'function') {
+          refreshProductionStats();
         }
       }
       function updateCarousel() {
@@ -2472,6 +2711,503 @@
           if (!isNaN(s)) showStep(s);
         });
       });
+      (function () {
+        var PRODUCTION_STORAGE_KEY = 'cristal_production_logs';
+        var TIMERS_STORAGE_KEY = 'cristal_production_timers';
+        var TASK_LABELS = {
+          'receiving': 'Receiving', 'qc': 'QC', 'inventory': 'Inventory',
+          'sandblasting': 'Sandblasting', 'digital-printing': 'Digital printing',
+          'kitting': 'Kitting', 'expedition': 'Expedition'
+        };
+        var WORKERS = [
+          { id: 'enzo', name: 'Enzo' },
+          { id: 'andre', name: 'Andre' },
+          { id: 'enrique', name: 'Enrique' },
+          { id: 'scot', name: 'Scoth' }
+        ];
+        var WORK_ORDERS = ['OOKLA', 'SHOPIFY', 'WE TRACK'];
+        var COST_PER_HOUR = 18;
+        function getLast12MonthKeys() {
+          var now = new Date();
+          var out = [];
+          for (var i = 0; i < 12; i++) {
+            var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            out.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+          }
+          return out;
+        }
+        function getProductionLogs() {
+          try {
+            var raw = localStorage.getItem(PRODUCTION_STORAGE_KEY);
+            return raw ? JSON.parse(raw) : [];
+          } catch (e) { return []; }
+        }
+        function saveProductionLogs(logs) {
+          try {
+            localStorage.setItem(PRODUCTION_STORAGE_KEY, JSON.stringify(logs));
+          } catch (e) {}
+        }
+        function getTimers() {
+          try {
+            var raw = localStorage.getItem(TIMERS_STORAGE_KEY);
+            return raw ? JSON.parse(raw) : {};
+          } catch (e) { return {}; }
+        }
+        function saveTimers(timers) {
+          try {
+            localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(timers));
+          } catch (e) {}
+        }
+        var JAN_TOTAL_HOURS = 500;
+        var janTaskShare = [
+          { id: 'receiving', share: 0.14 },
+          { id: 'qc', share: 0.16 },
+          { id: 'inventory', share: 0.11 },
+          { id: 'sandblasting', share: 0.14 },
+          { id: 'digital-printing', share: 0.15 },
+          { id: 'kitting', share: 0.16 },
+          { id: 'expedition', share: 0.14 }
+        ];
+        function getWorkingDaysInMonth(year, month) {
+          var days = [];
+          var last = new Date(year, month + 1, 0).getDate();
+          for (var d = 1; d <= last; d++) {
+            var dayOfWeek = new Date(year, month, d).getDay();
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) days.push(d);
+          }
+          return days;
+        }
+        function buildJanuaryMockEntries(year, month, totalHoursJan) {
+          var totalMins = Math.round(totalHoursJan * 60);
+          var workingDays = getWorkingDaysInMonth(year, month);
+          if (workingDays.length === 0) workingDays = [15];
+          var nWorkers = WORKERS.length;
+          var nOrders = WORK_ORDERS.length;
+          var minsPerWorker = Math.floor(totalMins / nWorkers);
+          var mock = [];
+          var taskIds = janTaskShare.map(function (t) { return t.id; });
+          WORKERS.forEach(function (worker, wi) {
+            var dayIdx = 0;
+            var workOrderIdx = wi % nOrders;
+            var taskMinutes = {};
+            janTaskShare.forEach(function (t, idx) {
+              taskMinutes[t.id] = Math.round(minsPerWorker * t.share);
+            });
+            var totalAllocated = Object.keys(taskMinutes).reduce(function (s, k) { return s + taskMinutes[k]; }, 0);
+            if (totalAllocated < minsPerWorker && taskIds[0]) taskMinutes[taskIds[0]] = (taskMinutes[taskIds[0]] || 0) + (minsPerWorker - totalAllocated);
+            taskIds.forEach(function (taskId) {
+              var mins = taskMinutes[taskId] || 0;
+              if (mins < 1) return;
+              var numEntries = Math.max(1, Math.min(Math.ceil(mins / 90), 15));
+              var perEntry = Math.floor(mins / numEntries);
+              var remainder = mins - perEntry * numEntries;
+              for (var e = 0; e < numEntries; e++) {
+                var entryMins = perEntry + (e === numEntries - 1 ? remainder : 0);
+                var d = workingDays[dayIdx % workingDays.length];
+                dayIdx++;
+                var workOrder = WORK_ORDERS[workOrderIdx % nOrders];
+                workOrderIdx++;
+                var hour = 8 + (e % 5);
+                var minute = (e * 13) % 60;
+                mock.push({
+                  workerId: worker.id,
+                  workerName: worker.name,
+                  taskId: taskId,
+                  taskName: TASK_LABELS[taskId],
+                  workOrder: workOrder,
+                  minutes: entryMins,
+                  date: new Date(year, month, d, hour, minute).toISOString()
+                });
+              }
+            });
+          });
+          return mock;
+        }
+        function ensureJanuary500h() {
+          var logs = getProductionLogs();
+          var monthKeys = getLast12MonthKeys();
+          var janKey = null;
+          for (var i = 0; i < monthKeys.length; i++) {
+            if (monthKeys[i].indexOf('-01') === 4) { janKey = monthKeys[i]; break; }
+          }
+          if (!janKey) return;
+          var parts = janKey.split('-');
+          var year = parseInt(parts[0], 10);
+          var month = 0;
+          var janEntries = buildJanuaryMockEntries(year, month, JAN_TOTAL_HOURS);
+          var other = logs.filter(function (e) {
+            var d = new Date(e.date);
+            var k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            return k !== janKey;
+          });
+          saveProductionLogs(other.concat(janEntries));
+        }
+        function seedMockProductionLogs() {
+          var logs = getProductionLogs();
+          var taskIds = Object.keys(TASK_LABELS);
+          var months = getLast12MonthKeys();
+          var mock = [];
+          if (logs.length === 0) {
+            months.forEach(function (monthKey, mi) {
+              var parts = monthKey.split('-');
+              var year = parseInt(parts[0], 10);
+              var month = parseInt(parts[1], 10) - 1;
+              var daysInMonth = new Date(year, month + 1, 0).getDate();
+              var isJan = month === 0;
+              if (isJan) {
+                mock = mock.concat(buildJanuaryMockEntries(year, month, JAN_TOTAL_HOURS));
+              } else {
+                var count = mi === 0 ? 18 : 8 + (mi % 3);
+                for (var i = 0; i < count; i++) {
+                  var day = (i % daysInMonth) + 1;
+                  var workerId = WORKERS[i % WORKERS.length].id;
+                  var taskId = taskIds[i % taskIds.length];
+                  var worker = WORKERS.find(function (w) { return w.id === workerId; });
+                  var taskName = TASK_LABELS[taskId];
+                  mock.push({
+                    workerId: workerId,
+                    workerName: worker.name,
+                    taskId: taskId,
+                    taskName: taskName,
+                    workOrder: WORK_ORDERS[i % WORK_ORDERS.length],
+                    minutes: 15 + (i % 12) * 10 + (mi % 5) * 6,
+                    date: new Date(year, month, day, 9 + (i % 6), (i * 7) % 60).toISOString()
+                  });
+                }
+              }
+            });
+            saveProductionLogs(mock);
+          } else {
+            ensureJanuary500h();
+          }
+        }
+        function addProductionLog(workerId, taskId, minutes, workOrder, dateIso) {
+          var worker = WORKERS.find(function (w) { return w.id === workerId; });
+          var taskName = TASK_LABELS[taskId] || taskId;
+          if (!worker || !taskName || minutes < 1) return false;
+          var logs = getProductionLogs();
+          var entryDate = dateIso && (new Date(dateIso)).getTime() ? dateIso : new Date().toISOString();
+          logs.push({
+            workerId: workerId,
+            workerName: worker.name,
+            taskId: taskId,
+            taskName: taskName,
+            workOrder: workOrder || '',
+            minutes: Math.round(minutes),
+            date: entryDate
+          });
+          saveProductionLogs(logs);
+          return true;
+        }
+        function startTimer(workerId, taskId, workOrder) {
+          var taskName = TASK_LABELS[taskId];
+          if (!taskId || !taskName) return false;
+          var timers = getTimers();
+          timers[workerId] = { taskId: taskId, taskName: taskName, workOrder: workOrder || '', startTime: new Date().toISOString() };
+          saveTimers(timers);
+          updateWorkerTimerUI(workerId);
+          return true;
+        }
+        function stopTimer(workerId) {
+          var timers = getTimers();
+          var t = timers[workerId];
+          if (!t) return false;
+          var start = new Date(t.startTime).getTime();
+          var mins = Math.max(1, Math.round((Date.now() - start) / 60000));
+          delete timers[workerId];
+          saveTimers(timers);
+          addProductionLog(workerId, t.taskId, mins, t.workOrder, t.startTime);
+          updateWorkerTimerUI(workerId);
+          return true;
+        }
+        function formatElapsed(ms) {
+          var totalSec = Math.floor(ms / 1000);
+          var m = Math.floor(totalSec / 60);
+          var s = totalSec % 60;
+          return m + ':' + String(s).padStart(2, '0');
+        }
+        function updateWorkerTimerUI(workerId) {
+          var timers = getTimers();
+          var t = timers[workerId];
+          var startEl = document.getElementById('worker-start-' + workerId);
+          var runningEl = document.getElementById('worker-running-' + workerId);
+          var taskEl = document.getElementById('worker-running-task-' + workerId);
+          var elapsedEl = document.getElementById('worker-elapsed-' + workerId);
+          var selectEl = document.getElementById('log-task-' + workerId);
+          if (!startEl || !runningEl) return;
+          if (t) {
+            startEl.style.display = 'none';
+            runningEl.style.display = 'flex';
+            if (taskEl) taskEl.textContent = t.taskName + (t.workOrder ? ' · ' + t.workOrder + ' —' : ' —');
+            if (elapsedEl) {
+              var start = new Date(t.startTime).getTime();
+              elapsedEl.textContent = formatElapsed(Date.now() - start);
+            }
+            if (selectEl) selectEl.value = t.taskId;
+            var woEl = document.getElementById('log-workorder-' + workerId);
+            if (woEl) woEl.value = t.workOrder || '';
+          } else {
+            startEl.style.display = 'flex';
+            runningEl.style.display = 'none';
+            if (selectEl) selectEl.value = '';
+            var woEl = document.getElementById('log-workorder-' + workerId);
+            if (woEl) woEl.value = '';
+          }
+        }
+        function updateAllTimerDisplays() {
+          var timers = getTimers();
+          Object.keys(timers).forEach(function (workerId) {
+            var t = timers[workerId];
+            var elapsedEl = document.getElementById('worker-elapsed-' + workerId);
+            if (elapsedEl && t) {
+              var start = new Date(t.startTime).getTime();
+              elapsedEl.textContent = formatElapsed(Date.now() - start);
+            }
+          });
+        }
+        function refreshProductionStats() {
+          seedMockProductionLogs();
+          var logs = getProductionLogs();
+          var byWorker = {};
+          var byMonth = {};
+          WORKERS.forEach(function (w) { byWorker[w.id] = 0; });
+          logs.forEach(function (entry) {
+            byWorker[entry.workerId] = (byWorker[entry.workerId] || 0) + entry.minutes;
+            var d = new Date(entry.date);
+            var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            if (!byMonth[key]) byMonth[key] = [];
+            byMonth[key].push(entry);
+          });
+          WORKERS.forEach(function (w) {
+            var el = document.getElementById('worker-total-' + w.id);
+            if (el) el.textContent = 'Total: ' + (byWorker[w.id] || 0) + ' min';
+            updateWorkerTimerUI(w.id);
+          });
+          var last12MonthKeys = getLast12MonthKeys();
+          var tabsWrap = document.getElementById('production-month-tabs');
+          var tablesWrap = document.getElementById('production-summary-tables');
+          if (tabsWrap) {
+            tabsWrap.innerHTML = '';
+            var allTab = document.createElement('button');
+            allTab.type = 'button';
+            allTab.className = 'month-tab active';
+            allTab.textContent = 'All time';
+            allTab.setAttribute('data-month', '');
+            tabsWrap.appendChild(allTab);
+            last12MonthKeys.forEach(function (key) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'month-tab';
+              btn.textContent = key;
+              btn.setAttribute('data-month', key);
+              tabsWrap.appendChild(btn);
+            });
+            tabsWrap.querySelectorAll('.month-tab').forEach(function (tab) {
+              tab.addEventListener('click', function () {
+                tabsWrap.querySelectorAll('.month-tab').forEach(function (t) { t.classList.remove('active'); });
+                tab.classList.add('active');
+                var monthKey = tab.getAttribute('data-month');
+                renderProductionSummaryTable(monthKey, byMonth, last12MonthKeys, logs);
+                renderProductionInfographic(monthKey, byMonth, last12MonthKeys, logs);
+              });
+            });
+          }
+          var activeMonth = '';
+          if (tablesWrap) renderProductionSummaryTable(activeMonth, byMonth, last12MonthKeys, logs);
+          renderProductionInfographic(activeMonth, byMonth, last12MonthKeys, logs);
+          var grand = logs.reduce(function (sum, e) { return sum + e.minutes; }, 0);
+          var grandEl = document.getElementById('production-grand-total');
+          var grandHours = grand / 60;
+          var grandCost = (grandHours * COST_PER_HOUR).toFixed(0);
+          if (grandEl) grandEl.textContent = 'Total (all time): ' + grandHours.toFixed(1) + ' h (€' + grandCost + ')';
+        }
+        function renderProductionInfographic(monthKey, byMonth, last12MonthKeys, allLogs) {
+          var logs = monthKey ? (byMonth[monthKey] || []) : allLogs;
+          var byTask = {};
+          Object.keys(TASK_LABELS).forEach(function (tid) { byTask[tid] = 0; });
+          var byWorkOrder = {};
+          WORK_ORDERS.forEach(function (wo) { byWorkOrder[wo] = 0; });
+          byWorkOrder['Other'] = 0;
+          logs.forEach(function (e) {
+            if (byTask[e.taskId] !== undefined) byTask[e.taskId] += e.minutes;
+            var wo = e.workOrder && WORK_ORDERS.indexOf(e.workOrder) >= 0 ? e.workOrder : 'Other';
+            byWorkOrder[wo] = (byWorkOrder[wo] || 0) + e.minutes;
+          });
+          var monthMinutes = {};
+          last12MonthKeys.forEach(function (k) { monthMinutes[k] = 0; });
+          last12MonthKeys.forEach(function (k) {
+            (byMonth[k] || []).forEach(function (e) { monthMinutes[k] += e.minutes; });
+          });
+          var maxMonth = Math.max(1, Math.max.apply(null, Object.values(monthMinutes)));
+          var maxTask = Math.max(1, Math.max.apply(null, Object.values(byTask)));
+          var orderKeys = WORK_ORDERS.concat(byWorkOrder['Other'] > 0 ? ['Other'] : []);
+          var maxOrder = orderKeys.length ? Math.max(1, Math.max.apply(null, orderKeys.map(function (k) { return byWorkOrder[k] || 0; }))) : 1;
+          var monthEl = document.getElementById('chart-bars-by-month');
+          var taskEl = document.getElementById('chart-bars-by-task');
+          var orderEl = document.getElementById('chart-bars-by-workorder');
+          if (monthEl) {
+            monthEl.innerHTML = last12MonthKeys.map(function (k) {
+              var mins = monthMinutes[k] || 0;
+              var h = (mins / 60).toFixed(1);
+              var pct = maxMonth ? (mins / maxMonth * 100) : 0;
+              return '<div class="chart-bar-row"><span class="chart-label">' + k + '</span><div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:' + pct + '%"></div></div><span class="chart-value">' + h + ' h</span></div>';
+            }).join('');
+          }
+          if (taskEl) {
+            taskEl.innerHTML = Object.keys(TASK_LABELS).map(function (tid) {
+              var mins = byTask[tid] || 0;
+              var h = (mins / 60).toFixed(1);
+              var pct = maxTask ? (mins / maxTask * 100) : 0;
+              return '<div class="chart-bar-row"><span class="chart-label">' + TASK_LABELS[tid] + '</span><div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:' + pct + '%"></div></div><span class="chart-value">' + h + ' h</span></div>';
+            }).join('');
+          }
+          if (orderEl) {
+            orderEl.innerHTML = orderKeys.map(function (wo) {
+              var mins = byWorkOrder[wo] || 0;
+              var h = (mins / 60).toFixed(1);
+              var pct = maxOrder ? (mins / maxOrder * 100) : 0;
+              return '<div class="chart-bar-row"><span class="chart-label">' + wo + '</span><div class="chart-bar-wrap"><div class="chart-bar-fill" style="width:' + pct + '%"></div></div><span class="chart-value">' + h + ' h</span></div>';
+            }).join('');
+          }
+        }
+        function renderProductionSummaryTable(monthKey, byMonth, monthKeys, allLogs) {
+          var wrap = document.getElementById('production-summary-tables');
+          if (!wrap) return;
+          var logs = monthKey ? (byMonth[monthKey] || []) : allLogs;
+          var byWorkerTask = {};
+          WORKERS.forEach(function (w) {
+            byWorkerTask[w.id] = {};
+            Object.keys(TASK_LABELS).forEach(function (tid) { byWorkerTask[w.id][tid] = 0; });
+          });
+          logs.forEach(function (e) {
+            if (byWorkerTask[e.workerId] && byWorkerTask[e.workerId][e.taskId] !== undefined) {
+              byWorkerTask[e.workerId][e.taskId] += e.minutes;
+            }
+          });
+          var taskIds = Object.keys(TASK_LABELS);
+          var html = '<table class="production-summary-table"><thead><tr><th>Worker</th>';
+          taskIds.forEach(function (tid) { html += '<th>' + TASK_LABELS[tid] + '</th>'; });
+          html += '<th>Total</th><th>Cost (€)</th></tr></thead><tbody>';
+          var grandTotalMins = 0;
+          WORKERS.forEach(function (w) {
+            var rowTotal = 0;
+            html += '<tr><td>' + w.name + '</td>';
+            taskIds.forEach(function (tid) {
+              var m = byWorkerTask[w.id][tid] || 0;
+              rowTotal += m;
+              html += '<td>' + (m ? (m / 60).toFixed(1) + ' h' : '–') + '</td>';
+            });
+            grandTotalMins += rowTotal;
+            var rowHours = rowTotal / 60;
+            var cost = (rowHours * COST_PER_HOUR).toFixed(0);
+            html += '<td>' + (rowTotal ? (rowHours).toFixed(1) + ' h' : '–') + '</td><td>' + (rowTotal ? '€' + cost : '–') + '</td></tr>';
+          });
+          html += '</tbody></table>';
+          wrap.innerHTML = html;
+        }
+        function exportProductionToExcel() {
+          var activeTab = document.querySelector('#production-month-tabs .month-tab.active');
+          var monthKey = activeTab ? (activeTab.getAttribute('data-month') || '') : '';
+          var logs = getProductionLogs();
+          var byMonth = {};
+          logs.forEach(function (entry) {
+            var d = new Date(entry.date);
+            var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            if (!byMonth[key]) byMonth[key] = [];
+            byMonth[key].push(entry);
+          });
+          var periodLogs = monthKey ? (byMonth[monthKey] || []) : logs;
+          var byWorkerTask = {};
+          WORKERS.forEach(function (w) {
+            byWorkerTask[w.id] = {};
+            Object.keys(TASK_LABELS).forEach(function (tid) { byWorkerTask[w.id][tid] = 0; });
+          });
+          periodLogs.forEach(function (e) {
+            if (byWorkerTask[e.workerId] && byWorkerTask[e.workerId][e.taskId] !== undefined) {
+              byWorkerTask[e.workerId][e.taskId] += e.minutes;
+            }
+          });
+          var taskIds = Object.keys(TASK_LABELS);
+          var escapeCsv = function (v) {
+            var s = String(v);
+            return s.indexOf(',') >= 0 || s.indexOf('"') >= 0 ? '"' + s.replace(/"/g, '""') + '"' : s;
+          };
+          var rows = [];
+          var header = ['Worker'].concat(taskIds.map(function (tid) { return TASK_LABELS[tid]; })).concat(['Total (h)', 'Cost (€)']);
+          rows.push(header.map(escapeCsv).join(','));
+          var colTotals = {};
+          taskIds.forEach(function (tid) { colTotals[tid] = 0; });
+          var grandTotal = 0;
+          WORKERS.forEach(function (w) {
+            var rowTotal = 0;
+            var row = [w.name];
+            taskIds.forEach(function (tid) {
+              var m = byWorkerTask[w.id][tid] || 0;
+              rowTotal += m;
+              colTotals[tid] += m;
+              row.push((m / 60).toFixed(1));
+            });
+            grandTotal += rowTotal;
+            var rowHours = rowTotal / 60;
+            row.push((rowHours).toFixed(1));
+            row.push((rowHours * COST_PER_HOUR).toFixed(0));
+            rows.push(row.map(escapeCsv).join(','));
+          });
+          var grandHours = grandTotal / 60;
+          var totalRow = ['Total'].concat(taskIds.map(function (tid) { return (colTotals[tid] / 60).toFixed(1); })).concat([(grandHours).toFixed(1), (grandHours * COST_PER_HOUR).toFixed(0)]);
+          rows.push(totalRow.map(escapeCsv).join(','));
+          var byWorkOrderTask = {};
+          WORK_ORDERS.forEach(function (wo) { byWorkOrderTask[wo] = {}; Object.keys(TASK_LABELS).forEach(function (tid) { byWorkOrderTask[wo][tid] = 0; }); });
+          periodLogs.forEach(function (e) {
+            var wo = e.workOrder && WORK_ORDERS.indexOf(e.workOrder) >= 0 ? e.workOrder : 'Other';
+            if (!byWorkOrderTask[wo]) { byWorkOrderTask[wo] = {}; taskIds.forEach(function (tid) { byWorkOrderTask[wo][tid] = 0; }); }
+            if (byWorkOrderTask[wo][e.taskId] !== undefined) byWorkOrderTask[wo][e.taskId] += e.minutes;
+          });
+          rows.push('');
+          rows.push(escapeCsv('By work order'));
+          rows.push(['Work order'].concat(taskIds.map(function (tid) { return TASK_LABELS[tid]; })).concat(['Total (h)', 'Cost (€)']).map(escapeCsv).join(','));
+          Object.keys(byWorkOrderTask).forEach(function (wo) {
+            var wt = byWorkOrderTask[wo];
+            var woTotal = taskIds.reduce(function (sum, tid) { return sum + (wt[tid] || 0); }, 0);
+            var woHours = woTotal / 60;
+            var woRow = [wo].concat(taskIds.map(function (tid) { return ((wt[tid] || 0) / 60).toFixed(1); })).concat([(woHours).toFixed(1), (woHours * COST_PER_HOUR).toFixed(0)]);
+            rows.push(woRow.map(escapeCsv).join(','));
+          });
+          var csv = rows.join('\r\n');
+          var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'production-stats-' + (monthKey || 'all-time') + '.csv';
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+        document.getElementById('production-export-excel').addEventListener('click', exportProductionToExcel);
+        document.getElementById('production-workers-grid').addEventListener('click', function (e) {
+          var startBtn = e.target && e.target.closest('.worker-start-btn');
+          var stopBtn = e.target && e.target.closest('.worker-stop-btn');
+          if (startBtn) {
+            var workerId = startBtn.getAttribute('data-worker-id');
+            var taskSelect = document.getElementById('log-task-' + workerId);
+            var workOrderSelect = document.getElementById('log-workorder-' + workerId);
+            if (!taskSelect || !workOrderSelect) return;
+            var taskId = taskSelect.value;
+            var workOrder = workOrderSelect.value;
+            if (!taskId || !workOrder) return;
+            if (startTimer(workerId, taskId, workOrder)) refreshProductionStats();
+            return;
+          }
+          if (stopBtn) {
+            var workerId = stopBtn.getAttribute('data-worker-id');
+            if (stopTimer(workerId)) refreshProductionStats();
+          }
+        });
+        setInterval(function () {
+          var timers = getTimers();
+          if (Object.keys(timers).length === 0) return;
+          updateAllTimerDisplays();
+        }, 1000);
+      })();
       document.getElementById('start-btn').addEventListener('click', function () {
         if (introPlayed) return;
         introPlayed = true;
