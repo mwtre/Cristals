@@ -1031,39 +1031,48 @@
       position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
       padding: 0; padding-top: 4.5rem; box-sizing: border-box;
       background: var(--bg);
+      font-size: 1.05rem;
     }
     #step-innovation .innovation-hero {
-      min-height: 42vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 3rem 2rem 4rem; position: relative; width: 100%;
+      min-height: 45vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 4rem 2.5rem 5rem; position: relative; width: 100%;
       background: linear-gradient(180deg, rgba(26,26,26,0.6) 0%, transparent 100%);
     }
     #step-innovation .innovation-hero::after {
       content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 80px; height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent); border-radius: 2px;
+      width: 100px; height: 4px; background: linear-gradient(90deg, transparent, var(--accent), transparent); border-radius: 2px;
     }
     #step-innovation .innovation-badge {
-      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
-      margin-bottom: 0.75rem;
+      font-size: 0.8rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 1rem;
     }
     #step-innovation .innovation-title {
-      font-family: 'DM Serif Display', serif; font-weight: 400; font-size: clamp(1.85rem, 4vw, 2.5rem);
-      margin: 0 0 0.5rem 0; line-height: 1.2;
+      font-family: 'DM Serif Display', serif; font-weight: 400; font-size: clamp(2rem, 5vw, 2.85rem);
+      margin: 0 0 0.75rem 0; line-height: 1.25;
     }
     #step-innovation .innovation-subtitle {
-      font-size: clamp(0.95rem, 2vw, 1.1rem); color: rgba(201,169,98,0.95); margin-bottom: 0.75rem;
+      font-size: clamp(1.05rem, 2.2vw, 1.25rem); color: rgba(201,169,98,0.95); margin-bottom: 1rem; line-height: 1.4;
     }
-    #step-innovation .innovation-meta { font-size: 0.85rem; color: var(--muted); }
+    #step-innovation .innovation-meta { font-size: 1rem; color: var(--muted); }
     #step-innovation .innovation-content { width: 100%; box-sizing: border-box; }
-    /* Full-width sections: each is a distinct block with optional media area */
+    /* Wall-to-wall sections: full width, clear separation, generous space */
     #step-innovation .innovation-section {
-      width: 100%; padding: 3rem 2rem; box-sizing: border-box;
-      border-top: 1px solid var(--border);
+      width: 100%; padding: 4rem 2.5rem; box-sizing: border-box;
+      border-top: 2px solid var(--border);
       background: var(--surface);
+      position: relative;
     }
-    #step-innovation .innovation-section:nth-child(even) { background: rgba(20,20,20,0.6); }
+    #step-innovation .innovation-section::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+      background: linear-gradient(180deg, var(--accent), transparent 60%);
+      opacity: 0.5;
+    }
+    #step-innovation .innovation-section:nth-child(even) { background: rgba(18,18,18,0.95); }
+    #step-innovation .innovation-section.innovation-section-gallery,
+    #step-innovation .innovation-section.innovation-section-full { padding: 4rem 2.5rem; }
     #step-innovation .innovation-section-inner {
       max-width: 1280px; margin: 0 auto;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: start;
     }
     #step-innovation .innovation-section.media-right .innovation-section-inner {
       grid-template-columns: 1fr 1fr;
@@ -1082,7 +1091,7 @@
     }
     #step-innovation .innovation-section-full .innovation-section-inner {
       grid-template-columns: 1fr;
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
     }
     #step-innovation .innovation-section.innovation-section-gallery .innovation-section-inner {
@@ -1091,57 +1100,57 @@
       margin: 0 auto;
     }
     #step-innovation .innovation-media {
-      min-height: 280px; border: 2px dashed var(--border); border-radius: 12px;
+      min-height: 300px; border: 2px dashed var(--border); border-radius: 14px;
       background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;
-      color: var(--muted); font-size: 0.85rem; text-align: center; padding: 1.5rem;
+      color: var(--muted); font-size: 1rem; text-align: center; padding: 2rem;
       box-sizing: border-box;
     }
     #step-innovation .innovation-media:not(:empty) { border-style: solid; border-color: var(--border); }
     #step-innovation .innovation-media img { width: 100%; height: auto; border-radius: 10px; display: block; }
     #step-innovation .innovation-body { min-width: 0; }
     #step-innovation .innovation-section h3 {
-      font-size: 1.15rem; font-weight: 600; margin: 0 0 1rem 0; color: var(--text);
-      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 1.45rem; font-weight: 600; margin: 0 0 1.25rem 0; color: var(--text);
+      display: flex; align-items: center; gap: 0.6rem;
     }
     #step-innovation .innovation-section h3 .section-num {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 28px; height: 28px; border-radius: 8px; background: rgba(201,169,98,0.15);
-      color: var(--accent); font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
+      width: 34px; height: 34px; border-radius: 10px; background: rgba(201,169,98,0.15);
+      color: var(--accent); font-size: 1rem; font-weight: 700; flex-shrink: 0;
     }
-    #step-innovation .innovation-section p { margin: 0 0 0.65rem 0; font-size: 0.95rem; line-height: 1.6; color: rgba(255,255,255,0.9); }
+    #step-innovation .innovation-section p { margin: 0 0 0.9rem 0; font-size: 1.08rem; line-height: 1.65; color: rgba(255,255,255,0.92); }
     #step-innovation .innovation-section p:last-of-type { margin-bottom: 0; }
-    #step-innovation .innovation-section ul { margin: 0.5rem 0 1rem 1.5rem; padding: 0; }
-    #step-innovation .innovation-section li { margin-bottom: 0.4rem; font-size: 0.95rem; line-height: 1.55; color: rgba(255,255,255,0.88); }
+    #step-innovation .innovation-section ul { margin: 0.75rem 0 1.25rem 1.5rem; padding: 0; }
+    #step-innovation .innovation-section li { margin-bottom: 0.55rem; font-size: 1.05rem; line-height: 1.6; color: rgba(255,255,255,0.9); }
     #step-innovation .innovation-section .highlight { color: var(--accent); font-weight: 500; }
     #step-innovation .innovation-phase {
-      background: rgba(0,0,0,0.25); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0 0.75rem;
-      border-left: 3px solid var(--accent);
+      background: rgba(0,0,0,0.25); border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1.25rem 0 1rem;
+      border-left: 4px solid var(--accent);
     }
-    #step-innovation .innovation-phase strong { color: var(--accent); font-size: 0.9rem; }
+    #step-innovation .innovation-phase strong { color: var(--accent); font-size: 1.05rem; }
     #step-innovation .innovation-phase.innovation-explainer a { color: var(--accent); text-decoration: none; }
     #step-innovation .innovation-phase.innovation-explainer a:hover { text-decoration: underline; }
-    #step-innovation .innovation-media-caption { margin: 0.75rem 0 0; font-size: 0.8rem; color: var(--muted); }
+    #step-innovation .innovation-media-caption { margin: 1rem 0 0; font-size: 0.95rem; color: var(--muted); }
     #step-innovation .innovation-media-caption a { color: var(--accent); text-decoration: none; }
     #step-innovation .innovation-media-caption a:hover { text-decoration: underline; }
     /* Hardware gallery: details left/right alternating */
     #step-innovation .innovation-gallery { width: 100%; max-width: 1280px; margin: 0 auto; }
     #step-innovation .innovation-gallery-item {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start;
-      padding: 2rem 0; border-bottom: 1px solid var(--border);
-      min-height: 200px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;
+      padding: 2.75rem 0; border-bottom: 2px solid var(--border);
+      min-height: 220px;
     }
     #step-innovation .innovation-gallery-item:last-child { border-bottom: none; }
     #step-innovation .innovation-gallery-item.details-right { grid-template-columns: 1fr 1fr; }
     #step-innovation .innovation-gallery-item.details-right .gallery-details { order: 2; }
     #step-innovation .innovation-gallery-item.details-right .gallery-media { order: 1; }
     #step-innovation .innovation-gallery-item .gallery-details { min-width: 0; }
-    #step-innovation .innovation-gallery-item .gallery-details h4 { font-size: 1.1rem; margin: 0 0 0.5rem 0; color: var(--accent); }
-    #step-innovation .innovation-gallery-item .gallery-details p { margin: 0 0 0.5rem 0; font-size: 0.92rem; line-height: 1.55; color: rgba(255,255,255,0.9); }
-    #step-innovation .innovation-gallery-item .gallery-details ul { margin: 0.35rem 0 0 1rem; padding: 0; font-size: 0.9rem; line-height: 1.5; }
+    #step-innovation .innovation-gallery-item .gallery-details h4 { font-size: 1.3rem; margin: 0 0 0.75rem 0; color: var(--accent); }
+    #step-innovation .innovation-gallery-item .gallery-details p { margin: 0 0 0.75rem 0; font-size: 1.05rem; line-height: 1.6; color: rgba(255,255,255,0.92); }
+    #step-innovation .innovation-gallery-item .gallery-details ul { margin: 0.5rem 0 0 1.25rem; padding: 0; font-size: 1.02rem; line-height: 1.6; }
     #step-innovation .innovation-gallery-item .gallery-details a { color: var(--accent); text-decoration: none; }
     #step-innovation .innovation-gallery-item .gallery-details a:hover { text-decoration: underline; }
     #step-innovation .innovation-gallery-item .gallery-media {
-      min-height: 220px; border-radius: 12px; overflow: hidden;
+      min-height: 260px; border-radius: 14px; overflow: hidden;
       background: rgba(0,0,0,0.25); border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
     }
@@ -1159,28 +1168,210 @@
       #step-innovation .innovation-gallery-item.details-right .gallery-media { order: unset; }
     }
     #step-innovation .innovation-tax-grid {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-top: 1rem;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;
     }
     @media (max-width: 900px) {
       #step-innovation .innovation-section-inner { grid-template-columns: 1fr; gap: 2rem; }
       #step-innovation .innovation-section.innovation-section-row .innovation-section-inner { grid-template-columns: 1fr 1fr; }
       #step-innovation .innovation-section.media-left .innovation-body,
       #step-innovation .innovation-section.media-left .innovation-media { order: unset; }
-      #step-innovation .innovation-media { min-height: 200px; }
-      #step-innovation .innovation-section { padding: 2rem 1.5rem; }
+      #step-innovation .innovation-media { min-height: 220px; }
+      #step-innovation .innovation-section { padding: 2.5rem 1.5rem; }
       #step-innovation .innovation-tax-grid { grid-template-columns: 1fr; }
     }
     #step-innovation .innovation-tax-card {
-      background: rgba(0,0,0,0.3); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--border);
+      background: rgba(0,0,0,0.3); border-radius: 14px; padding: 1.75rem 1.5rem; border: 1px solid var(--border);
+      display: flex; flex-direction: column;
     }
-    #step-innovation .innovation-tax-card h4 { font-size: 1rem; margin: 0 0 0.5rem 0; color: var(--accent); }
-    #step-innovation .innovation-tax-card p { font-size: 0.88rem; margin: 0; line-height: 1.5; }
+    #step-innovation .innovation-tax-card h4 { font-size: 1.2rem; margin: 0 0 0.75rem 0; color: var(--accent); }
+    #step-innovation .innovation-tax-card p { font-size: 1.05rem; margin: 0; line-height: 1.6; }
+    #step-innovation .innovation-tax-card .tax-saving {
+      margin-top: 1.25rem; padding: 1rem 1.25rem; border-radius: 10px;
+      background: rgba(201,169,98,0.12); border: 1px solid rgba(201,169,98,0.35);
+      text-align: center;
+    }
+    #step-innovation .innovation-tax-card .tax-saving .saving-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.25rem; }
+    #step-innovation .innovation-tax-card .tax-saving .saving-amount { font-size: 1.6rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+    #step-innovation .innovation-tax-card .tax-saving .saving-note { font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-top: 0.35rem; }
+    #step-innovation .innovation-tax-intro { margin-bottom: 2rem; }
+    #step-innovation .innovation-tax-intro p { font-size: 1.1rem; line-height: 1.7; }
+    #step-innovation .innovation-tax-roadmap-wrap { margin: 2.5rem 0; text-align: center; }
+    #step-innovation .innovation-tax-roadmap-wrap img { max-width: 100%; height: auto; border-radius: 12px; display: block; margin: 0 auto 1rem; border: 1px solid var(--border); }
+    #step-innovation .innovation-tax-roadmap-wrap .roadmap-caption { font-size: 1.05rem; line-height: 1.6; color: rgba(255,255,255,0.9); max-width: 640px; margin: 0 auto; }
+    #step-innovation .innovation-tax-roadmap-wrap .roadmap-caption .highlight { color: var(--accent); font-weight: 500; }
+    #step-innovation .innovation-tax-example { background: rgba(0,0,0,0.25); border-left: 4px solid var(--accent); border-radius: 12px; padding: 2rem 2rem; margin: 1.5rem 0; }
+    #step-innovation .innovation-tax-example h4 { font-size: 1.2rem; margin: 0 0 1.25rem 0; color: var(--accent); }
+    #step-innovation .innovation-tax-example > p { font-size: 1.05rem; margin-bottom: 1.25rem; }
+    #step-innovation .innovation-roadmap {
+      display: flex; flex-wrap: wrap; gap: 0; justify-content: space-between;
+      position: relative; margin: 1.5rem 0 1rem;
+    }
+    #step-innovation .innovation-roadmap::before {
+      content: ''; position: absolute; top: 28px; left: 12%; right: 12%; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--border)); opacity: 0.6;
+      z-index: 0;
+    }
+    @media (max-width: 900px) {
+      #step-innovation .innovation-roadmap { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+      #step-innovation .innovation-roadmap::before { display: none; }
+    }
+    #step-innovation .innovation-roadmap-step {
+      flex: 1; min-width: 140px; max-width: 200px; text-align: center; position: relative; z-index: 1;
+      padding: 0.5rem 0.25rem;
+    }
+    @media (max-width: 900px) {
+      #step-innovation .innovation-roadmap-step { max-width: 100%; min-width: 0; text-align: left; display: flex; align-items: flex-start; gap: 1rem; }
+    }
+    #step-innovation .innovation-roadmap-step .roadmap-icon {
+      width: 56px; height: 56px; margin: 0 auto 0.75rem; border-radius: 12px;
+      background: rgba(201,169,98,0.15); border: 1px solid rgba(201,169,98,0.35);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #step-innovation .innovation-roadmap-step .roadmap-icon svg { width: 28px; height: 28px; color: var(--accent); }
+    @media (max-width: 900px) {
+      #step-innovation .innovation-roadmap-step .roadmap-icon { margin: 0; flex-shrink: 0; }
+    }
+    #step-innovation .innovation-roadmap-step .roadmap-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem; color: var(--text); }
+    #step-innovation .innovation-roadmap-step .roadmap-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.4; }
+    #step-innovation .innovation-tax-example .roadmap-closing { font-size: 1.05rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    #step-innovation .innovation-tax-impact { background: rgba(201,169,98,0.08); border: 1px solid rgba(201,169,98,0.25); border-radius: 12px; padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+    #step-innovation .innovation-tax-impact h4 { font-size: 1.12rem; margin: 0 0 0.75rem 0; }
+    #step-innovation .innovation-tax-impact p { font-size: 1.05rem; }
+    #step-innovation .innovation-tax-impact .highlight { color: var(--accent); font-weight: 600; }
+    #step-innovation .innovation-subsection-title { margin-top: 2rem; margin-bottom: 0.75rem; font-size: 1.2rem; font-weight: 600; color: var(--accent); }
+    #step-innovation .innovation-tax-conclusion { margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--border); font-size: 1.08rem; line-height: 1.65; }
+    /* With vs Without Tax – clear side-by-side totals */
+    #step-innovation .innovation-tax-compare {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2.5rem 0;
+      max-width: 900px;
+    }
+    #step-innovation .innovation-tax-compare .compare-card {
+      border-radius: 16px; padding: 2rem 2rem; text-align: center;
+      border: 2px solid var(--border);
+    }
+    #step-innovation .innovation-tax-compare .compare-card.without {
+      background: rgba(80,60,60,0.25); border-color: rgba(180,120,120,0.45);
+    }
+    #step-innovation .innovation-tax-compare .compare-card.with {
+      background: rgba(50,70,50,0.25); border-color: rgba(201,169,98,0.55);
+    }
+    #step-innovation .innovation-tax-compare .compare-card h4 {
+      font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 0.75rem 0;
+      color: var(--muted);
+    }
+    /* Visual bar: tax vs net */
+    #step-innovation .innovation-tax-compare .compare-bar-wrap {
+      margin: 1.25rem 0; border-radius: 10px; overflow: hidden; height: 32px;
+      display: flex; background: var(--border);
+    }
+    #step-innovation .innovation-tax-compare .compare-card.without .compare-bar-wrap .bar-tax { background: rgba(200,100,100,0.7); }
+    #step-innovation .innovation-tax-compare .compare-card.without .compare-bar-wrap .bar-net { background: rgba(120,80,80,0.6); }
+    #step-innovation .innovation-tax-compare .compare-card.with .compare-bar-wrap .bar-tax { background: rgba(201,169,98,0.4); }
+    #step-innovation .innovation-tax-compare .compare-card.with .compare-bar-wrap .bar-net { background: rgba(201,169,98,0.25); }
+    #step-innovation .innovation-tax-compare .compare-bar-legend {
+      display: flex; justify-content: center; gap: 1.25rem; margin-top: 0.5rem; font-size: 0.8rem; color: var(--muted);
+    }
+    #step-innovation .innovation-tax-compare .compare-card .compare-total {
+      font-size: 2.25rem; font-weight: 700; margin: 0.5rem 0 0.25rem;
+    }
+    #step-innovation .innovation-tax-compare .compare-card.without .compare-total { color: #c99; }
+    #step-innovation .innovation-tax-compare .compare-card.with .compare-total { color: var(--accent); }
+    #step-innovation .innovation-tax-compare .compare-card .compare-detail { font-size: 0.95rem; color: var(--muted); margin-top: 0.25rem; }
+    #step-innovation .innovation-tax-compare .compare-breakdown {
+      text-align: left; margin-top: 1rem; font-size: 1rem; line-height: 1.5;
+    }
+    #step-innovation .innovation-tax-compare .compare-breakdown .row { display: flex; justify-content: space-between; margin: 0.4rem 0; }
+    #step-innovation .innovation-tax-compare .compare-breakdown .row.total { margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.15); font-weight: 700; font-size: 1.05rem; }
+    #step-innovation .innovation-tax-compare .compare-saving {
+      grid-column: 1 / -1; text-align: center; padding: 1.75rem 1.5rem;
+      background: linear-gradient(135deg, rgba(201,169,98,0.2), rgba(201,169,98,0.08)); border: 2px solid rgba(201,169,98,0.5); border-radius: 14px;
+      font-weight: 700; color: var(--accent);
+    }
+    #step-innovation .innovation-tax-compare .compare-saving .saving-annual { display: block; font-size: 1.5rem; margin-bottom: 0.5rem; }
+    #step-innovation .innovation-tax-compare .compare-saving .saving-5y { font-size: 1.2rem; opacity: 0.95; }
+    @media (max-width: 600px) {
+      #step-innovation .innovation-tax-compare { grid-template-columns: 1fr; }
+    }
+    /* Phase 1 vs Phase 2 – clear blocks */
+    #step-innovation .innovation-phases {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; margin: 2.5rem 0;
+    }
+    #step-innovation .innovation-phase-block {
+      border-radius: 14px; padding: 2rem 2rem;
+      border: 2px solid var(--border); background: rgba(0,0,0,0.2);
+    }
+    #step-innovation .innovation-phase-block h4 {
+      font-size: 1.2rem; margin: 0 0 0.6rem 0; color: var(--accent);
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    #step-innovation .innovation-phase-block .phase-badge {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0.3rem 0.6rem; border-radius: 6px; background: rgba(201,169,98,0.2); color: var(--accent);
+    }
+    #step-innovation .innovation-phase-block .phase-timeline { font-size: 1rem; color: var(--muted); margin-bottom: 0.9rem; }
+    #step-innovation .innovation-phase-block p { font-size: 1.05rem; line-height: 1.6; margin-bottom: 0.6rem; }
+    #step-innovation .innovation-phase-block .phase-total { font-size: 1.35rem; font-weight: 700; color: var(--text); margin-top: 1rem; }
+    #step-innovation .innovation-phase-block ul { margin: 0.6rem 0 0 1.2rem; padding: 0; font-size: 1.02rem; line-height: 1.6; }
+    @media (max-width: 700px) {
+      #step-innovation .innovation-phases { grid-template-columns: 1fr; }
+    }
+    #step-innovation .innovation-roi { margin-top: 2.5rem; }
+    #step-innovation .innovation-roi-title { font-size: 1.35rem; font-weight: 600; margin: 0 0 0.5rem 0; }
+    #step-innovation .innovation-roi-subtitle { font-size: 1.05rem; color: var(--muted); margin: 0 0 1.5rem 0; line-height: 1.5; }
+    #step-innovation .innovation-roi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    #step-innovation .innovation-roi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    #step-innovation .innovation-roi-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+      border-color: rgba(201,169,98,0.7);
+    }
+    #step-innovation .innovation-roi-card h4 {
+      font-size: 1.15rem;
+      margin: 0 0 0.6rem 0;
+      color: var(--accent);
+    }
+    #step-innovation .innovation-roi-card p { font-size: 1.02rem; line-height: 1.6; margin-bottom: 0.5rem; }
+    #step-innovation .innovation-roi-card table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+    }
+    #step-innovation .innovation-roi-card table td,
+    #step-innovation .innovation-roi-card table th {
+      padding: 0.35rem 0;
+    }
+    #step-innovation .innovation-roi-card table tr:last-child td {
+      padding-bottom: 0;
+    }
+    #step-innovation .innovation-roi-card table th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    #step-innovation .innovation-roi-card .value-strong { font-weight: 600; }
+    #step-innovation .innovation-roi-footer {
+      margin-top: 1.5rem;
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
     #step-innovation .innovation-signature {
-      width: 100%; padding: 3rem 2rem; text-align: center; box-sizing: border-box;
-      background: var(--surface); border-top: 1px solid var(--border);
-      font-size: 0.95rem; color: var(--muted); line-height: 1.6;
+      width: 100%; padding: 4rem 2.5rem; text-align: center; box-sizing: border-box;
+      background: var(--surface); border-top: 2px solid var(--border);
+      font-size: 1.1rem; color: var(--muted); line-height: 1.7;
     }
-    #step-innovation .innovation-signature strong { color: var(--text); font-size: 1rem; }
+    #step-innovation .innovation-signature strong { color: var(--text); font-size: 1.15rem; }
     .checkout-wrap { width: 100%; }
     .checkout-title { font-family: 'DM Serif Display', serif; font-weight: 400; font-size: 1.75rem; margin: 0 0 0.35rem 0; }
     .checkout-subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
@@ -1791,7 +1982,7 @@
           <div class="innovation-body">
             <h3><span class="section-num">3</span> Phased Rollout – Low Risk, High Subsidy</h3>
             <div class="innovation-phase">
-              <strong>Phase 1 (3–6 months) – Digital Factory Twin</strong> (our starting point)
+              <strong>Phase 1 · 3–6 months · Digital Factory Twin</strong> (our starting point)
             </div>
             <ul>
               <li>Lightweight digital model / twin of the entire production line</li>
@@ -1802,7 +1993,7 @@
             </ul>
             <p>→ Low cost (€5k–€15k sensors/scanners + dev hours) · Runs parallel to current manual line – no production stop · Immediate benefits: better visibility, fewer errors, data foundation · Perfect proof-of-concept before buying robots.</p>
             <div class="innovation-phase">
-              <strong>Phase 2 (6–12+ months) – Physical Automation</strong>
+              <strong>Phase 2 · 6–12+ months · Physical Automation</strong>
             </div>
             <ul>
               <li>Add collaborative robotic arm for handling, laser etching/hatching &amp; auto-packing</li>
@@ -1908,21 +2099,154 @@
       <section class="innovation-section innovation-section-full">
         <div class="innovation-section-inner">
           <div class="innovation-body">
-            <h3><span class="section-num">5</span> Massive Tax Savings – Government Pays a Big Share (2026 rules)</h3>
-            <p style="margin-bottom: 0.5rem;">Total estimated recovery: <strong>50–70%+ of project costs</strong> (upfront cash + permanently lower profit tax).</p>
+            <h3><span class="section-num">5</span> Tax Incentives &amp; Financial Leverage</h3>
+            <div class="innovation-tax-intro">
+              <p><strong>Why this project is financially strategic.</strong> Our Crystal Remote Factory is not just an automation upgrade — it is the development of proprietary software, digital manufacturing control systems, and AI-assisted design tools. Because of this, the project qualifies for powerful Dutch innovation tax incentives.</p>
+            </div>
             <div class="innovation-tax-grid">
               <div class="innovation-tax-card">
-                <h4>A. KIA</h4>
-                <p>Investment deduction – hardware &amp; sensors. 28% extra deduction on €2,901–€71,683. Example €60k → ~€7,400 tax saving Year 1. Total 25–40% hardware cost recovered over time.</p>
+                <h4>1. KIA – Investment deduction (hardware)</h4>
+                <p>One-time extra deduction on qualifying equipment (robots, sensors, packaging machines). Reduces taxable profit in the year of investment. Helpful for small-to-medium investments; not the main driver — a bonus.</p>
+                <div class="tax-saving">
+                  <div class="saving-label">Estimated benefit</div>
+                  <div class="saving-amount">€2,000 – €4,000</div>
+                  <div class="saving-note">on mid-sized automation (one-time)</div>
+                </div>
               </div>
               <div class="innovation-tax-card">
-                <h4>B. WBSO</h4>
-                <p>R&amp;D payroll tax cash relief – software/AI/digital twin. 36% reduction on first €391,020 R&amp;D wages (50% if starter). 1,000–1,500 hours → €30k–€60k+ cash back on payroll taxes.</p>
+                <h4>2. WBSO – R&amp;D payroll tax reduction</h4>
+                <p>Because we develop proprietary software, WBSO applies. Qualifying: design app, AI pattern editing, Digital Twin, robot control, remote dashboard. Up to <strong>36%</strong> reduction on R&amp;D wage costs — significantly lowers development cost.</p>
+                <div class="tax-saving">
+                  <div class="saving-label">Estimated payroll tax relief</div>
+                  <div class="saving-amount">€30,000 – €60,000</div>
+                  <div class="saving-note">for ~1,200 R&amp;D hours (cash back)</div>
+                </div>
               </div>
               <div class="innovation-tax-card">
-                <h4>C. Innovation Box</h4>
-                <p>Profits from self-developed IP taxed at only <strong>9%</strong> vs 19–25.8%. Example: €100k extra profit → <span class="highlight">€16,800 saved every year</span> ongoing.</p>
+                <h4>3. Innovation Box – major advantage</h4>
+                <p>Profits from self-developed IP taxed at <strong>9%</strong> instead of 19–25.8%. Applies when we develop proprietary software, obtain WBSO approval, and document the IP. The long-term profit multiplier.</p>
+                <div class="tax-saving">
+                  <div class="saving-label">Tax on IP profit</div>
+                  <div class="saving-amount">9% instead of 25.8%</div>
+                  <div class="saving-note">e.g. €168,000/year saved on €1M profit</div>
+                </div>
               </div>
+            </div>
+            <div class="innovation-tax-roadmap-wrap">
+              <img src="cristals/roadmap.png" alt="Tax incentives roadmap: R&D (25% tax credit) → Automation (40% investment) → Innovation Box (9% effective)" />
+              <p class="roadmap-caption"><strong>How the 9% applies:</strong> The 9% only hits that <span class="highlight">innovation profit slice</span> (e.g. €100,000 or whatever % your allocation justifies) — not your full revenue (e.g. €2M) or full profit (e.g. €700k). It’s the <span class="highlight">"innovation premium"</span> part.</p>
+            </div>
+            <div class="innovation-tax-example">
+              <h4>Example – Crystal Remote Factory (what we’re developing)</h4>
+              <p>Our proprietary software layer — process roadmap:</p>
+              <div class="innovation-roadmap" role="list" aria-label="Crystal Remote Factory process steps">
+                <div class="innovation-roadmap-step" role="listitem">
+                  <div class="roadmap-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6M3 15h6M15 9h6M15 15h6"/></svg>
+                  </div>
+                  <div class="roadmap-title">Design app</div>
+                  <div class="roadmap-desc">Clients create and customize crystal awards remotely</div>
+                </div>
+                <div class="innovation-roadmap-step" role="listitem">
+                  <div class="roadmap-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                  </div>
+                  <div class="roadmap-title">Production control</div>
+                  <div class="roadmap-desc">Translates designs into robotic engraving instructions</div>
+                </div>
+                <div class="innovation-roadmap-step" role="listitem">
+                  <div class="roadmap-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                  </div>
+                  <div class="roadmap-title">Remote control</div>
+                  <div class="roadmap-desc">Monitor and control production from anywhere</div>
+                </div>
+                <div class="innovation-roadmap-step" role="listitem">
+                  <div class="roadmap-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                  </div>
+                  <div class="roadmap-title">Digital twin</div>
+                  <div class="roadmap-desc">Tracks each crystal from blank to shipment in real time</div>
+                </div>
+                <div class="innovation-roadmap-step" role="listitem">
+                  <div class="roadmap-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  </div>
+                  <div class="roadmap-title">AI layout</div>
+                  <div class="roadmap-desc">Optimizes engraving layout on crystal surfaces</div>
+                </div>
+              </div>
+              <p class="roadmap-closing">This software is proprietary and forms a new technological asset for the company. That qualifies as innovation under Dutch rules and opens the door to the Innovation Box.</p>
+            </div>
+            <div class="innovation-tax-impact">
+              <h4>Financial impact example — with or without tax incentive</h4>
+              <p>Assume the Crystal Remote Factory generates <strong>€1,000,000</strong> additional annual profit from: higher production capacity, reduced labor dependency, lower breakage, and premium remote customization revenue.</p>
+              <p><strong>Same profit, different tax treatment:</strong></p>
+              <div class="innovation-tax-compare" aria-label="With vs without Innovation Box">
+                <div class="compare-card without">
+                  <h4>Without Innovation Box</h4>
+                  <p class="compare-detail">Standard corporate tax (25.8%)</p>
+                  <div class="compare-bar-wrap" aria-hidden="true">
+                    <span class="bar-tax" style="width: 25.8%;" title="Tax 25.8%"></span>
+                    <span class="bar-net" style="width: 74.2%;" title="Net 74.2%"></span>
+                  </div>
+                  <div class="compare-bar-legend"><span>Tax 25.8%</span><span>You keep 74.2%</span></div>
+                  <div class="compare-breakdown">
+                    <div class="row"><span>Additional annual profit</span><span>€1,000,000</span></div>
+                    <div class="row"><span>Tax rate</span><span>25.8%</span></div>
+                    <div class="row"><span>Tax due</span><span>€258,000</span></div>
+                    <div class="row total"><span>Net profit (after tax)</span><span>€742,000</span></div>
+                  </div>
+                  <p class="compare-total">€742,000 net</p>
+                </div>
+                <div class="compare-card with">
+                  <h4>With Innovation Box (9%)</h4>
+                  <p class="compare-detail">Profits from self-developed IP taxed at 9%</p>
+                  <div class="compare-bar-wrap" aria-hidden="true">
+                    <span class="bar-tax" style="width: 9%;" title="Tax 9%"></span>
+                    <span class="bar-net" style="width: 91%;" title="Net 91%"></span>
+                  </div>
+                  <div class="compare-bar-legend"><span>Tax 9%</span><span>You keep 91%</span></div>
+                  <div class="compare-breakdown">
+                    <div class="row"><span>Additional annual profit</span><span>€1,000,000</span></div>
+                    <div class="row"><span>Tax rate</span><span>9%</span></div>
+                    <div class="row"><span>Tax due</span><span>€90,000</span></div>
+                    <div class="row total"><span>Net profit (after tax)</span><span>€910,000</span></div>
+                  </div>
+                  <p class="compare-total">€910,000 net</p>
+                </div>
+                <p class="compare-saving">
+                  <span class="saving-annual">Annual tax saving: €168,000</span>
+                  <span class="saving-5y">Over 5 years: €840,000 more profit retained with the tax incentive</span>
+                </p>
+              </div>
+            </div>
+            <h4 class="innovation-subsection-title">Investment by phase</h4>
+            <div class="innovation-phases">
+              <div class="innovation-phase-block">
+                <h4><span class="phase-badge">Phase 1</span> Digital Factory Twin</h4>
+                <p class="phase-timeline">3–6 months</p>
+                <p>Digital twin, real-time tracking, live dashboard, remote control, data logging. Runs parallel to current line — no production stop.</p>
+                <ul>
+                  <li>Budget: €10,000–€15,000 + ring-fenced dev hours</li>
+                  <li>WBSO applies to software development</li>
+                </ul>
+                <p class="phase-total">Total Phase 1: ≈ €10k–€15k (excl. WBSO benefit)</p>
+              </div>
+              <div class="innovation-phase-block">
+                <h4><span class="phase-badge">Phase 2</span> Physical Automation</h4>
+                <p class="phase-timeline">6–12+ months</p>
+                <p>Collaborative robot, laser etching/hatching, auto-packing, integration with digital twin. Remote edit app + AI design assistance later.</p>
+                <ul>
+                  <li>Robot + integration: ~€120k; sensors/infra: ~€50k</li>
+                  <li>KIA on hardware; WBSO on control software</li>
+                </ul>
+                <p class="phase-total">Total Phase 2 (example): ≈ €170k hardware + software (before incentives)</p>
+              </div>
+            </div>
+            <p><strong>Why this matters.</strong> This project transforms us into a software-enabled crystal manufacturing platform: higher margins, scalable remote production, international expansion, recurring high-value clients. The Dutch government effectively co-invests through WBSO (development cost reduction) and Innovation Box (long-term tax reduction).</p>
+            <div class="innovation-tax-conclusion">
+              <p><strong>Strategic conclusion:</strong> KIA = small bonus. WBSO = development accelerator. Innovation Box = long-term profit multiplier. The real value is building proprietary smart manufacturing software. This is not just automation — this is CrystalTech.</p>
             </div>
           </div>
         </div>
