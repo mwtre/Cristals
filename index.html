@@ -1475,6 +1475,8 @@
     .summary-month-tabs-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
     .summary-month-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .production-export-btn { margin-left: auto; font-size: 0.9rem; }
+    .production-sync-status { font-size: 0.85rem; color: var(--muted); margin-left: 0.5rem; }
+    .production-sync-status.error { color: #e88; }
     .summary-month-tabs .month-tab {
       padding: 0.45rem 0.9rem; background: var(--bg); border: 1px solid var(--border);
       border-radius: 8px; font-size: 0.9rem; color: var(--text); cursor: pointer;
@@ -1509,6 +1511,8 @@
   </style>
 </head>
 <body>
+  Optional: enable online saving so all PCs share the same production data. See PRODUCTION-STATS-ONLINE-SETUP.md
+   <script>window.CRISTAL_SUPABASE_URL='https://gimzlqbodxnriaqieetm.supabase.co';window.CRISTAL_SUPABASE_ANON_KEY='sb_publishable_fmHwMrvM6ccnMCJgFYpEAA_Pu-ydW5u';</script> 
   <nav id="top-steps-nav" aria-label="Configuration steps">
     <button type="button" class="top-step active" data-step="0"><span class="step-index">1</span> Intro</button>
     <button type="button" class="top-step" data-step="1"><span class="step-index">2</span> Choose crystal</button>
@@ -2489,6 +2493,7 @@
         <h3 class="summary-title">Totals by month</h3>
         <div class="summary-month-tabs-wrap">
           <div class="summary-month-tabs" id="production-month-tabs" role="tablist"></div>
+          <span id="production-sync-status" class="production-sync-status" aria-live="polite"></span>
           <button type="button" class="cta secondary production-export-btn" id="production-export-excel" aria-label="Export current month to Excel">Export to Excel</button>
         </div>
         <div class="production-infographic" id="production-infographic" aria-label="Production data charts">
@@ -2602,8 +2607,14 @@
           if (typeof renderProductionCalendar === 'function') renderProductionCalendar();
         } else if (step === 4 && typeof updateCheckoutPage === 'function') {
           updateCheckoutPage();
-        } else if (step === 6 && typeof refreshProductionStats === 'function') {
-          refreshProductionStats();
+        } else if (step === 6) {
+          if (window.CRISTAL_SUPABASE_URL && window.CRISTAL_SUPABASE_ANON_KEY && typeof window.loadProductionFromRemote === 'function') {
+            window.loadProductionFromRemote(function () {
+              if (typeof refreshProductionStats === 'function') refreshProductionStats();
+            });
+          } else if (typeof refreshProductionStats === 'function') {
+            refreshProductionStats();
+          }
         }
       }
       function updateCarousel() {
@@ -2714,6 +2725,74 @@
       (function () {
         var PRODUCTION_STORAGE_KEY = 'cristal_production_logs';
         var TIMERS_STORAGE_KEY = 'cristal_production_timers';
+        /* Online saving (Supabase): set before loading the page, e.g. in a script tag:
+           window.CRISTAL_SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
+           window.CRISTAL_SUPABASE_ANON_KEY = 'your-anon-key';
+           In Supabase SQL Editor run: create table production_data ( key text primary key, value jsonb );
+           Then enable RLS and add policy: allow all for anon (or restrict as needed). */
+        var SUPABASE_URL = (typeof window !== 'undefined' && window.CRISTAL_SUPABASE_URL) ? window.CRISTAL_SUPABASE_URL.replace(/\/$/, '') : '';
+        var SUPABASE_KEY = (typeof window !== 'undefined' && window.CRISTAL_SUPABASE_ANON_KEY) || '';
+        var useRemote = SUPABASE_URL && SUPABASE_KEY;
+        function supabaseFetch(path, options) {
+          if (!useRemote) return Promise.reject(new Error('No remote'));
+          var url = SUPABASE_URL + '/rest/v1' + path;
+          var headers = {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': (options && options.prefer) || ''
+          };
+          if (options && options.body !== undefined) headers['Prefer'] = 'resolution=merge-duplicates';
+          return fetch(url, {
+            method: (options && options.method) || 'GET',
+            headers: headers,
+            body: (options && options.body !== undefined) ? JSON.stringify(options.body) : undefined
+          });
+        }
+        function loadProductionFromRemote(callback) {
+          if (!useRemote) { if (callback) callback(); return; }
+          supabaseFetch('/production_data?key=in.(logs,timers)')
+            .then(function (r) {
+              if (!r.ok) throw new Error('Load failed: ' + r.status);
+              return r.json();
+            })
+            .then(function (rows) {
+              var logs = [];
+              var timers = {};
+              rows.forEach(function (row) {
+                if (row.key === 'logs' && Array.isArray(row.value)) logs = row.value;
+                if (row.key === 'timers' && row.value && typeof row.value === 'object') timers = row.value;
+              });
+              try {
+                localStorage.setItem(PRODUCTION_STORAGE_KEY, JSON.stringify(logs));
+                localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(timers));
+              } catch (e) {}
+              if (callback) callback();
+            })
+            .catch(function (err) {
+              console.error('Production load from Supabase failed:', err);
+              if (callback) callback();
+            });
+        }
+        function saveProductionLogsToRemote(logs) {
+          if (!useRemote) return;
+          supabaseFetch('/production_data', { method: 'POST', body: [{ key: 'logs', value: logs || [] }] })
+            .then(function () { showProductionSyncStatus('synced'); })
+            .catch(function (err) { console.error('Production sync failed (logs):', err); showProductionSyncStatus('error'); });
+        }
+        function saveTimersToRemote(timers) {
+          if (!useRemote) return;
+          supabaseFetch('/production_data', { method: 'POST', body: [{ key: 'timers', value: timers || {} }] })
+            .catch(function (err) { console.error('Production sync failed (timers):', err); });
+        }
+        function showProductionSyncStatus(status) {
+          var el = document.getElementById('production-sync-status');
+          if (!el) return;
+          el.textContent = status === 'synced' ? 'Synced' : (status === 'error' ? 'Sync failed' : '');
+          el.className = 'production-sync-status ' + (status === 'error' ? 'error' : '');
+          if (status) setTimeout(function () { el.textContent = ''; }, 3000);
+        }
+        if (typeof window !== 'undefined') window.loadProductionFromRemote = loadProductionFromRemote;
         var TASK_LABELS = {
           'receiving': 'Receiving', 'qc': 'QC', 'inventory': 'Inventory',
           'sandblasting': 'Sandblasting', 'digital-printing': 'Digital printing',
@@ -2745,6 +2824,7 @@
         function saveProductionLogs(logs) {
           try {
             localStorage.setItem(PRODUCTION_STORAGE_KEY, JSON.stringify(logs));
+            saveProductionLogsToRemote(logs);
           } catch (e) {}
         }
         function getTimers() {
@@ -2756,6 +2836,7 @@
         function saveTimers(timers) {
           try {
             localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(timers));
+            saveTimersToRemote(timers);
           } catch (e) {}
         }
         var JAN_TOTAL_HOURS = 500;
