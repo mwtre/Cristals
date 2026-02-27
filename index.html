@@ -1508,6 +1508,33 @@
       transition: width 0.3s ease;
     }
     .chart-bar-row .chart-value { min-width: 3rem; text-align: right; color: var(--accent); font-weight: 500; }
+
+    /* Recruiting step */
+    #step-recruiting { align-items: flex-start; padding: 2rem 1.5rem 3rem; }
+    .recruiting-inner { max-width: 1100px; margin: 0 auto; width: 100%; }
+    .recruiting-title { font-family: 'DM Serif Display', serif; font-size: 1.8rem; font-weight: 400; margin: 0 0 0.5rem 0; color: var(--text); }
+    .recruiting-subtitle { font-size: 1rem; color: var(--muted); margin: 0 0 1.75rem 0; max-width: 720px; }
+    .recruiting-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .recruiting-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.4rem 1.4rem 1.3rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .recruiting-card h3 { margin: 0 0 0.6rem 0; font-size: 1.1rem; color: var(--accent); }
+    .recruiting-tagline { font-size: 0.9rem; color: var(--muted); margin: 0 0 0.75rem 0; }
+    .recruiting-card ul { margin: 0 0 0.75rem 1.2rem; padding: 0; font-size: 0.95rem; line-height: 1.5; }
+    .recruiting-card li { margin-bottom: 0.4rem; }
+    .recruiting-metric { font-size: 0.9rem; color: var(--muted); margin-top: 0.25rem; }
+    .recruiting-note {
+      margin-top: 1.5rem; padding: 1rem 1.1rem; border-radius: 10px;
+      background: rgba(201,169,98,0.06); border: 1px dashed rgba(201,169,98,0.4);
+      font-size: 0.95rem; line-height: 1.6;
+    }
+    .recruiting-note strong { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -1521,6 +1548,7 @@
     <button type="button" class="top-step" data-step="4"><span class="step-index">5</span> Checkout</button>
     <button type="button" class="top-step" data-step="5"><span class="step-index">6</span> Innovation</button>
     <button type="button" class="top-step" data-step="6"><span class="step-index">7</span> Production Stats</button>
+    <button type="button" class="top-step" data-step="7"><span class="step-index">8</span> Recruiting</button>
   </nav>
   <div id="step-intro" class="step-screen active">
     <div class="intro-video-wrap">
@@ -2516,6 +2544,99 @@
     </div>
   </div>
 
+  <div id="step-recruiting" class="step-screen">
+    <div class="recruiting-inner">
+      <h2 class="recruiting-title">Recruiting roadmap</h2>
+      <p class="recruiting-subtitle">
+        Three recruiting channels that match our production reality, and one clear target team: a small, stable crew that can actually run the factory across two shifts.
+      </p>
+      <div class="production-infographic" aria-label="Target team structure">
+        <div class="infographic-chart">
+          <h4 class="chart-title">Target team (per day)</h4>
+          <div class="chart-bars">
+            <div class="chart-bar-row">
+              <span class="chart-label">Production specialists</span>
+              <span class="chart-value">4</span>
+            </div>
+            <div class="chart-bar-row">
+              <span class="chart-label">Team leader</span>
+              <span class="chart-value">1</span>
+            </div>
+            <div class="chart-bar-row">
+              <span class="chart-label">Shifts</span>
+              <span class="chart-value">2 × 8h</span>
+            </div>
+          </div>
+        </div>
+        <div class="infographic-chart">
+          <h4 class="chart-title">Shift 1 – 06:00–14:00</h4>
+          <div class="chart-bars">
+            <div class="chart-bar-row">
+              <span class="chart-label">Focus</span>
+              <span class="chart-value">Receiving &amp; production</span>
+            </div>
+            <div class="chart-bar-row">
+              <span class="chart-label">Work</span>
+              <span class="chart-value">Goods in, inventory, sandblasting, printing, kitting &amp; expedition</span>
+            </div>
+          </div>
+        </div>
+        <div class="infographic-chart">
+          <h4 class="chart-title">Shift 2 – 12:00–20:00</h4>
+          <div class="chart-bars">
+            <div class="chart-bar-row">
+              <span class="chart-label">Focus</span>
+              <span class="chart-value">Business &amp; QC</span>
+            </div>
+            <div class="chart-bar-row">
+              <span class="chart-label">Work</span>
+              <span class="chart-value">Chicago HQ calls, quality control, production set-up &amp; late orders</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="recruiting-grid">
+        <article class="recruiting-card">
+          <h3>1. Marketing – flyers at expat companies &amp; housing</h3>
+          <p class="recruiting-tagline">Top-of-funnel: make sure every expat in our area knows CrystalWork exists.</p>
+          <ul>
+            <li>Print and distribute <strong>10,000 flyers</strong> at expat-heavy companies, housing complexes and relocation offices.</li>
+            <li>Clear value proposition: stable hours, transparent pay, clean work, growth path to machine operator / team lead.</li>
+            <li>QR code to a very simple application page (name, phone, WhatsApp, language, availability).</li>
+            <li>Option for referral: reward existing workers for bringing in reliable friends.</li>
+          </ul>
+          <p class="recruiting-metric">Goal: build a local talent pool &gt; 100 interested candidates within 2–3 months.</p>
+        </article>
+        <article class="recruiting-card">
+          <h3>2. Online – only ads with Indeed &amp; similar</h3>
+          <p class="recruiting-tagline">Always-on digital funnel that keeps bringing candidates without manual outreach.</p>
+          <ul>
+            <li>Create 1–2 standard job profiles (Production Worker, Line Operator) and keep them live on Indeed and local boards.</li>
+            <li>Use clear shift windows and real pictures from the factory so expectations match reality.</li>
+            <li>Screen quickly: short phone or WhatsApp call, then invite for a paid trial shift.</li>
+            <li>Feed accepted workers directly into our production stats system (Enzo / Andre / Enrique / Scoth cards).</li>
+          </ul>
+          <p class="recruiting-metric">Goal: 3–5 hires / month purely from online channels once tuned.</p>
+        </article>
+        <article class="recruiting-card">
+          <h3>3. Import workers – Spain, Italy, Poland</h3>
+          <p class="recruiting-tagline">Structured partnership with agencies to bring stable teams, with housing &amp; transport provided.</p>
+          <ul>
+            <li>Work with trusted partners in Spain, Italy and Poland to pre-screen candidates for language, reliability and willingness to relocate.</li>
+            <li>CrystalWork (or partner) organises <strong>housing and daily transport</strong> to the factory.</li>
+            <li>All housing &amp; transport costs are charged <strong>directly on the salary</strong>, up to <strong>25% of net pay</strong>, so the worker has no surprises and we stay compliant.</li>
+            <li>Standard contract structure: minimum guaranteed hours, clear overtime rules, onboarding pack in native language.</li>
+          </ul>
+          <p class="recruiting-metric">Goal: build a stable international core team (e.g. 10–20 workers) that can cover peaks and night shifts.</p>
+        </article>
+      </div>
+      <div class="recruiting-note">
+        <strong>How this fits the factory.</strong> Local expats and online applicants cover flexible day shifts, while imported workers provide a stable backbone for evening / night and repetitive tasks.
+        All three channels feed into the same production stats dashboard, so we can see hours, cost per hour and performance per worker, task and work order.
+      </div>
+    </div>
+  </div>
+
   <div id="template-manager-overlay" class="template-manager-overlay" aria-hidden="true">
     <div class="template-manager-header">
       <h2>Manage templates</h2>
@@ -2585,7 +2706,7 @@
       function showStep(step) {
         currentStep = step;
         document.querySelectorAll('.step-screen').forEach(function (el) { el.classList.remove('active'); });
-        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation', 'step-production-stats'];
+        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation', 'step-production-stats', 'step-recruiting'];
         var el = document.getElementById(stepIds[step] || 'step-product');
         if (el) el.classList.add('active');
         updateTopNav(step);
