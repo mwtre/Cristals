@@ -2,3 +2,6 @@
 *.log
 .env
 .env.*
+node_modules/
+factory-map/node_modules/
+factory-map/dist/

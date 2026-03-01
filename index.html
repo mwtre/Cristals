@@ -607,11 +607,13 @@
     }
     .quantity-controls input:focus { outline: none; }
 
-    /* Top step navigation */
+    /* Top step navigation — fixed so it stays above full-screen step content and remains clickable */
     #top-steps-nav {
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 150;
+      left: 0;
+      right: 0;
+      z-index: 9999;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -619,7 +621,12 @@
       background: rgba(13, 13, 13, 0.96);
       border-bottom: 1px solid var(--border);
       backdrop-filter: blur(10px);
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+      pointer-events: auto;
     }
+    #top-steps-nav .top-step { flex-shrink: 0; }
     .top-step {
       padding: 0.35rem 0.75rem;
       border-radius: 999px;
@@ -749,11 +756,13 @@
     #mapping-result-actions { margin-top: 0.5rem; }
     #mapping-result-actions button { margin-right: 0.5rem; }
 
-    .step-screen { position: fixed; inset: 0; z-index: 100; display: none; flex-direction: column; background: var(--bg); overflow: auto; transition: opacity 0.5s ease; }
-    .step-screen.active { display: flex; opacity: 1; }
+    /* Only the active step is visible; use !important so ID rules (e.g. #step-product) cannot override */
+    .step-screen { position: fixed; top: 3.25rem; left: 0; right: 0; bottom: 0; z-index: 100; display: none !important; flex-direction: column; background: var(--bg); overflow: auto; transition: opacity 0.5s ease; }
+    .step-screen.active { display: flex !important; opacity: 1; }
     .step-screen.leaving { opacity: 0; pointer-events: none; }
     .step-screen.entering { opacity: 0; }
     .step-screen.entering.active { opacity: 1; }
+    #step-intro.step-screen { top: 0; }
     #step-intro { align-items: center; justify-content: center; overflow: hidden; background: #000; }
     #step-intro .intro-video-wrap {
       position: absolute;
@@ -944,7 +953,7 @@
       .crystal-stats-list { grid-template-columns: 1fr; }
     }
 
-    #step-product { position: relative; z-index: 1; min-height: 100vh; padding-top: 4.5rem; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; }
+    #step-product { position: relative; z-index: 1; min-height: 100vh; padding-top: 4.5rem; box-sizing: border-box; flex-direction: column; overflow: hidden; }
     #step-plan-production { padding: 1.5rem; padding-top: 4.5rem; max-width: 900px; margin: 0 auto; min-height: 100vh; box-sizing: border-box; }
     #step-plan-production h2 { font-family: 'DM Serif Display', serif; font-weight: 400; margin: 0 0 0.5rem 0; font-size: 1.5rem; }
     #step-plan-production .plan-subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
@@ -1535,6 +1544,71 @@
       font-size: 0.95rem; line-height: 1.6;
     }
     .recruiting-note strong { color: var(--accent); }
+
+    /* Factory map (digital twin) */
+    #step-factory-map { align-items: flex-start; padding: 1rem 1.5rem 2rem; overflow: auto; display: flex; flex-direction: column; }
+    .factory-map-inner { max-width: 1400px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .factory-map-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin: 0 0 0.35rem 0; color: var(--text); }
+    .factory-map-subtitle { font-size: 0.95rem; color: var(--muted); margin: 0 0 0.75rem 0; }
+    .factory-map-wrap { position: relative; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); }
+    .factory-map-wrap img { display: block; width: 100%; height: auto; vertical-align: top; }
+    .factory-map-zones { position: absolute; inset: 0; pointer-events: none; }
+    .factory-map-zones .zone {
+      position: absolute; pointer-events: auto; cursor: pointer;
+      border: 2px solid rgba(201,169,98,0.5); border-radius: 6px;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.35);
+    }
+    .factory-map-zones .zone:hover { border-color: var(--accent); background: rgba(201,169,98,0.25); }
+    .factory-map-zones .zone.active { border-color: var(--accent); background: rgba(201,169,98,0.35); }
+    .factory-map-zones .zone-label {
+      font-size: clamp(0.65rem, 2vw, 0.85rem); font-weight: 700; color: #fff;
+      text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      padding: 0.2em 0.4em; line-height: 1.2;
+    }
+    .factory-map-panel { margin-top: 1rem; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; display: none; }
+    .factory-map-panel.visible { display: block; }
+    .factory-map-panel h4 { margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--accent); }
+    .factory-map-panel p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+    .factory-map-react-root { flex: 1; min-height: 65vh; width: 100%; }
+    .factory-map-embedded { height: 100%; }
+
+    /* Routes (step 10) */
+    #step-routes { align-items: flex-start; padding: 1rem 1.5rem 2rem; overflow: auto; }
+    .routes-inner { max-width: 800px; margin: 0 auto; width: 100%; }
+    .routes-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin: 0 0 0.35rem 0; color: var(--text); }
+    .routes-subtitle { font-size: 0.95rem; color: var(--muted); margin: 0 0 0.5rem 0; }
+    .routes-hint { font-size: 0.9rem; color: var(--muted); margin: 0 0 1rem 0; padding: 0.5rem 0.75rem; background: rgba(201,169,98,0.1); border-radius: 8px; border: 1px solid rgba(201,169,98,0.25); }
+    .routes-hint strong { color: var(--accent); }
+    .routes-toolbar { margin-bottom: 1rem; }
+    .routes-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .route-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+    .route-card h4 { margin: 0; font-size: 1.1rem; color: var(--text); }
+    .route-card .route-time { font-size: 0.95rem; color: var(--accent); font-weight: 600; }
+    .route-card .route-steps-preview { font-size: 0.85rem; color: var(--muted); }
+    .route-card-actions { display: flex; gap: 0.5rem; }
+    .routes-editor { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-top: 1rem; }
+    .routes-editor-title { margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--text); }
+    .routes-editor-name-wrap { margin-bottom: 1rem; }
+    .routes-editor-name-wrap label { display: block; font-size: 0.9rem; color: var(--muted); margin-bottom: 0.35rem; }
+    .routes-input { width: 100%; max-width: 320px; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 1rem; }
+    .routes-input-num { max-width: 90px; }
+    .routes-select { padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.95rem; margin-right: 0.5rem; }
+    .routes-steps-wrap h4 { margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--muted); }
+    .routes-steps-list { list-style: none; margin: 0 0 1rem 0; padding: 0; }
+    .routes-steps-list li { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+    .routes-steps-list li .step-type { font-weight: 600; color: var(--accent); min-width: 100px; }
+    .routes-add-step-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+    .routes-total-time { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin-bottom: 1rem; }
+    .routes-editor-actions { display: flex; gap: 0.5rem; }
+    .routes-canvas-wrap { margin: 1rem 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: var(--bg); }
+    .routes-canvas { display: block; width: 100%; height: 320px; touch-action: none; }
+    .routes-polyline { pointer-events: none; }
+    .routes-line-toolbar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .route-handle { fill: var(--accent); stroke: #0d0d0d; stroke-width: 2; cursor: grab; }
+    .route-handle:hover { filter: brightness(1.2); }
+    .route-handle:active { cursor: grabbing; }
   </style>
 </head>
 <body>
@@ -1549,6 +1623,7 @@
     <button type="button" class="top-step" data-step="5"><span class="step-index">6</span> Innovation</button>
     <button type="button" class="top-step" data-step="6"><span class="step-index">7</span> Production Stats</button>
     <button type="button" class="top-step" data-step="7"><span class="step-index">8</span> Recruiting</button>
+    <button type="button" class="top-step" data-step="8"><span class="step-index">9</span> Factory map</button>
   </nav>
   <div id="step-intro" class="step-screen active">
     <div class="intro-video-wrap">
@@ -2637,6 +2712,16 @@
     </div>
   </div>
 
+  <div id="step-factory-map" class="step-screen">
+    <div class="factory-map-inner">
+      <h2 class="factory-map-title">Factory map</h2>
+      <p class="factory-map-subtitle">Digital twin — drag areas to move, resize with handles when selected. Create routes in the panel; drag routes on the map to position them. Same Supabase as Production Stats.</p>
+      <link rel="stylesheet" href="cristals/factory-map/factory-map.css" />
+      <div id="factory-map-root" class="factory-map-react-root"></div>
+      <script type="module" src="cristals/factory-map/factory-map.js"></script>
+    </div>
+  </div>
+
   <div id="template-manager-overlay" class="template-manager-overlay" aria-hidden="true">
     <div class="template-manager-header">
       <h2>Manage templates</h2>
@@ -2706,7 +2791,7 @@
       function showStep(step) {
         currentStep = step;
         document.querySelectorAll('.step-screen').forEach(function (el) { el.classList.remove('active'); });
-        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation', 'step-production-stats', 'step-recruiting'];
+        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation', 'step-production-stats', 'step-recruiting', 'step-factory-map'];
         var el = document.getElementById(stepIds[step] || 'step-product');
         if (el) el.classList.add('active');
         updateTopNav(step);
@@ -2837,12 +2922,20 @@
           if (currentStep === 0 && !introPlayed) runIntroLoading();
         }, INTRO_LOGO_DELAY);
       }
-      document.querySelectorAll('.top-step').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var s = parseInt(this.getAttribute('data-step'), 10);
-          if (!isNaN(s)) showStep(s);
+      var topNav = document.getElementById('top-steps-nav');
+      if (topNav) {
+        topNav.addEventListener('click', function (e) {
+          var btn = e.target && (e.target.closest ? e.target.closest('.top-step') : e.target);
+          if (btn && btn.classList && btn.classList.contains('top-step')) {
+            var s = parseInt(btn.getAttribute('data-step'), 10);
+            if (!isNaN(s)) {
+              e.preventDefault();
+              e.stopPropagation();
+              showStep(s);
+            }
+          }
         });
-      });
+      }
       (function () {
         var PRODUCTION_STORAGE_KEY = 'cristal_production_logs';
         var TIMERS_STORAGE_KEY = 'cristal_production_timers';

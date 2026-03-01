@@ -1,0 +1,8 @@
+{
+  "name": "cristal",
+  "private": true,
+  "scripts": {
+    "serve": "npx --yes serve . -l 5000",
+    "start": "npm run serve"
+  }
+}

@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* When embedded in main app */
+#factory-map-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 65vh;
+}
+#factory-map-root .factory-map-embedded {
+  flex: 1;
+  min-height: 0;
+}
