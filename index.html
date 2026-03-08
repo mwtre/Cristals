@@ -1646,10 +1646,13 @@
     }
     .production-scheduler-layout {
       display: grid;
-      grid-template-columns: 220px 1fr;
+      grid-template-columns: 260px 1fr;
       gap: 0.75rem;
       flex: 1;
       min-height: 0;
+    }
+    .production-scheduler-layout.is-sidebar-collapsed {
+      grid-template-columns: 1fr;
     }
     @media (max-width: 980px) {
       .production-scheduler-layout { grid-template-columns: 1fr; }
@@ -1660,6 +1663,9 @@
       padding: 0.65rem;
       background: linear-gradient(180deg, rgba(28,28,28,0.88), rgba(14,14,14,0.88));
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .production-scheduler-layout.is-sidebar-collapsed .scheduler-sidebar {
+      display: none;
     }
     .scheduler-sidebar h4 { margin: 0 0 0.4rem 0; color: var(--accent); font-size: 0.86rem; letter-spacing: 0.02em; }
     .scheduler-help {
@@ -1674,14 +1680,14 @@
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      padding: 0.32rem 0.45rem;
+      padding: 0.42rem 0.55rem;
       border-radius: 7px;
       border: 1px solid rgba(255,255,255,0.09);
       background: linear-gradient(180deg, rgba(36,36,36,0.95), rgba(17,17,17,0.95));
       color: var(--text);
       cursor: grab;
       user-select: none;
-      font-size: 0.78rem;
+      font-size: 0.86rem;
       transition: transform 0.12s ease, border-color 0.16s ease, box-shadow 0.16s ease;
     }
     .drag-chip:hover {
@@ -1726,7 +1732,7 @@
     .drag-chip.task-painting { border-color: rgba(236,72,153,0.55); }
     .drag-chip.task-cleaning { border-color: rgba(20,184,166,0.55); }
     .drag-chip.task-maintenance { border-color: rgba(148,163,184,0.55); }
-    .scheduler-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+    .scheduler-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
     .scheduler-topbar {
       display: flex;
       flex-wrap: wrap;
@@ -1736,7 +1742,7 @@
       margin-bottom: 0.45rem;
     }
     .scheduler-topbar .scheduler-title {
-      font-size: 0.86rem;
+      font-size: 1rem;
       color: var(--accent);
       font-weight: 600;
     }
@@ -1748,8 +1754,9 @@
       border-radius: 12px;
       background: linear-gradient(180deg, #101010, #0a0a0a);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-      flex: 1;
-      min-height: 0;
+      flex: 0 0 auto;
+      height: calc(100vh - 280px);
+      min-height: 520px;
     }
     .scheduler-table {
       width: 100%;
@@ -2093,6 +2100,7 @@
       color: #cbd5e1;
     }
     .scheduler-topbar-actions,
+    .scheduler-legend-row,
     .scheduler-filter-row,
     .scheduler-bulk-row,
     .scheduler-clone-row {
@@ -2102,13 +2110,73 @@
       align-items: center;
       margin-bottom: 0.35rem;
     }
+    .scheduler-legend-row {
+      gap: 0.45rem;
+      margin-bottom: 0.45rem;
+    }
+    .scheduler-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.28rem;
+      font-size: 0.74rem;
+      color: #cbd5e1;
+      padding: 0.14rem 0.28rem;
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 999px;
+      background: rgba(15,23,42,0.5);
+    }
+    .scheduler-legend-swatch {
+      width: 16px;
+      height: 10px;
+      border-radius: 3px;
+      background: rgba(2,6,23,0.8);
+      border: 1px solid rgba(148,163,184,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .scheduler-legend-swatch.worker::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #60a5fa;
+    }
+    .scheduler-legend-swatch.task::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 3px;
+      background: #22c55e;
+    }
+    .scheduler-legend-swatch.order::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #2563eb;
+    }
+    .scheduler-legend-swatch.machine::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: #a78bfa;
+    }
     .scheduler-mini-btn {
-      padding: 0.2rem 0.45rem;
+      padding: 0.28rem 0.6rem;
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 6px;
       background: linear-gradient(180deg, rgba(35,35,35,0.96), rgba(16,16,16,0.96));
       color: var(--text);
-      font-size: 0.72rem;
+      font-size: 0.82rem;
       cursor: pointer;
       transition: border-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
     }
@@ -2121,21 +2189,21 @@
     .scheduler-mini-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .scheduler-mini-select {
       min-width: 90px;
-      padding: 0.2rem 0.35rem;
+      padding: 0.28rem 0.42rem;
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 6px;
       background: linear-gradient(180deg, rgba(32,32,32,0.96), rgba(14,14,14,0.96));
       color: var(--text);
-      font-size: 0.72rem;
+      font-size: 0.8rem;
     }
     .scheduler-mini-input {
       min-width: 110px;
-      padding: 0.2rem 0.35rem;
+      padding: 0.28rem 0.42rem;
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 6px;
       background: linear-gradient(180deg, rgba(32,32,32,0.96), rgba(14,14,14,0.96));
       color: var(--text);
-      font-size: 0.72rem;
+      font-size: 0.8rem;
     }
     .scheduler-capacity {
       display: grid;
@@ -2162,13 +2230,296 @@
       font-size: 0.68rem;
       color: var(--muted);
     }
+    .scheduler-infographic {
+      margin-top: 0.5rem;
+      border: 1px solid rgba(201,169,98,0.18);
+      border-radius: 12px;
+      padding: 0.55rem;
+      background: linear-gradient(180deg, rgba(18,18,18,0.92), rgba(10,10,10,0.92));
+      display: grid;
+      gap: 0.45rem;
+      flex: 0 0 auto;
+    }
+    .scheduler-infographic-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .scheduler-infographic-head h4 {
+      margin: 0;
+      font-size: 0.84rem;
+      color: var(--accent);
+    }
+    .scheduler-kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.35rem;
+    }
+    .scheduler-kpi {
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 8px;
+      padding: 0.35rem 0.4rem;
+      background: rgba(15,23,42,0.45);
+    }
+    .scheduler-kpi-label {
+      font-size: 0.62rem;
+      color: #94a3b8;
+      margin-bottom: 0.1rem;
+    }
+    .scheduler-kpi-value {
+      font-size: 0.88rem;
+      color: #e2e8f0;
+      font-weight: 700;
+    }
+    .scheduler-charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 0.45rem;
+    }
+    .scheduler-chart-card {
+      border: 1px solid rgba(148,163,184,0.18);
+      border-radius: 8px;
+      background: rgba(2,6,23,0.5);
+      padding: 0.3rem 0.35rem 0.25rem;
+      min-height: 170px;
+    }
+    .scheduler-chart-title {
+      font-size: 0.68rem;
+      color: #cbd5e1;
+      margin: 0 0 0.18rem 0;
+      font-weight: 600;
+    }
+    .scheduler-chart {
+      width: 100%;
+      height: 135px;
+    }
+    .scheduler-infographic-fallback {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      border: 1px dashed rgba(148,163,184,0.28);
+      border-radius: 8px;
+      padding: 0.4rem;
+      text-align: center;
+    }
+    .scheduler-wo-profit {
+      border: 1px solid rgba(148,163,184,0.22);
+      border-radius: 8px;
+      background: rgba(2,6,23,0.5);
+      padding: 0.6rem;
+      overflow: auto;
+    }
+    .scheduler-wo-profit-title {
+      margin: 0 0 0.3rem 0;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+    .scheduler-wo-profit-table {
+      width: 100%;
+      min-width: 1120px;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      color: #e2e8f0;
+    }
+    .scheduler-wo-profit-table th,
+    .scheduler-wo-profit-table td {
+      border-bottom: 1px solid rgba(148,163,184,0.16);
+      padding: 0.34rem 0.42rem;
+      text-align: left;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .scheduler-wo-profit-table th {
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .scheduler-wo-profit-input {
+      width: 96px;
+      padding: 0.24rem 0.32rem;
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 4px;
+      background: rgba(15,23,42,0.9);
+      color: #e2e8f0;
+      font-size: 0.82rem;
+    }
+    .scheduler-wo-pair {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .scheduler-wo-pair .scheduler-wo-profit-input {
+      width: 66px;
+    }
+    .scheduler-wo-pair-label {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      min-width: 16px;
+      text-transform: uppercase;
+    }
+    .scheduler-wo-totals {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      margin: 0 0 0.35rem 0;
+    }
+    .scheduler-wo-total-chip {
+      border: 1px solid rgba(148,163,184,0.22);
+      border-radius: 999px;
+      padding: 0.12rem 0.35rem;
+      font-size: 0.58rem;
+      color: #cbd5e1;
+      background: rgba(15,23,42,0.6);
+    }
+    .scheduler-report-block {
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 10px;
+      background: rgba(2,6,23,0.5);
+      padding: 0.65rem;
+      margin-bottom: 0.5rem;
+    }
+    .scheduler-report-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+    }
+    .scheduler-report-title {
+      margin: 0;
+      font-size: 0.92rem;
+      color: #e2e8f0;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .scheduler-report-sub {
+      font-size: 0.66rem;
+      color: #93c5fd;
+      border: 1px solid rgba(147,197,253,0.28);
+      border-radius: 999px;
+      padding: 0.06rem 0.28rem;
+      background: rgba(30,58,138,0.2);
+      white-space: nowrap;
+    }
+    .scheduler-report-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.28rem;
+      margin-bottom: 0.35rem;
+    }
+    .scheduler-report-kpi {
+      border: 1px solid rgba(148,163,184,0.16);
+      border-radius: 8px;
+      background: rgba(15,23,42,0.58);
+      padding: 0.24rem 0.3rem;
+    }
+    .scheduler-report-kpi-label {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-bottom: 0.06rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .scheduler-report-kpi-value {
+      font-size: 1.16rem;
+      color: #f8fafc;
+      font-weight: 700;
+    }
+    .scheduler-sidebar-toggle {
+      border-color: rgba(96,165,250,0.45);
+      color: #bfdbfe;
+    }
+    .scheduler-table-wrap {
+      overflow: auto;
+      border: 1px solid rgba(148,163,184,0.14);
+      border-radius: 8px;
+      background: rgba(15,23,42,0.38);
+    }
+    .scheduler-wo-profit-table thead th {
+      position: sticky;
+      top: 0;
+      background: rgba(15,23,42,0.95);
+      z-index: 1;
+    }
+    .scheduler-wo-profit-select {
+      width: 90px;
+      padding: 0.2rem 0.3rem;
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 4px;
+      background: rgba(15,23,42,0.9);
+      color: #e2e8f0;
+      font-size: 0.8rem;
+    }
+    .scheduler-pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.35rem;
+      margin-bottom: 0.5rem;
+    }
+    .scheduler-pricing-card {
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 8px;
+      background: rgba(15,23,42,0.55);
+      padding: 0.3rem;
+    }
+    .scheduler-pricing-label {
+      margin: 0 0 0.18rem 0;
+      font-size: 0.68rem;
+      color: #93c5fd;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .scheduler-pricing-row {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-bottom: 0.2rem;
+      font-size: 0.7rem;
+      color: #cbd5e1;
+    }
+    .scheduler-wo-profit-total {
+      margin-top: 0.35rem;
+      font-size: 0.62rem;
+      color: #e2e8f0;
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .scheduler-waiting-pill {
+      display: inline-block;
+      padding: 0.08rem 0.28rem;
+      border-radius: 999px;
+      border: 1px solid rgba(251,191,36,0.4);
+      background: rgba(120,53,15,0.35);
+      color: #fde68a;
+      font-size: 0.58rem;
+      font-weight: 600;
+    }
+    .scheduler-archived-pill {
+      display: inline-block;
+      padding: 0.08rem 0.28rem;
+      border-radius: 999px;
+      border: 1px solid rgba(74,222,128,0.35);
+      background: rgba(20,83,45,0.3);
+      color: #bbf7d0;
+      font-size: 0.58rem;
+      font-weight: 600;
+    }
+    .scheduler-profit-good { color: #86efac; font-weight: 700; }
+    .scheduler-profit-bad { color: #fca5a5; font-weight: 700; }
     .scheduler-audit .audit-item { padding: 0.12rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .scheduler-audit .audit-item:last-child { border-bottom: none; }
     .scheduler-slot.bulk-selected { box-shadow: inset 0 0 0 2px rgba(96,165,250,0.75); }
     @media (max-width: 760px) {
-      .scheduler-grid-wrap { max-height: 62vh; }
+      .scheduler-grid-wrap { height: calc(100vh - 320px); min-height: 380px; }
+      .scheduler-charts-grid { grid-template-columns: 1fr; }
       .scheduler-topbar .scheduler-title { font-size: 0.78rem; }
       .scheduler-mini-btn, .scheduler-mini-select { font-size: 0.68rem; }
+      .scheduler-report-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     /* Recruiting step */
@@ -2263,6 +2614,7 @@
     .route-handle:hover { filter: brightness(1.2); }
     .route-handle:active { cursor: grabbing; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
 <body>
   Optional: enable online saving so all PCs share the same production data. See PRODUCTION-STATS-ONLINE-SETUP.md
@@ -3118,8 +3470,8 @@
     <div class="production-stats-inner">
       <h2 class="production-stats-title">Production Stats</h2>
       <section class="production-scheduler-wrap" aria-label="Weekly production scheduler">
-        <div class="production-scheduler-layout">
-          <aside class="scheduler-sidebar">
+        <div class="production-scheduler-layout" id="scheduler-layout">
+          <aside class="scheduler-sidebar" id="scheduler-sidebar">
             <h4>Workers</h4>
             <div id="scheduler-workers" class="scheduler-list"></div>
             <h4>Tasks</h4>
@@ -3135,10 +3487,17 @@
               <span id="scheduler-sync-status" class="scheduler-sync-status" aria-live="polite"></span>
             </div>
             <div class="scheduler-topbar-actions">
+              <button type="button" class="scheduler-mini-btn scheduler-sidebar-toggle" id="scheduler-sidebar-toggle" aria-expanded="true">Hide sidebar</button>
               <button type="button" class="scheduler-mini-btn" id="scheduler-prev-week">← Week</button>
               <button type="button" class="scheduler-mini-btn" id="scheduler-today-week">This week</button>
               <button type="button" class="scheduler-mini-btn" id="scheduler-next-week">Week →</button>
               <strong id="scheduler-week-label" style="font-size:0.72rem;color:var(--accent);"></strong>
+            </div>
+            <div class="scheduler-legend-row" aria-label="Scheduler color legend">
+              <span class="scheduler-legend-item"><span class="scheduler-legend-swatch worker"></span>Worker (left)</span>
+              <span class="scheduler-legend-item"><span class="scheduler-legend-swatch task"></span>Task (top)</span>
+              <span class="scheduler-legend-item"><span class="scheduler-legend-swatch order"></span>Order (right)</span>
+              <span class="scheduler-legend-item"><span class="scheduler-legend-swatch machine"></span>Machine (bottom)</span>
             </div>
             <div class="scheduler-clone-row">
               <select id="scheduler-clone-from" class="scheduler-mini-select"></select>
@@ -3173,6 +3532,38 @@
             <div class="scheduler-capacity" id="scheduler-capacity"></div>
             <div class="scheduler-grid-wrap">
               <table class="scheduler-table" id="scheduler-table"></table>
+            </div>
+            <div class="scheduler-infographic" id="scheduler-infographic" aria-label="Weekly scheduler infographic">
+              <div class="scheduler-infographic-head">
+                <h4>Weekly infographic</h4>
+              </div>
+              <div class="scheduler-kpis" id="scheduler-kpis"></div>
+              <div class="scheduler-charts-grid">
+                <div class="scheduler-chart-card">
+                  <p class="scheduler-chart-title">Hours by worker</p>
+                  <div class="scheduler-chart" id="chart-hours-worker"></div>
+                </div>
+                <div class="scheduler-chart-card">
+                  <p class="scheduler-chart-title">Cost by worker (€)</p>
+                  <div class="scheduler-chart" id="chart-cost-worker"></div>
+                </div>
+                <div class="scheduler-chart-card">
+                  <p class="scheduler-chart-title">Hours by task</p>
+                  <div class="scheduler-chart" id="chart-hours-task"></div>
+                </div>
+                <div class="scheduler-chart-card">
+                  <p class="scheduler-chart-title">Hours by order</p>
+                  <div class="scheduler-chart" id="chart-hours-order"></div>
+                </div>
+                <div class="scheduler-chart-card">
+                  <p class="scheduler-chart-title">Hours by machine</p>
+                  <div class="scheduler-chart" id="chart-hours-machine"></div>
+                </div>
+              </div>
+              <div class="scheduler-infographic-fallback" id="scheduler-infographic-fallback" style="display:none;">
+                Charts unavailable: ECharts failed to load.
+              </div>
+            <div class="scheduler-wo-profit" id="scheduler-wo-profit"></div>
             </div>
             <div class="scheduler-audit" id="scheduler-audit"></div>
           </div>
@@ -4404,6 +4795,7 @@
       (function () {
         var SCHEDULER_KEY = 'cristal_weekly_scheduler';
         var REMOTE_KEY = 'weekly_scheduler';
+        var SCHEDULER_UI_KEY = 'cristal_scheduler_ui';
         var DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
         var WORKERS = [
           { id: 'enzo', name: 'Enzo', cls: 'worker-enzo' },
@@ -4432,6 +4824,7 @@
           { id: 'mimaki2', name: 'Mimaki 2', cls: 'machine-mimaki2' },
           { id: 'sand-blaster', name: 'Sand blaster', cls: 'machine-sand-blaster' }
         ];
+        var WORKER_HOURLY_COST_EUR = 20;
         var DEFAULT_ORDER_ID = 'ookla';
         var SLOT_MINUTES = 30;
         var DEFAULT_DURATION_SLOTS = 2;
@@ -4469,21 +4862,58 @@
         var bulkSelected = {};
         var copiedAssignment = null;
         var openPendingMetaKey = '';
+        var schedulerCharts = {};
+        var chartsResizeBound = false;
         var undoStack = [];
         var redoStack = [];
-        var schedulerStore = { version: 4, weeks: {}, audit: [] };
+        var DEFAULT_WO_PRICING = {
+          ookla: { sl: { revenue: 0, material: 0 }, lg: { revenue: 0, material: 0 } },
+          shopify: { std: { revenue: 0, material: 0 } },
+          wetrack: { std: { revenue: 0, material: 0 } }
+        };
+        var schedulerStore = { version: 6, weeks: {}, audit: [], woFinance: {}, woPricing: clone(DEFAULT_WO_PRICING) };
 
         var SUPABASE_URL = (typeof window !== 'undefined' && window.CRISTAL_SUPABASE_URL) ? window.CRISTAL_SUPABASE_URL.replace(/\/$/, '') : '';
         var SUPABASE_KEY = (typeof window !== 'undefined' && window.CRISTAL_SUPABASE_ANON_KEY) || '';
         var useRemote = !!(SUPABASE_URL && SUPABASE_KEY);
 
         function schedulerEl(id) { return document.getElementById(id); }
+        function readSchedulerUi() {
+          try {
+            var raw = localStorage.getItem(SCHEDULER_UI_KEY);
+            return raw ? JSON.parse(raw) : {};
+          } catch (e) { return {}; }
+        }
+        function saveSchedulerUi(ui) {
+          try { localStorage.setItem(SCHEDULER_UI_KEY, JSON.stringify(ui || {})); } catch (e) {}
+        }
+        function setSidebarCollapsed(collapsed) {
+          var layout = schedulerEl('scheduler-layout');
+          var btn = schedulerEl('scheduler-sidebar-toggle');
+          if (!layout) return;
+          layout.classList.toggle('is-sidebar-collapsed', !!collapsed);
+          if (btn) {
+            btn.textContent = collapsed ? 'Show sidebar' : 'Hide sidebar';
+            btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+          }
+        }
         function slotKey(day, time) { return day + '|' + time; }
         function pad2(n) { return String(n).padStart(2, '0'); }
         function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
         function timeIndex(time) { return TIMES.indexOf(time); }
         function hasRequiredOrderMeta(meta) {
           return !!(meta && meta.woId && Number(meta.plannedQty) > 0);
+        }
+        function normalizeWoId(value) {
+          if (value === null || value === undefined) return '';
+          return String(value).trim().toUpperCase();
+        }
+        function normalizeTaskId(value) {
+          var raw = (value === null || value === undefined) ? '' : String(value).trim().toLowerCase();
+          if (!raw) return '';
+          if (raw === 'digital-printing' || raw === 'digital printing') return 'printing';
+          if (raw === 'sandblasting') return 'hatching';
+          return raw;
         }
         function slotHours() { return SLOT_MINUTES / 60; }
         function formatHoursFromSlots(slots) {
@@ -4568,6 +4998,59 @@
             return '<div class="audit-item">' + line + '</div>';
           }).join('');
         }
+        function normalizeWOFIn(finance) {
+          if (!finance || typeof finance !== 'object') return {};
+          var out = {};
+          Object.keys(finance).forEach(function (wo) {
+            var key = normalizeWoId(wo);
+            if (!key) return;
+            var row = finance[wo] || {};
+            var unitRevenue = Number(row.unitRevenue);
+            var unitMaterial = Number(row.unitMaterial);
+            var pieceType = (row.pieceType === 'lg' || row.pieceType === 'sl') ? row.pieceType : 'sl';
+            var ooklaSLQty = Number(row.ooklaSLQty);
+            var ooklaLGQty = Number(row.ooklaLGQty);
+            out[key] = {
+              unitRevenue: isFinite(unitRevenue) && unitRevenue >= 0 ? unitRevenue : 0,
+              unitMaterial: isFinite(unitMaterial) && unitMaterial >= 0 ? unitMaterial : 0,
+              pieceType: pieceType,
+              ooklaSLQty: isFinite(ooklaSLQty) && ooklaSLQty >= 0 ? Math.round(ooklaSLQty) : 0,
+              ooklaLGQty: isFinite(ooklaLGQty) && ooklaLGQty >= 0 ? Math.round(ooklaLGQty) : 0
+            };
+          });
+          return out;
+        }
+        function normalizeWoPricingIn(pricing) {
+          var inData = (pricing && typeof pricing === 'object') ? pricing : {};
+          function cleanNum(v) {
+            var n = Number(v);
+            return isFinite(n) && n >= 0 ? n : 0;
+          }
+          return {
+            ookla: {
+              sl: {
+                revenue: cleanNum(inData.ookla && inData.ookla.sl && inData.ookla.sl.revenue),
+                material: cleanNum(inData.ookla && inData.ookla.sl && inData.ookla.sl.material)
+              },
+              lg: {
+                revenue: cleanNum(inData.ookla && inData.ookla.lg && inData.ookla.lg.revenue),
+                material: cleanNum(inData.ookla && inData.ookla.lg && inData.ookla.lg.material)
+              }
+            },
+            shopify: {
+              std: {
+                revenue: cleanNum(inData.shopify && inData.shopify.std && inData.shopify.std.revenue),
+                material: cleanNum(inData.shopify && inData.shopify.std && inData.shopify.std.material)
+              }
+            },
+            wetrack: {
+              std: {
+                revenue: cleanNum(inData.wetrack && inData.wetrack.std && inData.wetrack.std.revenue),
+                material: cleanNum(inData.wetrack && inData.wetrack.std && inData.wetrack.std.material)
+              }
+            }
+          };
+        }
         function supabaseFetch(path, options) {
           var url = SUPABASE_URL + '/rest/v1' + path;
           var headers = {
@@ -4598,12 +5081,15 @@
           Object.keys(obj).forEach(function (k) {
             var p = obj[k] || {};
             var workers = Array.isArray(p.workers) ? p.workers.filter(function (w) { return !!workersById[w]; }) : [];
-            var tasks = Array.isArray(p.tasks) ? p.tasks.filter(function (t) { return !!tasksById[t]; }) : [];
+            var tasks = Array.isArray(p.tasks)
+              ? p.tasks.map(normalizeTaskId).filter(function (t) { return !!tasksById[t]; })
+              : [];
             var orders = Array.isArray(p.orders) ? p.orders.filter(function (o) { return !!ordersById[o]; }) : [];
             var machines = Array.isArray(p.machines) ? p.machines.filter(function (m) { return !!machinesById[m]; }) : [];
-            var woId = p.woId ? String(p.woId).trim() : '';
+            var woId = normalizeWoId(p.woId || '');
             var plannedQty = Number(p.plannedQty) > 0 ? Math.round(Number(p.plannedQty)) : 0;
-            if (tasks.length === 0 && p.taskId && tasksById[p.taskId]) tasks.push(p.taskId);
+            var singleTask = normalizeTaskId(p.taskId);
+            if (tasks.length === 0 && singleTask && tasksById[singleTask]) tasks.push(singleTask);
             if (orders.length === 0 && p.orderId && ordersById[p.orderId]) orders.push(p.orderId);
             if (machines.length === 0 && p.machineId && machinesById[p.machineId]) machines.push(p.machineId);
             if (workers.length || tasks.length || orders.length || machines.length || woId || plannedQty > 0) {
@@ -4620,7 +5106,8 @@
             var day = DAYS.indexOf(a.day) >= 0 ? a.day : null;
             var startTime = timeIndex(a.startTime) >= 0 ? a.startTime : null;
             var workerId = workersById[a.workerId] ? a.workerId : null;
-            var taskId = tasksById[a.taskId] ? a.taskId : null;
+            var taskId = normalizeTaskId(a.taskId);
+            taskId = tasksById[taskId] ? taskId : null;
             var orderId = ordersById[a.orderId] ? a.orderId : '';
             if (taskId && taskNeedsOrder(taskId) && !orderId) {
               orderId = ordersById[DEFAULT_ORDER_ID] ? DEFAULT_ORDER_ID : null;
@@ -4640,7 +5127,7 @@
               orderId: orderId,
               machineId: machineId,
               seriesId: (typeof a.seriesId === 'string' ? a.seriesId : ''),
-              woId: (typeof a.woId === 'string' ? a.woId : ''),
+              woId: normalizeWoId(typeof a.woId === 'string' ? a.woId : ''),
               plannedQty: (Number(a.plannedQty) > 0 ? Math.round(Number(a.plannedQty)) : 0)
             };
           }).filter(Boolean);
@@ -4656,12 +5143,14 @@
           return out;
         }
         function normalizeStore(data) {
-          var out = { version: 4, weeks: {}, audit: [] };
+          var out = { version: 6, weeks: {}, audit: [], woFinance: {}, woPricing: clone(DEFAULT_WO_PRICING) };
           if (!data || typeof data !== 'object') return out;
           if (data.version >= 3 && data.weeks && typeof data.weeks === 'object') {
             var slotFactor = data.version >= 4 ? 1 : 2;
             Object.keys(data.weeks).forEach(function (wk) { out.weeks[wk] = normalizeWeekDataWithFactor(data.weeks[wk], slotFactor); });
             out.audit = Array.isArray(data.audit) ? data.audit.slice(0, 120) : [];
+            out.woFinance = normalizeWOFIn(data.woFinance);
+            out.woPricing = normalizeWoPricingIn(data.woPricing);
             return out;
           }
           if (Array.isArray(data.assignments)) {
@@ -4689,6 +5178,8 @@
             }
           });
           out.weeks[weekKeyByOffset(0)] = { assignments: legacy, pending: {} };
+          out.woFinance = normalizeWOFIn(data.woFinance);
+          out.woPricing = normalizeWoPricingIn(data.woPricing);
           return out;
         }
         function saveRemoteDebounced(next) {
@@ -4770,10 +5261,11 @@
         function createAssignment(day, time, workerId, taskId, orderId, duration, machineId, woId, plannedQty) {
           var startIdx = timeIndex(time);
           if (startIdx < 0 || !workersById[workerId] || !tasksById[taskId]) return false;
+          var normalizedWoId = normalizeWoId(woId || '');
           var normalizedOrderId = '';
           if (taskNeedsOrder(taskId)) {
             if (!ordersById[orderId]) return false;
-            if (!woId || Number(plannedQty) <= 0) return false;
+            if (!normalizedWoId || Number(plannedQty) <= 0) return false;
             normalizedOrderId = orderId;
           } else {
             normalizedOrderId = ordersById[orderId] ? orderId : '';
@@ -4781,7 +5273,7 @@
           var dur = clampDuration(startIdx, Math.round(duration || DEFAULT_DURATION_SLOTS));
           if (hasWorkerConflict(workerId, day, startIdx, dur, null)) return false;
           var exists = currentWeekData.assignments.some(function (a) {
-            return a.day === day && a.startTime === time && a.workerId === workerId && a.taskId === taskId && (a.orderId || '') === normalizedOrderId && (a.machineId || '') === (machineId || '') && (a.woId || '') === (woId || '') && (Number(a.plannedQty) || 0) === (Number(plannedQty) || 0);
+            return a.day === day && a.startTime === time && a.workerId === workerId && a.taskId === taskId && (a.orderId || '') === normalizedOrderId && (a.machineId || '') === (machineId || '') && normalizeWoId(a.woId || '') === normalizedWoId && (Number(a.plannedQty) || 0) === (Number(plannedQty) || 0);
           });
           if (exists) return false;
           currentWeekData.assignments.push({
@@ -4794,7 +5286,7 @@
             orderId: normalizedOrderId,
             machineId: machinesById[machineId] ? machineId : '',
             seriesId: '',
-            woId: woId ? String(woId) : '',
+            woId: normalizedWoId,
             plannedQty: Number(plannedQty) > 0 ? Math.round(Number(plannedQty)) : 0
           });
           return true;
@@ -4822,7 +5314,7 @@
               existing.taskId = baseAssignment.taskId;
               existing.orderId = baseAssignment.orderId;
               existing.machineId = baseAssignment.machineId;
-              existing.woId = baseAssignment.woId || '';
+              existing.woId = normalizeWoId(baseAssignment.woId || '');
               existing.plannedQty = baseAssignment.plannedQty || 0;
               return;
             }
@@ -4840,7 +5332,7 @@
               orderId: baseAssignment.orderId,
               machineId: baseAssignment.machineId,
               seriesId: seriesId,
-              woId: baseAssignment.woId || '',
+              woId: normalizeWoId(baseAssignment.woId || ''),
               plannedQty: baseAssignment.plannedQty || 0
             });
             changed = true;
@@ -4873,7 +5365,7 @@
           var missingOrders = 0;
           var missingMeta = 0;
           var machineList = (pending.machines && pending.machines.length > 0) ? pending.machines : [''];
-          var woId = pending.woId ? String(pending.woId).trim() : '';
+          var woId = normalizeWoId(pending.woId || '');
           var plannedQty = Number(pending.plannedQty) > 0 ? Math.round(Number(pending.plannedQty)) : 0;
           pending.workers.forEach(function (wid) {
             pending.tasks.forEach(function (tid) {
@@ -4907,7 +5399,7 @@
             var hasPending = (pending.workers && pending.workers.length) || (pending.tasks && pending.tasks.length) || (pending.orders && pending.orders.length) || (pending.machines && pending.machines.length);
             var needsOrderMetaInline = (pending.tasks || []).some(function (tid) { return taskNeedsOrder(tid); });
             var showMetaInline = openPendingMetaKey === key;
-            var pendingWoValue = pending.woId ? String(pending.woId).replace(/"/g, '&quot;') : '';
+            var pendingWoValue = pending.woId ? String(normalizeWoId(pending.woId)).replace(/"/g, '&quot;') : '';
             var pendingQtyValue = Number(pending.plannedQty) > 0 ? String(Math.round(Number(pending.plannedQty))) : '';
             var cards = inSlot.map(function (a) {
               var w = workersById[a.workerId];
@@ -4954,7 +5446,7 @@
             var taskText = (pending.tasks || []).map(function (t) { return tasksById[t] ? tasksById[t].name : ''; }).filter(Boolean).join(', ');
             var orderText = (pending.orders || []).map(function (o) { return ordersById[o] ? ordersById[o].name : ''; }).filter(Boolean).join(', ');
             var machineText = (pending.machines || []).map(function (m) { return machinesById[m] ? machinesById[m].name : ''; }).filter(Boolean).join(', ');
-            var woValue = pending.woId ? String(pending.woId).replace(/"/g, '&quot;') : '';
+            var woValue = pending.woId ? String(normalizeWoId(pending.woId)).replace(/"/g, '&quot;') : '';
             var qtyValue = Number(pending.plannedQty) > 0 ? String(Math.round(Number(pending.plannedQty))) : '';
             var needsOrderMeta = (pending.tasks || []).some(function (tid) { return taskNeedsOrder(tid); });
             var showMetaEditor = openPendingMetaKey === key;
@@ -4997,6 +5489,429 @@
               'Assigned: ' + h.toFixed(1) + 'h<br>Free: ' + free.toFixed(1) + 'h</div>';
           }).join('');
         }
+        function chartPairsFromMap(mapObj, labelFn, includeZeros) {
+          var pairs = Object.keys(mapObj || {}).map(function (k) {
+            return { label: labelFn(k), value: Number(mapObj[k] || 0) };
+          });
+          if (!includeZeros) pairs = pairs.filter(function (p) { return p.value > 0; });
+          pairs.sort(function (a, b) { return b.value - a.value; });
+          return pairs;
+        }
+        function ensureSchedulerChart(id) {
+          if (!window.echarts) return null;
+          var el = schedulerEl(id);
+          if (!el) return null;
+          if (!schedulerCharts[id]) schedulerCharts[id] = window.echarts.init(el);
+          return schedulerCharts[id];
+        }
+        function renderSimpleBarChart(id, pairs, color, unitSuffix) {
+          var chart = ensureSchedulerChart(id);
+          if (!chart) return;
+          var suffix = unitSuffix || '';
+          var labels = pairs.map(function (p) { return p.label; });
+          var values = pairs.map(function (p) { return Number(p.value.toFixed(2)); });
+          chart.setOption({
+            animation: false,
+            grid: { left: 52, right: 8, top: 10, bottom: 24 },
+            xAxis: {
+              type: 'value',
+              axisLabel: { color: '#94a3b8', fontSize: 10 },
+              splitLine: { lineStyle: { color: 'rgba(148,163,184,0.15)' } }
+            },
+            yAxis: {
+              type: 'category',
+              data: labels,
+              axisLabel: { color: '#cbd5e1', fontSize: 10, width: 90, overflow: 'truncate' }
+            },
+            series: [{
+              type: 'bar',
+              data: values,
+              itemStyle: { color: color, borderRadius: [0, 4, 4, 0] },
+              barWidth: 10
+            }],
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: { type: 'shadow' },
+              valueFormatter: function (v) { return suffix ? (v + ' ' + suffix) : String(v); }
+            }
+          }, true);
+        }
+        function renderSchedulerInfographic() {
+          var kpisEl = schedulerEl('scheduler-kpis');
+          var fallbackEl = schedulerEl('scheduler-infographic-fallback');
+          if (!kpisEl) return;
+          var byWorker = {};
+          var byTask = {};
+          var byOrder = {};
+          var byMachine = {};
+          WORKERS.forEach(function (w) { byWorker[w.id] = 0; });
+          var costByWorker = {};
+          WORKERS.forEach(function (w) { costByWorker[w.id] = 0; });
+          TASKS.forEach(function (t) { byTask[t.id] = 0; });
+          ORDERS.forEach(function (o) { byOrder[o.id] = 0; });
+          byOrder.none = 0;
+          MACHINES.forEach(function (m) { byMachine[m.id] = 0; });
+          byMachine.none = 0;
+          var totalHours = 0;
+          var totalQty = 0;
+          var woSet = {};
+          currentWeekData.assignments.forEach(function (a) {
+            var h = a.duration * slotHours();
+            totalHours += h;
+            if (byWorker[a.workerId] !== undefined) byWorker[a.workerId] += h;
+            if (costByWorker[a.workerId] !== undefined) costByWorker[a.workerId] += h * WORKER_HOURLY_COST_EUR;
+            if (byTask[a.taskId] !== undefined) byTask[a.taskId] += h;
+            if (a.orderId && byOrder[a.orderId] !== undefined) byOrder[a.orderId] += h;
+            else byOrder.none += h;
+            if (a.machineId && byMachine[a.machineId] !== undefined) byMachine[a.machineId] += h;
+            else byMachine.none += h;
+            if (a.woId) woSet[a.woId] = true;
+            totalQty += Number(a.plannedQty) || 0;
+          });
+          var uniqueWOs = Object.keys(woSet).length;
+          var assignmentsCount = currentWeekData.assignments.length;
+          var totalLaborCost = totalHours * WORKER_HOURLY_COST_EUR;
+          var maxHours = TIMES.length * slotHours() * DAYS.length * WORKERS.length;
+          var util = maxHours > 0 ? (totalHours / maxHours) * 100 : 0;
+          kpisEl.innerHTML =
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Total planned hours</div><div class="scheduler-kpi-value">' + totalHours.toFixed(1) + 'h</div></div>' +
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Labor cost (@ €' + WORKER_HOURLY_COST_EUR + '/h)</div><div class="scheduler-kpi-value">€' + totalLaborCost.toFixed(0) + '</div></div>' +
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Assignments</div><div class="scheduler-kpi-value">' + assignmentsCount + '</div></div>' +
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Unique WO</div><div class="scheduler-kpi-value">' + uniqueWOs + '</div></div>' +
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Total to produce</div><div class="scheduler-kpi-value">' + totalQty + '</div></div>' +
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Team utilization</div><div class="scheduler-kpi-value">' + util.toFixed(1) + '%</div></div>';
+          if (!window.echarts) {
+            if (fallbackEl) {
+              fallbackEl.style.display = 'block';
+              fallbackEl.textContent = 'Charts unavailable right now. KPIs are still updated live.';
+            }
+            return;
+          }
+          if (fallbackEl) fallbackEl.style.display = 'none';
+          renderSimpleBarChart('chart-hours-worker', chartPairsFromMap(byWorker, function (id) { return workersById[id] ? workersById[id].name : id; }, false), '#60a5fa', 'h');
+          renderSimpleBarChart('chart-cost-worker', chartPairsFromMap(costByWorker, function (id) { return workersById[id] ? workersById[id].name : id; }, false), '#f59e0b', '€');
+          renderSimpleBarChart('chart-hours-task', chartPairsFromMap(byTask, function (id) { return tasksById[id] ? tasksById[id].name : id; }, false), '#34d399', 'h');
+          renderSimpleBarChart('chart-hours-order', chartPairsFromMap(byOrder, function (id) { return id === 'none' ? 'No order' : (ordersById[id] ? ordersById[id].name : id); }, false), '#ec4899', 'h');
+          renderSimpleBarChart('chart-hours-machine', chartPairsFromMap(byMachine, function (id) { return id === 'none' ? 'No machine' : (machinesById[id] ? machinesById[id].name : id); }, false), '#a78bfa', 'h');
+          if (!chartsResizeBound) {
+            chartsResizeBound = true;
+            window.addEventListener('resize', function () {
+              Object.keys(schedulerCharts).forEach(function (k) { if (schedulerCharts[k]) schedulerCharts[k].resize(); });
+            });
+          }
+          renderWOProfitTable();
+        }
+        function getWeeksUpToCurrent() {
+          var allKeys = Object.keys(schedulerStore.weeks || {}).sort();
+          return allKeys.filter(function (wk) { return wk <= currentWeekKey; });
+        }
+        function renderWOProfitTable() {
+          var wrap = schedulerEl('scheduler-wo-profit');
+          if (!wrap) return;
+          var finance = schedulerStore.woFinance || {};
+          var pricing = normalizeWoPricingIn(schedulerStore.woPricing || DEFAULT_WO_PRICING);
+          var weeks = getWeeksUpToCurrent();
+          var woFlow = {};
+          function normalizeOrderId(value) {
+            return (value === null || value === undefined) ? '' : String(value).trim().toLowerCase();
+          }
+          function isOutputTaskForOrder(orderId, taskId) {
+            var order = normalizeOrderId(orderId);
+            var task = normalizeTaskId(taskId);
+            if (!task || task === 'shipping') return false;
+            /* Count produced on the last step before shipping for each order path. */
+            if (order === 'ookla') return task === 'cleaning';
+            if (order === 'shopify' || order === 'wetrack') return task === 'printing';
+            /* Fallback for legacy rows without order info */
+            return task === 'printing';
+          }
+          function isInternalWO(wo) {
+            var key = normalizeWoId(wo);
+            return key === 'QC' || key === 'INVENTORY' || key === 'STOCK';
+          }
+          function ensureWO(wo) {
+            if (!woFlow[wo]) {
+              var f = finance[wo] || { unitRevenue: 0, unitMaterial: 0 };
+              woFlow[wo] = {
+                wo: wo,
+                queue: 0,
+                producedWeek: 0,
+                shippedWeek: 0,
+                laborHoursWeek: 0,
+                laborHoursTotal: 0,
+                producedTotal: 0,
+                shippedTotal: 0,
+                internal: isInternalWO(wo),
+                orderCounts: {},
+                orderId: '',
+                unitRevenue: Number(f.unitRevenue) || 0,
+                unitMaterial: Number(f.unitMaterial) || 0,
+                pieceType: (f.pieceType === 'lg' || f.pieceType === 'sl') ? f.pieceType : 'sl',
+                ooklaSLQty: Number(f.ooklaSLQty) > 0 ? Math.round(Number(f.ooklaSLQty)) : 0,
+                ooklaLGQty: Number(f.ooklaLGQty) > 0 ? Math.round(Number(f.ooklaLGQty)) : 0
+              };
+            }
+            return woFlow[wo];
+          }
+          weeks.forEach(function (wk) {
+            var wd = normalizeWeekData(schedulerStore.weeks[wk]);
+            var producedMap = {};
+            var shipMap = {};
+            var producedBySlot = {};
+            var shipBySlot = {};
+            wd.assignments.forEach(function (a) {
+              if (!a.woId) return;
+              var wo = normalizeWoId(a.woId);
+              if (!wo) return;
+              var qty = Number(a.plannedQty) || 0;
+              var h = Number(a.duration || 0) * slotHours();
+              var row = ensureWO(wo);
+              if (a.orderId) {
+                var oid = normalizeOrderId(a.orderId);
+                if (oid) row.orderCounts[oid] = (row.orderCounts[oid] || 0) + 1;
+              }
+              row.laborHoursTotal += h;
+              if (wk === currentWeekKey) row.laborHoursWeek += h;
+              /* Build WO metrics from slot-level quantities:
+                 - Produced: order-specific completion tasks
+                 - Shipped: Shipping slots
+                 Use max per slot to avoid duplicate worker lines in same slot. */
+              if (a.taskId === 'shipping') {
+                var slotKey = a.day + '|' + a.startTime;
+                if (!shipBySlot[wo]) shipBySlot[wo] = {};
+                shipBySlot[wo][slotKey] = Math.max(shipBySlot[wo][slotKey] || 0, qty);
+              } else if (isOutputTaskForOrder(a.orderId, a.taskId)) {
+                var prodSlotKey = a.day + '|' + a.startTime;
+                if (!producedBySlot[wo]) producedBySlot[wo] = {};
+                producedBySlot[wo][prodSlotKey] = Math.max(producedBySlot[wo][prodSlotKey] || 0, qty);
+              }
+            });
+            Object.keys(producedBySlot).forEach(function (wo) {
+              var pslots = producedBySlot[wo];
+              producedMap[wo] = Object.keys(pslots).reduce(function (sum, k) {
+                return sum + (Number(pslots[k]) || 0);
+              }, 0);
+            });
+            Object.keys(shipBySlot).forEach(function (wo) {
+              var slots = shipBySlot[wo];
+              shipMap[wo] = Object.keys(slots).reduce(function (sum, k) {
+                return sum + (Number(slots[k]) || 0);
+              }, 0);
+            });
+            Object.keys(woFlow).forEach(function (wo) {
+              var row = woFlow[wo];
+              var produced = Number(producedMap[wo] || 0);
+              var requestedShip = Number(shipMap[wo] || 0);
+              var shipped = 0;
+              if (row.internal) {
+                /* Internal WO (e.g. QC -> inventory): no shipping queue logic */
+                row.queue = 0;
+              } else {
+                var available = row.queue + produced;
+                shipped = Math.min(available, requestedShip);
+                row.queue = Math.max(0, available - shipped);
+              }
+              row.producedTotal += produced;
+              if (!row.internal) row.shippedTotal += shipped;
+              if (wk === currentWeekKey) {
+                row.producedWeek = produced;
+                row.shippedWeek = row.internal ? 0 : shipped;
+              }
+            });
+            Object.keys(producedMap).forEach(function (wo) { ensureWO(wo); });
+            Object.keys(shipMap).forEach(function (wo) { ensureWO(wo); });
+          });
+          Object.keys(woFlow).forEach(function (wo) {
+            var row = woFlow[wo];
+            var counts = row.orderCounts || {};
+            var best = '';
+            var bestN = -1;
+            Object.keys(counts).forEach(function (k) {
+              if (counts[k] > bestN) { best = k; bestN = counts[k]; }
+            });
+            row.orderId = best || '';
+          });
+          var woList = Object.keys(woFlow).filter(function (wo) {
+            var r = woFlow[wo];
+            return (r.producedWeek > 0 || r.shippedWeek > 0 || r.queue > 0 || r.laborHoursWeek > 0 || r.producedTotal > 0 || r.shippedTotal > 0);
+          }).sort();
+          if (woList.length === 0) {
+            wrap.innerHTML = '<p class="scheduler-wo-profit-title">WO profit (recognized only when shipped)</p><div class="scheduler-infographic-fallback">No WO data yet. Add WO + TOTAL in scheduler slots.</div>';
+            return;
+          }
+          var activeList = [];
+          var archiveList = [];
+          var weekList = [];
+          woList.forEach(function (wo) {
+            var r = woFlow[wo];
+            var archived = (!r.internal && r.queue === 0 && r.producedTotal > 0 && r.shippedTotal >= r.producedTotal);
+            if (r.producedWeek > 0 || r.shippedWeek > 0 || r.laborHoursWeek > 0) weekList.push(wo);
+            if (archived) archiveList.push(wo);
+            else activeList.push(wo);
+          });
+          function unitPricingFor(row) {
+            if (row.internal) return { revenue: 0, material: 0 };
+            if (row.orderId === 'ookla') {
+              var pt = row.pieceType === 'lg' ? 'lg' : 'sl';
+              return {
+                revenue: Number(pricing.ookla[pt].revenue) || 0,
+                material: Number(pricing.ookla[pt].material) || 0
+              };
+            }
+            if (row.orderId === 'shopify') {
+              return {
+                revenue: Number(pricing.shopify.std.revenue) || 0,
+                material: Number(pricing.shopify.std.material) || 0
+              };
+            }
+            if (row.orderId === 'wetrack') {
+              return {
+                revenue: Number(pricing.wetrack.std.revenue) || 0,
+                material: Number(pricing.wetrack.std.material) || 0
+              };
+            }
+            return { revenue: row.unitRevenue, material: row.unitMaterial };
+          }
+          function rowTotalsFor(row, shippedQty) {
+            var shipped = Math.max(0, Number(shippedQty) || 0);
+            if (row.internal) return { revenueTotal: 0, materialTotal: 0, unitRevenue: 0, unitMaterial: 0, splitHtml: 'Internal' };
+            if (row.orderId === 'ookla') {
+              var sl = Math.max(0, Number(row.ooklaSLQty) || 0);
+              var lg = Math.max(0, Number(row.ooklaLGQty) || 0);
+              var sum = sl + lg;
+              var rev = (sl * (Number(pricing.ookla.sl.revenue) || 0)) + (lg * (Number(pricing.ookla.lg.revenue) || 0));
+              var mat = (sl * (Number(pricing.ookla.sl.material) || 0)) + (lg * (Number(pricing.ookla.lg.material) || 0));
+              var unitRev = shipped > 0 ? (rev / shipped) : 0;
+              var unitMat = shipped > 0 ? (mat / shipped) : 0;
+              var ok = sum === shipped;
+              var note = ok
+                ? '<span class="scheduler-archived-pill">Split ok</span>'
+                : '<span class="scheduler-waiting-pill">SL+LG must equal ' + shipped + ' (now ' + sum + ')</span>';
+              return { revenueTotal: rev, materialTotal: mat, unitRevenue: unitRev, unitMaterial: unitMat, splitHtml: note };
+            }
+            var unit = unitPricingFor(row);
+            return {
+              revenueTotal: shipped * unit.revenue,
+              materialTotal: shipped * unit.material,
+              unitRevenue: unit.revenue,
+              unitMaterial: unit.material,
+              splitHtml: (row.orderId ? row.orderId.toUpperCase() : 'STD')
+            };
+          }
+          function rowsFor(list, archivedMode) {
+            return list.map(function (wo) {
+              var r = woFlow[wo];
+              var producedView = archivedMode ? r.producedTotal : r.producedWeek;
+              var shippedView = archivedMode ? r.shippedTotal : r.shippedWeek;
+              var laborHoursView = archivedMode ? r.laborHoursTotal : r.laborHoursWeek;
+              var calc = rowTotalsFor(r, shippedView);
+              var marginUnit = calc.unitRevenue - calc.unitMaterial;
+              var revenueTotal = calc.revenueTotal;
+              var materialTotal = calc.materialTotal;
+              var laborCost = laborHoursView * WORKER_HOURLY_COST_EUR;
+              var realizedProfit = r.internal ? (-laborCost) : (revenueTotal - materialTotal - laborCost);
+              var waiting = archivedMode
+                ? '<span class="scheduler-archived-pill">Archived (fully shipped)</span>'
+                : (r.internal
+                  ? '<span class="scheduler-waiting-pill">Internal flow (inventory)</span>'
+                  : (r.queue > 0 ? '<span class="scheduler-waiting-pill">Waiting for shipping: ' + r.queue + '</span>' : ''));
+              if (r.orderId === 'ookla' && !r.internal) {
+                var splitSum = (Number(r.ooklaSLQty) || 0) + (Number(r.ooklaLGQty) || 0);
+                var splitTag = (splitSum === shippedView)
+                  ? '<span class="scheduler-archived-pill">SL+LG = ' + shippedView + '</span>'
+                  : '<span class="scheduler-waiting-pill">SL+LG must equal ' + shippedView + ' (now ' + splitSum + ')</span>';
+                waiting = waiting ? (waiting + ' ' + splitTag) : splitTag;
+              }
+              var profitClass = realizedProfit >= 0 ? 'scheduler-profit-good' : 'scheduler-profit-bad';
+              var pieceCol = (r.orderId === 'ookla')
+                ? ('<div class="scheduler-wo-pair">' +
+                    '<span class="scheduler-wo-pair-label">SL</span><input class="scheduler-wo-profit-input" type="number" min="0" step="1" data-wo-sl-qty="' + wo + '" value="' + Math.max(0, Number(r.ooklaSLQty) || 0) + '">' +
+                    '<span class="scheduler-wo-pair-label">LG</span><input class="scheduler-wo-profit-input" type="number" min="0" step="1" data-wo-lg-qty="' + wo + '" value="' + Math.max(0, Number(r.ooklaLGQty) || 0) + '">' +
+                  '</div>')
+                : calc.splitHtml;
+              return '<tr>' +
+                '<td>' + wo + '</td>' +
+                '<td>' + producedView + '</td>' +
+                '<td>' + shippedView + '</td>' +
+                '<td>' + waiting + '</td>' +
+                '<td>' + pieceCol + '</td>' +
+                '<td>€' + calc.unitRevenue.toFixed(2) + '</td>' +
+                '<td>€' + calc.unitMaterial.toFixed(2) + '</td>' +
+                '<td>€' + marginUnit.toFixed(2) + '</td>' +
+                '<td>' + laborHoursView.toFixed(1) + 'h</td>' +
+                '<td>€' + laborCost.toFixed(0) + '</td>' +
+                '<td class="' + profitClass + '">€' + realizedProfit.toFixed(0) + '</td>' +
+                '</tr>';
+            }).join('');
+          }
+          var activeRows = rowsFor(weekList, false);
+          var archiveRows = rowsFor(archiveList, true);
+          function totalsFor(list, archivedMode) {
+            var t = { revenue: 0, material: 0, labor: 0, net: 0 };
+            list.forEach(function (wo) {
+              var r = woFlow[wo];
+              var shipped = archivedMode ? r.shippedTotal : r.shippedWeek;
+              var laborHours = archivedMode ? r.laborHoursTotal : r.laborHoursWeek;
+              var calc = rowTotalsFor(r, shipped);
+              var rev = calc.revenueTotal;
+              var mat = calc.materialTotal;
+              var labor = laborHours * WORKER_HOURLY_COST_EUR;
+              var net = r.internal ? (-labor) : (rev - mat - labor);
+              t.revenue += rev;
+              t.material += mat;
+              t.labor += labor;
+              t.net += net;
+            });
+            return t;
+          }
+          var activeTotals = totalsFor(weekList, false);
+          var archiveTotals = totalsFor(archiveList, true);
+          wrap.innerHTML =
+            '<p class="scheduler-wo-profit-title">WO profit (recognized only when shipped; waiting qty carries to next week)</p>' +
+            '<div class="scheduler-pricing-grid">' +
+              '<div class="scheduler-pricing-card">' +
+                '<p class="scheduler-pricing-label">OOKLA - SL</p>' +
+                '<div class="scheduler-pricing-row">Rev/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="ookla.sl.revenue" value="' + pricing.ookla.sl.revenue.toFixed(2) + '"></div>' +
+                '<div class="scheduler-pricing-row">Cost/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="ookla.sl.material" value="' + pricing.ookla.sl.material.toFixed(2) + '"></div>' +
+              '</div>' +
+              '<div class="scheduler-pricing-card">' +
+                '<p class="scheduler-pricing-label">OOKLA - LG</p>' +
+                '<div class="scheduler-pricing-row">Rev/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="ookla.lg.revenue" value="' + pricing.ookla.lg.revenue.toFixed(2) + '"></div>' +
+                '<div class="scheduler-pricing-row">Cost/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="ookla.lg.material" value="' + pricing.ookla.lg.material.toFixed(2) + '"></div>' +
+              '</div>' +
+              '<div class="scheduler-pricing-card">' +
+                '<p class="scheduler-pricing-label">SHOPIFY / WE TRACK</p>' +
+                '<div class="scheduler-pricing-row">Shopify Rev/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="shopify.std.revenue" value="' + pricing.shopify.std.revenue.toFixed(2) + '"></div>' +
+                '<div class="scheduler-pricing-row">Shopify Cost/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="shopify.std.material" value="' + pricing.shopify.std.material.toFixed(2) + '"></div>' +
+                '<div class="scheduler-pricing-row">WeTrack Rev/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="wetrack.std.revenue" value="' + pricing.wetrack.std.revenue.toFixed(2) + '"></div>' +
+                '<div class="scheduler-pricing-row">WeTrack Cost/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="wetrack.std.material" value="' + pricing.wetrack.std.material.toFixed(2) + '"></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="scheduler-report-block">' +
+              '<div class="scheduler-report-head"><p class="scheduler-report-title">Active Week Report</p><span class="scheduler-report-sub">All WO touched this week</span></div>' +
+              '<div class="scheduler-report-kpis">' +
+                '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Revenue</div><div class="scheduler-report-kpi-value">€' + activeTotals.revenue.toFixed(0) + '</div></div>' +
+                '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Material</div><div class="scheduler-report-kpi-value">€' + activeTotals.material.toFixed(0) + '</div></div>' +
+                '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Worker Cost</div><div class="scheduler-report-kpi-value">€' + activeTotals.labor.toFixed(0) + '</div></div>' +
+                '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Net</div><div class="scheduler-report-kpi-value">' + (activeTotals.net >= 0 ? '+' : '') + '€' + activeTotals.net.toFixed(0) + '</div></div>' +
+              '</div>' +
+              '<div class="scheduler-table-wrap"><table class="scheduler-wo-profit-table">' +
+              '<thead><tr><th>WO</th><th>Produced</th><th>Shipped</th><th>Status</th><th>Piece</th><th>Revenue/u (€)</th><th>Material/u (€)</th><th>Margin/u</th><th>Labor</th><th>Labor cost</th><th>Net</th></tr></thead>' +
+              '<tbody>' + (activeRows || '<tr><td colspan="11"><span class="scheduler-infographic-fallback">No WO activity in this week.</span></td></tr>') + '</tbody></table></div>' +
+            '</div>' +
+            '<div class="scheduler-report-block">' +
+              '<div class="scheduler-report-head"><p class="scheduler-report-title">Archived Totals Report</p><span class="scheduler-report-sub">Fully shipped orders</span></div>' +
+              '<div class="scheduler-report-kpis">' +
+                '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Revenue</div><div class="scheduler-report-kpi-value">€' + archiveTotals.revenue.toFixed(0) + '</div></div>' +
+                '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Material</div><div class="scheduler-report-kpi-value">€' + archiveTotals.material.toFixed(0) + '</div></div>' +
+                '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Worker Cost</div><div class="scheduler-report-kpi-value">€' + archiveTotals.labor.toFixed(0) + '</div></div>' +
+                '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Net</div><div class="scheduler-report-kpi-value">' + (archiveTotals.net >= 0 ? '+' : '') + '€' + archiveTotals.net.toFixed(0) + '</div></div>' +
+              '</div>' +
+              '<div class="scheduler-table-wrap"><table class="scheduler-wo-profit-table">' +
+              '<thead><tr><th>WO</th><th>Produced (total)</th><th>Shipped (total)</th><th>Status</th><th>Piece</th><th>Revenue/u (€)</th><th>Material/u (€)</th><th>Margin/u</th><th>Labor (total)</th><th>Labor cost</th><th>Net</th></tr></thead>' +
+              '<tbody>' + (archiveRows || '<tr><td colspan="11"><span class="scheduler-infographic-fallback">No archived WO yet.</span></td></tr>') + '</tbody></table></div>' +
+            '</div>';
+        }
         function renderScheduler() {
           var table = schedulerEl('scheduler-table');
           if (!table) return;
@@ -5016,6 +5931,7 @@
           table.innerHTML = thead + tbody;
           renderWeekHeader();
           renderCapacity();
+          renderSchedulerInfographic();
           renderUndoRedoButtons();
         }
         function renderPaletteAndControls() {
@@ -5171,8 +6087,20 @@
           var tasksEl = schedulerEl('scheduler-tasks');
           var ordersEl = schedulerEl('scheduler-orders');
           var machinesEl = schedulerEl('scheduler-machines');
+          var sidebarToggleBtn = schedulerEl('scheduler-sidebar-toggle');
           var table = schedulerEl('scheduler-table');
           if (!table) return;
+          if (sidebarToggleBtn) {
+            sidebarToggleBtn.addEventListener('click', function () {
+              var layout = schedulerEl('scheduler-layout');
+              var collapsed = !!(layout && layout.classList.contains('is-sidebar-collapsed'));
+              var next = !collapsed;
+              setSidebarCollapsed(next);
+              var ui = readSchedulerUi();
+              ui.sidebarCollapsed = next;
+              saveSchedulerUi(ui);
+            });
+          }
           initResize();
           function bindDragStart(root) {
             if (!root) return;
@@ -5245,7 +6173,7 @@
               var key = input.getAttribute('data-slot-wo-input') || input.getAttribute('data-slot-qty-input') || '';
               if (!key) return;
               var pending = ensurePending(key);
-              if (input.matches('input[data-slot-wo-input]')) pending.woId = String(input.value || '').trim();
+              if (input.matches('input[data-slot-wo-input]')) pending.woId = normalizeWoId(input.value || '');
               if (input.matches('input[data-slot-qty-input]')) {
                 var n = Number(input.value);
                 pending.plannedQty = isFinite(n) && n > 0 ? Math.round(n) : 0;
@@ -5274,7 +6202,7 @@
               var pendingSave = ensurePending(saveKey);
               var woInput = table.querySelector('input[data-slot-wo-input="' + saveKey + '"]');
               var qtyInput = table.querySelector('input[data-slot-qty-input="' + saveKey + '"]');
-              pendingSave.woId = woInput && woInput.value ? String(woInput.value).trim() : '';
+              pendingSave.woId = normalizeWoId(woInput && woInput.value ? woInput.value : '');
               var qtyNum = qtyInput ? Number(qtyInput.value) : 0;
               pendingSave.plannedQty = isFinite(qtyNum) && qtyNum > 0 ? Math.round(qtyNum) : 0;
               saveStore();
@@ -5486,9 +6414,75 @@
           var printBtn = schedulerEl('scheduler-print');
           if (exportBtn) exportBtn.addEventListener('click', exportWeekCsv);
           if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
+          var woProfitWrap = schedulerEl('scheduler-wo-profit');
+          if (woProfitWrap) {
+            woProfitWrap.addEventListener('change', function (e) {
+              var input = e.target && e.target.matches ? e.target : null;
+              if (!input) return;
+              var pricingKey = input.getAttribute('data-pricing');
+              if (pricingKey) {
+                schedulerStore.woPricing = normalizeWoPricingIn(schedulerStore.woPricing || DEFAULT_WO_PRICING);
+                var pv = Number(input.value);
+                var clean = isFinite(pv) && pv >= 0 ? pv : 0;
+                if (pricingKey === 'ookla.sl.revenue') schedulerStore.woPricing.ookla.sl.revenue = clean;
+                else if (pricingKey === 'ookla.sl.material') schedulerStore.woPricing.ookla.sl.material = clean;
+                else if (pricingKey === 'ookla.lg.revenue') schedulerStore.woPricing.ookla.lg.revenue = clean;
+                else if (pricingKey === 'ookla.lg.material') schedulerStore.woPricing.ookla.lg.material = clean;
+                else if (pricingKey === 'shopify.std.revenue') schedulerStore.woPricing.shopify.std.revenue = clean;
+                else if (pricingKey === 'shopify.std.material') schedulerStore.woPricing.shopify.std.material = clean;
+                else if (pricingKey === 'wetrack.std.revenue') schedulerStore.woPricing.wetrack.std.revenue = clean;
+                else if (pricingKey === 'wetrack.std.material') schedulerStore.woPricing.wetrack.std.material = clean;
+                saveStore();
+                renderSchedulerInfographic();
+                return;
+              }
+              var woPieceType = input.getAttribute('data-wo-piece-type');
+              if (woPieceType) {
+                var woKey = normalizeWoId(woPieceType);
+                if (!woKey) return;
+                schedulerStore.woFinance = schedulerStore.woFinance || {};
+                if (!schedulerStore.woFinance[woKey]) schedulerStore.woFinance[woKey] = { unitRevenue: 0, unitMaterial: 0, pieceType: 'sl', ooklaSLQty: 0, ooklaLGQty: 0 };
+                schedulerStore.woFinance[woKey].pieceType = (input.value === 'lg') ? 'lg' : 'sl';
+                saveStore();
+                renderSchedulerInfographic();
+                return;
+              }
+              var woSL = input.getAttribute('data-wo-sl-qty');
+              var woLG = input.getAttribute('data-wo-lg-qty');
+              var woQtyKey = normalizeWoId(woSL || woLG || '');
+              if (woQtyKey) {
+                schedulerStore.woFinance = schedulerStore.woFinance || {};
+                if (!schedulerStore.woFinance[woQtyKey]) schedulerStore.woFinance[woQtyKey] = { unitRevenue: 0, unitMaterial: 0, pieceType: 'sl', ooklaSLQty: 0, ooklaLGQty: 0 };
+                var qv = Math.max(0, Math.round(Number(input.value) || 0));
+                if (woSL) schedulerStore.woFinance[woQtyKey].ooklaSLQty = qv;
+                if (woLG) schedulerStore.woFinance[woQtyKey].ooklaLGQty = qv;
+                saveStore();
+                renderSchedulerInfographic();
+                return;
+              }
+              var woRevenue = input.getAttribute('data-wo-revenue');
+              var woMaterial = input.getAttribute('data-wo-material');
+              var wo = woRevenue || woMaterial || '';
+              if (!wo) return;
+              schedulerStore.woFinance = schedulerStore.woFinance || {};
+              if (!schedulerStore.woFinance[wo]) schedulerStore.woFinance[wo] = { unitRevenue: 0, unitMaterial: 0, pieceType: 'sl', ooklaSLQty: 0, ooklaLGQty: 0 };
+              if (woRevenue) {
+                var rev = Number(input.value);
+                schedulerStore.woFinance[wo].unitRevenue = isFinite(rev) && rev >= 0 ? rev : 0;
+              }
+              if (woMaterial) {
+                var mat = Number(input.value);
+                schedulerStore.woFinance[wo].unitMaterial = isFinite(mat) && mat >= 0 ? mat : 0;
+              }
+              saveStore();
+              renderSchedulerInfographic();
+            });
+          }
         }
         function initScheduler() {
           if (!schedulerEl('scheduler-table')) return;
+          var ui = readSchedulerUi();
+          setSidebarCollapsed(!!ui.sidebarCollapsed);
           renderPaletteAndControls();
           loadRemote(function (data) {
             schedulerStore = normalizeStore(data);
