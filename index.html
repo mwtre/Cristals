@@ -309,7 +309,6 @@
       max-height: 100%;
       width: auto;
       height: auto;
-      vertical-align: top;
       transition: transform 0.2s ease-out;
       border-radius: 0;
     }
@@ -1438,8 +1437,19 @@
     .link-btn:hover { color: var(--accent-hover, #d4b872); }
 
     /* Production Stats */
-    #step-production-stats { align-items: flex-start; padding: 2rem 1.5rem 3rem; }
-    .production-stats-inner { max-width: 1100px; margin: 0 auto; width: 100%; }
+    #step-production-stats {
+      align-items: stretch;
+      padding: 0.5rem;
+      min-height: 100%;
+    }
+    .production-stats-inner {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
     .production-stats-title { font-family: 'DM Serif Display', serif; font-size: 1.8rem; font-weight: 400; margin: 0 0 0.35rem 0; color: var(--text); }
     .production-stats-subtitle { font-size: 1rem; color: var(--muted); margin: 0 0 1.5rem 0; }
     .production-tasks-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.75rem; }
@@ -1479,6 +1489,99 @@
     .worker-running-row .worker-running-task { font-size: 0.9rem; color: var(--accent); margin-right: 0.5rem; }
     .worker-running-row .worker-elapsed { font-variant-numeric: tabular-nums; font-size: 1rem; font-weight: 600; margin-right: 0.75rem; color: var(--text); }
     .worker-total { font-size: 0.9rem; color: var(--muted); margin: 0; }
+    .production-calendar-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .production-calendar-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+    .production-calendar-head h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    .production-calendar-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .production-calendar-month-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.8rem;
+    }
+    .production-calendar-month-tab {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .production-calendar-month-tab.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+    .production-calendar-wrap { overflow-x: auto; margin-bottom: 0.85rem; }
+    .production-calendar-table { width: 100%; border-collapse: collapse; min-width: 980px; }
+    .production-calendar-table th,
+    .production-calendar-table td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.5rem 0.45rem;
+      text-align: left;
+      vertical-align: middle;
+      font-size: 0.85rem;
+    }
+    .production-calendar-table th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+    .production-calendar-table td { color: var(--text); }
+    .production-calendar-table .order-name { font-weight: 600; color: var(--accent); white-space: nowrap; }
+    .production-calendar-table input[type="number"] {
+      width: 100%;
+      min-width: 95px;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.85rem;
+    }
+    .production-calendar-table input[type="number"]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .production-calendar-kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.65rem;
+      margin-top: 0.65rem;
+    }
+    .production-calendar-kpi {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.65rem;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .production-calendar-kpi .kpi-label { color: var(--muted); font-size: 0.78rem; margin-bottom: 0.2rem; }
+    .production-calendar-kpi .kpi-value { color: var(--text); font-size: 1rem; font-weight: 600; }
+    .production-calendar-status {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+    }
+    .production-calendar-status.complete { color: #7dd3a3; }
     .production-stats-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; }
     .production-stats-summary .summary-title { font-size: 1.15rem; margin: 0 0 1rem 0; color: var(--accent); }
     .summary-month-tabs-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
@@ -1518,6 +1621,556 @@
     }
     .chart-bar-row .chart-value { min-width: 3rem; text-align: right; color: var(--accent); font-weight: 500; }
 
+    /* Production Stats v2: weekly scheduler */
+    #step-production-stats .production-tasks-row,
+    #step-production-stats .production-workers-grid,
+    #step-production-stats .production-calendar-panel,
+    #step-production-stats .production-stats-summary { display: none; }
+    /* Simplified controls: hide clone/filter/bulk toolbars */
+    #step-production-stats .scheduler-clone-row,
+    #step-production-stats .scheduler-filter-row,
+    #step-production-stats .scheduler-bulk-row {
+      display: none !important;
+    }
+    .production-scheduler-wrap {
+      background: radial-gradient(1200px 260px at 25% -120px, rgba(201,169,98,0.18), rgba(26,26,26,0.96) 55%),
+        linear-gradient(180deg, rgba(30,30,30,0.96), rgba(18,18,18,0.96));
+      border: 1px solid rgba(201,169,98,0.22);
+      border-radius: 14px;
+      padding: 0.75rem;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.04);
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .production-scheduler-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0.75rem;
+      flex: 1;
+      min-height: 0;
+    }
+    @media (max-width: 980px) {
+      .production-scheduler-layout { grid-template-columns: 1fr; }
+    }
+    .scheduler-sidebar {
+      border: 1px solid rgba(201,169,98,0.18);
+      border-radius: 12px;
+      padding: 0.65rem;
+      background: linear-gradient(180deg, rgba(28,28,28,0.88), rgba(14,14,14,0.88));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .scheduler-sidebar h4 { margin: 0 0 0.4rem 0; color: var(--accent); font-size: 0.86rem; letter-spacing: 0.02em; }
+    .scheduler-help {
+      margin: 0 0 0.55rem 0;
+      padding-left: 1rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.3;
+    }
+    .scheduler-list { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.6rem; }
+    .drag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.32rem 0.45rem;
+      border-radius: 7px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: linear-gradient(180deg, rgba(36,36,36,0.95), rgba(17,17,17,0.95));
+      color: var(--text);
+      cursor: grab;
+      user-select: none;
+      font-size: 0.78rem;
+      transition: transform 0.12s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+    .drag-chip:hover {
+      transform: translateY(-1px);
+      border-color: rgba(201,169,98,0.55);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.28);
+    }
+    .drag-chip:active { cursor: grabbing; }
+    .drag-chip .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+    .drag-chip.worker-enzo .dot { background: #60a5fa; }
+    .drag-chip.worker-andre .dot { background: #f59e0b; }
+    .drag-chip.worker-enrique .dot { background: #34d399; }
+    .drag-chip.worker-scoth .dot { background: #f472b6; }
+    .drag-chip.order-ookla .dot { background: #60a5fa; }
+    .drag-chip.order-wetrack .dot { background: #34d399; }
+    .drag-chip.order-shopify .dot { background: #f59e0b; }
+    .drag-chip.task-receiving .dot { background: #22c55e; }
+    .drag-chip.task-qc .dot { background: #06b6d4; }
+    .drag-chip.task-printing .dot { background: #a78bfa; }
+    .drag-chip.task-kitting .dot { background: #f59e0b; }
+    .drag-chip.task-shipping .dot { background: #ef4444; }
+    .drag-chip.task-hatching .dot { background: #84cc16; }
+    .drag-chip.task-painting .dot { background: #ec4899; }
+    .drag-chip.task-cleaning .dot { background: #14b8a6; }
+    .drag-chip.task-maintenance .dot { background: #64748b; }
+    .drag-chip.machine-mimaki1 .dot { background: #a78bfa; }
+    .drag-chip.machine-mimaki2 .dot { background: #22d3ee; }
+    .drag-chip.machine-sand-blaster .dot { background: #f87171; }
+    .drag-chip.worker-enzo { border-color: rgba(96,165,250,0.55); background: linear-gradient(180deg, rgba(30,58,138,0.35), rgba(15,23,42,0.95)); }
+    .drag-chip.worker-andre { border-color: rgba(245,158,11,0.55); background: linear-gradient(180deg, rgba(120,53,15,0.38), rgba(15,23,42,0.95)); }
+    .drag-chip.worker-enrique { border-color: rgba(16,185,129,0.55); background: linear-gradient(180deg, rgba(6,78,59,0.4), rgba(15,23,42,0.95)); }
+    .drag-chip.worker-scoth { border-color: rgba(236,72,153,0.55); background: linear-gradient(180deg, rgba(131,24,67,0.38), rgba(15,23,42,0.95)); }
+    .drag-chip.order-ookla { border-color: rgba(59,130,246,0.55); }
+    .drag-chip.order-wetrack { border-color: rgba(16,185,129,0.55); }
+    .drag-chip.order-shopify { border-color: rgba(245,158,11,0.55); }
+    .drag-chip.task-receiving { border-color: rgba(34,197,94,0.55); }
+    .drag-chip.task-qc { border-color: rgba(6,182,212,0.55); }
+    .drag-chip.task-printing { border-color: rgba(167,139,250,0.55); }
+    .drag-chip.task-kitting { border-color: rgba(245,158,11,0.55); }
+    .drag-chip.task-shipping { border-color: rgba(239,68,68,0.55); }
+    .drag-chip.task-hatching { border-color: rgba(132,204,22,0.55); }
+    .drag-chip.task-painting { border-color: rgba(236,72,153,0.55); }
+    .drag-chip.task-cleaning { border-color: rgba(20,184,166,0.55); }
+    .drag-chip.task-maintenance { border-color: rgba(148,163,184,0.55); }
+    .scheduler-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+    .scheduler-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem;
+      margin-bottom: 0.45rem;
+    }
+    .scheduler-topbar .scheduler-title {
+      font-size: 0.86rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .scheduler-sync-status { font-size: 0.74rem; color: var(--muted); }
+    .scheduler-sync-status.error { color: #f87171; }
+    .scheduler-grid-wrap {
+      overflow: auto;
+      border: 1px solid rgba(201,169,98,0.22);
+      border-radius: 12px;
+      background: linear-gradient(180deg, #101010, #0a0a0a);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      flex: 1;
+      min-height: 0;
+    }
+    .scheduler-table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .scheduler-table th,
+    .scheduler-table td {
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      vertical-align: top;
+      padding: 0;
+    }
+    .scheduler-table th:last-child,
+    .scheduler-table td:last-child { border-right: none; }
+    .scheduler-table thead th {
+      background: linear-gradient(180deg, #1e1e1e, #141414);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.28rem 0.26rem;
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+    .scheduler-time-col {
+      width: 62px;
+      background: linear-gradient(180deg, #1b1b1b, #131313);
+      color: var(--muted);
+      font-size: 0.66rem;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      padding: 0.2rem 0.2rem;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+    .scheduler-slot {
+      min-height: 34px;
+      background: linear-gradient(180deg, #141414, #0f0f0f);
+      transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      position: relative;
+      padding: 0.06rem;
+    }
+    .scheduler-slot.drag-over {
+      background: linear-gradient(180deg, rgba(201,169,98,0.16), rgba(201,169,98,0.08));
+      box-shadow: inset 0 0 0 2px rgba(201,169,98,0.72), 0 0 0 1px rgba(201,169,98,0.35);
+    }
+    .scheduler-empty {
+      font-size: 0.62rem;
+      color: #94a3b8;
+      text-align: center;
+      line-height: 28px;
+      user-select: none;
+    }
+    .scheduler-slot-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-height: 100%;
+    }
+    .scheduler-assignment {
+      min-height: 15px;
+      border-radius: 6px;
+      padding: 0.14rem 0.24rem;
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.22);
+      border: 1px solid rgba(148,163,184,0.28);
+    }
+    .scheduler-assignment .worker-name {
+      margin: 0;
+      font-size: 0.62rem;
+      line-height: 1.05;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .scheduler-assignment .task-name {
+      margin: 0;
+      font-size: 0.58rem;
+      line-height: 1.05;
+      color: #f8fafc;
+      display: inline-block;
+      width: fit-content;
+      padding: 0.02rem 0.2rem;
+      border-radius: 4px;
+      background: rgba(30,41,59,0.78);
+    }
+    .scheduler-assignment .order-name {
+      margin: 0;
+      font-size: 0.54rem;
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #f8fafc;
+      text-transform: uppercase;
+      display: inline-block;
+      width: fit-content;
+      padding: 0.02rem 0.22rem;
+      border-radius: 4px;
+      background: rgba(51,65,85,0.8);
+    }
+    .scheduler-assignment .machine-name {
+      margin: 0;
+      font-size: 0.52rem;
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #cbd5e1;
+      text-transform: uppercase;
+    }
+    .scheduler-assignment .wo-meta {
+      margin: 0;
+      font-size: 0.52rem;
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #bfdbfe;
+      text-transform: uppercase;
+    }
+    .scheduler-assignment .duration-tag {
+      position: absolute;
+      right: 16px;
+      top: 2px;
+      font-size: 0.52rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .scheduler-assignment .remove-btn {
+      position: absolute;
+      top: 1px;
+      right: 1px;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(17,24,39,0.28);
+      color: #111827;
+      cursor: pointer;
+      font-size: 0.62rem;
+      line-height: 14px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .scheduler-assignment .copy-btn {
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(17,24,39,0.28);
+      color: #111827;
+      cursor: pointer;
+      font-size: 0.55rem;
+      line-height: 14px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .scheduler-slot:hover .scheduler-assignment .remove-btn { opacity: 1; }
+    .scheduler-slot:hover .scheduler-assignment .copy-btn { opacity: 1; }
+    .scheduler-assignment .resize-handle {
+      position: absolute;
+      right: 2px;
+      bottom: 1px;
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      background: rgba(17,24,39,0.28);
+      cursor: ns-resize;
+    }
+    .scheduler-assignment .resize-handle-x {
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 9px;
+      height: 14px;
+      border-radius: 2px;
+      background: rgba(17,24,39,0.28);
+      cursor: ew-resize;
+    }
+    .scheduler-assignment .resize-handle-x::before {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        to right,
+        rgba(17,24,39,0.55) 0 1px,
+        transparent 1px 2px
+      );
+    }
+    .scheduler-assignment .resize-handle::before {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(17,24,39,0.55) 0 1px,
+        transparent 1px 2px
+      );
+    }
+    .scheduler-assignment.is-continued {
+      opacity: 0.9;
+      border: 1px dashed rgba(17,24,39,0.25);
+    }
+    .scheduler-assignment.is-continued .task-name,
+    .scheduler-assignment.is-continued .order-name,
+    .scheduler-assignment.is-continued .machine-name,
+    .scheduler-assignment.is-continued .wo-meta {
+      display: none;
+    }
+    .scheduler-assignment {
+      --worker-accent: #94a3b8;
+      --task-accent: #64748b;
+      --order-accent: #475569;
+      --task-bg: rgba(71, 85, 105, 0.34);
+      background: linear-gradient(180deg, var(--task-bg), rgba(2, 6, 23, 0.93));
+      border-left: 4px solid var(--worker-accent);
+      border-top: 3px solid var(--task-accent);
+      border-right: 3px solid var(--order-accent);
+    }
+    .scheduler-assignment.worker-enzo { --worker-accent: #60a5fa; }
+    .scheduler-assignment.worker-andre { --worker-accent: #f59e0b; }
+    .scheduler-assignment.worker-enrique { --worker-accent: #34d399; }
+    .scheduler-assignment.worker-scoth { --worker-accent: #f472b6; }
+    .scheduler-assignment.order-ookla { --order-accent: #2563eb; }
+    .scheduler-assignment.order-wetrack { --order-accent: #059669; }
+    .scheduler-assignment.order-shopify { --order-accent: #d97706; }
+    .scheduler-assignment.order-ookla .order-name { background: #1d4ed8; }
+    .scheduler-assignment.order-wetrack .order-name { background: #047857; }
+    .scheduler-assignment.order-shopify .order-name { background: #b45309; }
+    .scheduler-assignment.task-receiving { --task-accent: #22c55e; --task-bg: rgba(22, 163, 74, 0.42); }
+    .scheduler-assignment.task-qc { --task-accent: #06b6d4; --task-bg: rgba(8, 145, 178, 0.44); }
+    .scheduler-assignment.task-printing { --task-accent: #a78bfa; --task-bg: rgba(124, 58, 237, 0.44); }
+    .scheduler-assignment.task-kitting { --task-accent: #f59e0b; --task-bg: rgba(217, 119, 6, 0.42); }
+    .scheduler-assignment.task-shipping { --task-accent: #ef4444; --task-bg: rgba(220, 38, 38, 0.44); }
+    .scheduler-assignment.task-hatching { --task-accent: #84cc16; --task-bg: rgba(101, 163, 13, 0.43); }
+    .scheduler-assignment.task-painting { --task-accent: #ec4899; --task-bg: rgba(219, 39, 119, 0.44); }
+    .scheduler-assignment.task-cleaning { --task-accent: #14b8a6; --task-bg: rgba(15, 118, 110, 0.44); }
+    .scheduler-assignment.task-maintenance { --task-accent: #64748b; --task-bg: rgba(71, 85, 105, 0.44); }
+    .scheduler-assignment.task-receiving .task-name { background: #16a34a; }
+    .scheduler-assignment.task-qc .task-name { background: #0891b2; }
+    .scheduler-assignment.task-printing .task-name { background: #7c3aed; }
+    .scheduler-assignment.task-kitting .task-name { background: #d97706; }
+    .scheduler-assignment.task-shipping .task-name { background: #dc2626; }
+    .scheduler-assignment.task-hatching .task-name { background: #65a30d; }
+    .scheduler-assignment.task-painting .task-name { background: #db2777; }
+    .scheduler-assignment.task-cleaning .task-name { background: #0f766e; }
+    .scheduler-assignment.task-maintenance .task-name { background: #475569; }
+    .scheduler-assignment.machine-mimaki1 { box-shadow: inset 0 -2px 0 0 rgba(167,139,250,0.92), 0 4px 10px rgba(0,0,0,0.22); }
+    .scheduler-assignment.machine-mimaki2 { box-shadow: inset 0 -2px 0 0 rgba(34,211,238,0.92), 0 4px 10px rgba(0,0,0,0.22); }
+    .scheduler-assignment.machine-sand-blaster { box-shadow: inset 0 -2px 0 0 rgba(248,113,113,0.92), 0 4px 10px rgba(0,0,0,0.22); }
+    .scheduler-partial {
+      height: 100%;
+      border: 1px dashed rgba(201,169,98,0.64);
+      border-radius: 8px;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-direction: column;
+      text-align: center;
+      font-size: 0.66rem;
+      line-height: 1.24;
+      padding: 0.26rem;
+      background: linear-gradient(180deg, rgba(15,23,42,0.7), rgba(2,6,23,0.65));
+    }
+    .scheduler-partial-controls {
+      margin-top: 0.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.18rem;
+      justify-content: center;
+      align-items: center;
+    }
+    .scheduler-slot-meta-input {
+      min-width: 120px;
+      padding: 0.2rem 0.3rem;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 5px;
+      background: rgba(15,23,42,0.9);
+      color: #e5e7eb;
+      font-size: 0.64rem;
+    }
+    .scheduler-slot-meta-input.qty { min-width: 96px; width: 96px; }
+    .scheduler-slot-meta-btn {
+      padding: 0.16rem 0.34rem;
+      border: 1px solid rgba(96,165,250,0.55);
+      border-radius: 5px;
+      background: rgba(30,58,138,0.45);
+      color: #dbeafe;
+      font-size: 0.62rem;
+      cursor: pointer;
+    }
+    .scheduler-clear-pending-btn {
+      padding: 0.12rem 0.28rem;
+      border: 1px solid rgba(248,113,113,0.45);
+      border-radius: 5px;
+      background: rgba(127,29,29,0.45);
+      color: #fecaca;
+      font-size: 0.62rem;
+      cursor: pointer;
+    }
+    .scheduler-slot-meta-pop {
+      margin-top: 0.18rem;
+      border: 1px solid rgba(96,165,250,0.45);
+      border-radius: 6px;
+      background: rgba(2,6,23,0.86);
+      padding: 0.2rem;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.18rem;
+      justify-content: center;
+    }
+    .scheduler-pending-inline {
+      margin-top: 0.14rem;
+      border: 1px dashed rgba(96,165,250,0.5);
+      border-radius: 6px;
+      padding: 0.18rem;
+      background: rgba(15,23,42,0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 0.16rem;
+      align-items: center;
+      font-size: 0.58rem;
+      color: #cbd5e1;
+    }
+    .scheduler-topbar-actions,
+    .scheduler-filter-row,
+    .scheduler-bulk-row,
+    .scheduler-clone-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+    .scheduler-mini-btn {
+      padding: 0.2rem 0.45rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(35,35,35,0.96), rgba(16,16,16,0.96));
+      color: var(--text);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: border-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+    }
+    .scheduler-mini-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: rgba(201,169,98,0.6);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.24);
+    }
+    .scheduler-mini-btn.active { border-color: var(--accent); color: var(--accent); }
+    .scheduler-mini-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .scheduler-mini-select {
+      min-width: 90px;
+      padding: 0.2rem 0.35rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(32,32,32,0.96), rgba(14,14,14,0.96));
+      color: var(--text);
+      font-size: 0.72rem;
+    }
+    .scheduler-mini-input {
+      min-width: 110px;
+      padding: 0.2rem 0.35rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(32,32,32,0.96), rgba(14,14,14,0.96));
+      color: var(--text);
+      font-size: 0.72rem;
+    }
+    .scheduler-capacity {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.35rem;
+      margin-top: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+    .scheduler-cap-card {
+      border: 1px solid rgba(201,169,98,0.16);
+      border-radius: 9px;
+      padding: 0.3rem 0.4rem;
+      font-size: 0.68rem;
+      background: linear-gradient(180deg, rgba(27,27,27,0.92), rgba(14,14,14,0.92));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .scheduler-audit {
+      border: 1px solid rgba(201,169,98,0.18);
+      border-radius: 10px;
+      padding: 0.35rem 0.45rem;
+      background: linear-gradient(180deg, rgba(18,18,18,0.88), rgba(10,10,10,0.88));
+      max-height: 130px;
+      overflow: auto;
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+    .scheduler-audit .audit-item { padding: 0.12rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .scheduler-audit .audit-item:last-child { border-bottom: none; }
+    .scheduler-slot.bulk-selected { box-shadow: inset 0 0 0 2px rgba(96,165,250,0.75); }
+    @media (max-width: 760px) {
+      .scheduler-grid-wrap { max-height: 62vh; }
+      .scheduler-topbar .scheduler-title { font-size: 0.78rem; }
+      .scheduler-mini-btn, .scheduler-mini-select { font-size: 0.68rem; }
+    }
+
     /* Recruiting step */
     #step-recruiting { align-items: flex-start; padding: 2rem 1.5rem 3rem; }
     .recruiting-inner { max-width: 1100px; margin: 0 auto; width: 100%; }
@@ -1551,7 +2204,7 @@
     .factory-map-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin: 0 0 0.35rem 0; color: var(--text); }
     .factory-map-subtitle { font-size: 0.95rem; color: var(--muted); margin: 0 0 0.75rem 0; }
     .factory-map-wrap { position: relative; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); }
-    .factory-map-wrap img { display: block; width: 100%; height: auto; vertical-align: top; }
+    .factory-map-wrap img { display: block; width: 100%; height: auto; }
     .factory-map-zones { position: absolute; inset: 0; pointer-events: none; }
     .factory-map-zones .zone {
       position: absolute; pointer-events: auto; cursor: pointer;
@@ -2464,7 +3117,67 @@
   <div id="step-production-stats" class="step-screen">
     <div class="production-stats-inner">
       <h2 class="production-stats-title">Production Stats</h2>
-      <p class="production-stats-subtitle">Log time per task. Totals by worker and by month.</p>
+      <section class="production-scheduler-wrap" aria-label="Weekly production scheduler">
+        <div class="production-scheduler-layout">
+          <aside class="scheduler-sidebar">
+            <h4>Workers</h4>
+            <div id="scheduler-workers" class="scheduler-list"></div>
+            <h4>Tasks</h4>
+            <div id="scheduler-tasks" class="scheduler-list"></div>
+            <h4>Orders</h4>
+            <div id="scheduler-orders" class="scheduler-list"></div>
+            <h4>Machines</h4>
+            <div id="scheduler-machines" class="scheduler-list"></div>
+          </aside>
+          <div class="scheduler-main">
+            <div class="scheduler-topbar">
+              <span class="scheduler-title">Monday to Friday · 10:00-18:30 · 30min slots</span>
+              <span id="scheduler-sync-status" class="scheduler-sync-status" aria-live="polite"></span>
+            </div>
+            <div class="scheduler-topbar-actions">
+              <button type="button" class="scheduler-mini-btn" id="scheduler-prev-week">← Week</button>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-today-week">This week</button>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-next-week">Week →</button>
+              <strong id="scheduler-week-label" style="font-size:0.72rem;color:var(--accent);"></strong>
+            </div>
+            <div class="scheduler-clone-row">
+              <select id="scheduler-clone-from" class="scheduler-mini-select"></select>
+              <select id="scheduler-clone-to" class="scheduler-mini-select"></select>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-clone-day">Clone day</button>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-clone-week">Clone prev week</button>
+            </div>
+            <div class="scheduler-filter-row">
+              <select id="scheduler-filter-worker" class="scheduler-mini-select"></select>
+              <select id="scheduler-filter-task" class="scheduler-mini-select"></select>
+              <select id="scheduler-filter-order" class="scheduler-mini-select"></select>
+              <select id="scheduler-filter-machine" class="scheduler-mini-select"></select>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-export">Export CSV</button>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-print">Print</button>
+            </div>
+            <div class="scheduler-bulk-row">
+              <button type="button" class="scheduler-mini-btn" id="scheduler-bulk-toggle">Bulk: Off</button>
+              <select id="scheduler-bulk-worker" class="scheduler-mini-select"></select>
+              <select id="scheduler-bulk-task" class="scheduler-mini-select"></select>
+              <select id="scheduler-bulk-order" class="scheduler-mini-select"></select>
+              <select id="scheduler-bulk-machine" class="scheduler-mini-select"></select>
+              <select id="scheduler-bulk-duration" class="scheduler-mini-select">
+                <option value="1">30m</option>
+                <option value="2" selected>1h</option>
+                <option value="4">2h</option>
+                <option value="8">4h</option>
+              </select>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-bulk-apply">Apply</button>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-undo">Undo</button>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-redo">Redo</button>
+            </div>
+            <div class="scheduler-capacity" id="scheduler-capacity"></div>
+            <div class="scheduler-grid-wrap">
+              <table class="scheduler-table" id="scheduler-table"></table>
+            </div>
+            <div class="scheduler-audit" id="scheduler-audit"></div>
+          </div>
+        </div>
+      </section>
       <div class="production-tasks-row" aria-label="Task types">
         <span class="task-pill">Receiving</span>
         <span class="task-pill">QC</span>
@@ -2592,6 +3305,16 @@
           <p class="worker-total" id="worker-total-scot">Total: 0 min</p>
         </div>
       </div>
+      <section class="production-calendar-panel" aria-label="Monthly production calendar and cost results">
+        <div class="production-calendar-head">
+          <h3>Production calendar (month by month)</h3>
+          <p>Fill cost + results per order: SHOPIFY, OOKLA, WE TRACK.</p>
+        </div>
+        <div class="production-calendar-month-tabs" id="production-calendar-month-tabs"></div>
+        <div class="production-calendar-wrap" id="production-calendar-table-wrap"></div>
+        <div class="production-calendar-status" id="production-calendar-status" aria-live="polite"></div>
+        <div class="production-calendar-kpis" id="production-calendar-stats"></div>
+      </section>
       <div class="production-stats-summary">
         <h3 class="summary-title">Totals by month</h3>
         <div class="summary-month-tabs-wrap">
@@ -2817,9 +3540,11 @@
           if (window.CRISTAL_SUPABASE_URL && window.CRISTAL_SUPABASE_ANON_KEY && typeof window.loadProductionFromRemote === 'function') {
             window.loadProductionFromRemote(function () {
               if (typeof refreshProductionStats === 'function') refreshProductionStats();
+              if (typeof window.refreshProductionScheduler === 'function') window.refreshProductionScheduler();
             });
           } else if (typeof refreshProductionStats === 'function') {
             refreshProductionStats();
+            if (typeof window.refreshProductionScheduler === 'function') window.refreshProductionScheduler();
           }
         }
       }
@@ -2939,6 +3664,7 @@
       (function () {
         var PRODUCTION_STORAGE_KEY = 'cristal_production_logs';
         var TIMERS_STORAGE_KEY = 'cristal_production_timers';
+        var PRODUCTION_CALENDAR_STORAGE_KEY = 'cristal_production_calendar';
         /* Online saving (Supabase): set before loading the page, e.g. in a script tag:
            window.CRISTAL_SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
            window.CRISTAL_SUPABASE_ANON_KEY = 'your-anon-key';
@@ -2965,7 +3691,7 @@
         }
         function loadProductionFromRemote(callback) {
           if (!useRemote) { if (callback) callback(); return; }
-          supabaseFetch('/production_data?key=in.(logs,timers)')
+          supabaseFetch('/production_data?key=in.(logs,timers,calendar)')
             .then(function (r) {
               if (!r.ok) throw new Error('Load failed: ' + r.status);
               return r.json();
@@ -2973,13 +3699,16 @@
             .then(function (rows) {
               var logs = [];
               var timers = {};
+              var calendar = {};
               rows.forEach(function (row) {
                 if (row.key === 'logs' && Array.isArray(row.value)) logs = row.value;
                 if (row.key === 'timers' && row.value && typeof row.value === 'object') timers = row.value;
+                if (row.key === 'calendar' && row.value && typeof row.value === 'object') calendar = row.value;
               });
               try {
                 localStorage.setItem(PRODUCTION_STORAGE_KEY, JSON.stringify(logs));
                 localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(timers));
+                localStorage.setItem(PRODUCTION_CALENDAR_STORAGE_KEY, JSON.stringify(calendar));
               } catch (e) {}
               if (callback) callback();
             })
@@ -2998,6 +3727,12 @@
           if (!useRemote) return;
           supabaseFetch('/production_data', { method: 'POST', body: [{ key: 'timers', value: timers || {} }] })
             .catch(function (err) { console.error('Production sync failed (timers):', err); });
+        }
+        function saveCalendarToRemote(calendar) {
+          if (!useRemote) return;
+          supabaseFetch('/production_data', { method: 'POST', body: [{ key: 'calendar', value: calendar || {} }] })
+            .then(function () { showProductionSyncStatus('synced'); })
+            .catch(function (err) { console.error('Production sync failed (calendar):', err); showProductionSyncStatus('error'); });
         }
         function showProductionSyncStatus(status) {
           var el = document.getElementById('production-sync-status');
@@ -3052,6 +3787,138 @@
             localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(timers));
             saveTimersToRemote(timers);
           } catch (e) {}
+        }
+        function getProductionCalendar() {
+          try {
+            var raw = localStorage.getItem(PRODUCTION_CALENDAR_STORAGE_KEY);
+            return raw ? JSON.parse(raw) : {};
+          } catch (e) { return {}; }
+        }
+        function saveProductionCalendar(calendar) {
+          try {
+            localStorage.setItem(PRODUCTION_CALENDAR_STORAGE_KEY, JSON.stringify(calendar || {}));
+            saveCalendarToRemote(calendar || {});
+          } catch (e) {}
+        }
+        function getEmptyCalendarRow() {
+          return {
+            materialCost: 0,
+            hours: 0,
+            revenue: 0,
+            rejected: 0,
+            workerPerformance: 0,
+            timeHours: 0
+          };
+        }
+        var CALENDAR_ORDERS = ['SHOPIFY', 'OOKLA', 'WE TRACK'];
+        var CALENDAR_FIELDS = ['materialCost', 'hours', 'revenue', 'rejected', 'workerPerformance', 'timeHours'];
+        var productionCalendarActiveMonth = '';
+        function normalizeCalendarMonth(monthObj) {
+          var out = {};
+          CALENDAR_ORDERS.forEach(function (orderName) {
+            var src = monthObj && monthObj[orderName] ? monthObj[orderName] : {};
+            var row = getEmptyCalendarRow();
+            CALENDAR_FIELDS.forEach(function (f) {
+              var n = Number(src[f]);
+              row[f] = isFinite(n) ? n : 0;
+            });
+            out[orderName] = row;
+          });
+          return out;
+        }
+        function ensureCalendarMonth(calendar, monthKey) {
+          if (!calendar[monthKey]) calendar[monthKey] = {};
+          calendar[monthKey] = normalizeCalendarMonth(calendar[monthKey]);
+          return calendar[monthKey];
+        }
+        function formatEuro(v) { return '€' + Number(v || 0).toFixed(0); }
+        function formatPct(v) { return Number(v || 0).toFixed(1) + '%'; }
+        function renderProductionCostCalendar() {
+          var monthKeys = getLast12MonthKeys();
+          if (!productionCalendarActiveMonth || monthKeys.indexOf(productionCalendarActiveMonth) < 0) {
+            productionCalendarActiveMonth = monthKeys[0];
+          }
+          var tabsEl = document.getElementById('production-calendar-month-tabs');
+          var tableWrap = document.getElementById('production-calendar-table-wrap');
+          var statsWrap = document.getElementById('production-calendar-stats');
+          var statusEl = document.getElementById('production-calendar-status');
+          if (!tabsEl || !tableWrap || !statsWrap || !statusEl) return;
+          tabsEl.innerHTML = '';
+          monthKeys.forEach(function (k) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'production-calendar-month-tab' + (k === productionCalendarActiveMonth ? ' active' : '');
+            btn.setAttribute('data-month', k);
+            btn.textContent = k;
+            tabsEl.appendChild(btn);
+          });
+          var calendar = getProductionCalendar();
+          var monthData = ensureCalendarMonth(calendar, productionCalendarActiveMonth);
+          var rowsHtml = CALENDAR_ORDERS.map(function (orderName) {
+            var row = monthData[orderName] || getEmptyCalendarRow();
+            return '<tr>' +
+              '<td class="order-name">' + orderName + '</td>' +
+              '<td><input type="number" min="0" step="1" data-order="' + orderName + '" data-field="materialCost" value="' + Number(row.materialCost || 0) + '"></td>' +
+              '<td><input type="number" min="0" step="0.1" data-order="' + orderName + '" data-field="hours" value="' + Number(row.hours || 0) + '"></td>' +
+              '<td><input type="number" min="0" step="1" data-order="' + orderName + '" data-field="revenue" value="' + Number(row.revenue || 0) + '"></td>' +
+              '<td><input type="number" min="0" step="1" data-order="' + orderName + '" data-field="rejected" value="' + Number(row.rejected || 0) + '"></td>' +
+              '<td><input type="number" min="0" max="100" step="0.1" data-order="' + orderName + '" data-field="workerPerformance" value="' + Number(row.workerPerformance || 0) + '"></td>' +
+              '<td><input type="number" min="0" step="0.1" data-order="' + orderName + '" data-field="timeHours" value="' + Number(row.timeHours || 0) + '"></td>' +
+              '</tr>';
+          }).join('');
+          tableWrap.innerHTML = '' +
+            '<table class="production-calendar-table">' +
+              '<thead><tr>' +
+                '<th>Order</th><th>Material cost (€)</th><th>Hours</th><th>Revenue (€)</th><th>Rejected</th><th>Worker performance (%)</th><th>Time (h)</th>' +
+              '</tr></thead>' +
+              '<tbody>' + rowsHtml + '</tbody>' +
+            '</table>';
+
+          var totals = {
+            materialCost: 0, hours: 0, revenue: 0, rejected: 0, workerPerfWeighted: 0, perfHoursWeight: 0, timeHours: 0
+          };
+          var allFilled = true;
+          CALENDAR_ORDERS.forEach(function (orderName) {
+            var r = monthData[orderName] || getEmptyCalendarRow();
+            totals.materialCost += Number(r.materialCost) || 0;
+            totals.hours += Number(r.hours) || 0;
+            totals.revenue += Number(r.revenue) || 0;
+            totals.rejected += Number(r.rejected) || 0;
+            totals.timeHours += Number(r.timeHours) || 0;
+            var h = Number(r.hours) || 0;
+            var perf = Number(r.workerPerformance) || 0;
+            totals.workerPerfWeighted += perf * (h > 0 ? h : 1);
+            totals.perfHoursWeight += (h > 0 ? h : 1);
+            CALENDAR_FIELDS.forEach(function (fieldName) {
+              var v = Number(r[fieldName]);
+              if (!isFinite(v)) allFilled = false;
+            });
+            if ((Number(r.hours) || 0) <= 0 || (Number(r.revenue) || 0) <= 0 || (Number(r.timeHours) || 0) <= 0) allFilled = false;
+          });
+          var laborCost = totals.hours * COST_PER_HOUR;
+          var totalCost = totals.materialCost + laborCost;
+          var profit = totals.revenue - totalCost;
+          var avgPerf = totals.perfHoursWeight > 0 ? (totals.workerPerfWeighted / totals.perfHoursWeight) : 0;
+          var rejectionRate = totals.hours > 0 ? (totals.rejected / totals.hours) * 100 : 0;
+
+          statsWrap.innerHTML = [
+            { label: 'Material cost', value: formatEuro(totals.materialCost) },
+            { label: 'Labor cost', value: formatEuro(laborCost) },
+            { label: 'Total cost', value: formatEuro(totalCost) },
+            { label: 'Revenue', value: formatEuro(totals.revenue) },
+            { label: 'Result (profit)', value: formatEuro(profit) },
+            { label: 'Rejected total', value: String(Math.round(totals.rejected)) },
+            { label: 'Avg worker performance', value: formatPct(avgPerf) },
+            { label: 'Total time', value: totals.timeHours.toFixed(1) + ' h' },
+            { label: 'Rejection rate', value: formatPct(rejectionRate) }
+          ].map(function (kpi) {
+            return '<div class="production-calendar-kpi"><div class="kpi-label">' + kpi.label + '</div><div class="kpi-value">' + kpi.value + '</div></div>';
+          }).join('');
+          statusEl.className = 'production-calendar-status' + (allFilled ? ' complete' : '');
+          statusEl.textContent = allFilled
+            ? ('All data filled for ' + productionCalendarActiveMonth + '. Totals and stats are ready.')
+            : ('Fill all orders for ' + productionCalendarActiveMonth + ' (hours, revenue, time and other fields) to complete the monthly result.');
+          saveProductionCalendar(calendar);
         }
         var JAN_TOTAL_HOURS = 500;
         var janTaskShare = [
@@ -3262,6 +4129,7 @@
         }
         function refreshProductionStats() {
           seedMockProductionLogs();
+          renderProductionCostCalendar();
           var logs = getProductionLogs();
           var byWorker = {};
           var byMonth = {};
@@ -3478,6 +4346,36 @@
           URL.revokeObjectURL(url);
         }
         document.getElementById('production-export-excel').addEventListener('click', exportProductionToExcel);
+        var calendarTabs = document.getElementById('production-calendar-month-tabs');
+        if (calendarTabs) {
+          calendarTabs.addEventListener('click', function (e) {
+            var btn = e.target && e.target.closest ? e.target.closest('.production-calendar-month-tab') : null;
+            if (!btn) return;
+            var m = btn.getAttribute('data-month');
+            if (!m) return;
+            productionCalendarActiveMonth = m;
+            renderProductionCostCalendar();
+          });
+        }
+        var calendarTableWrap = document.getElementById('production-calendar-table-wrap');
+        if (calendarTableWrap) {
+          calendarTableWrap.addEventListener('change', function (e) {
+            var input = e.target && e.target.matches && e.target.matches('input[data-order][data-field]') ? e.target : null;
+            if (!input) return;
+            var orderName = input.getAttribute('data-order');
+            var field = input.getAttribute('data-field');
+            if (!orderName || !field) return;
+            var value = Number(input.value);
+            var safeValue = isFinite(value) ? value : 0;
+            if (!productionCalendarActiveMonth) productionCalendarActiveMonth = getLast12MonthKeys()[0];
+            var calendar = getProductionCalendar();
+            var monthData = ensureCalendarMonth(calendar, productionCalendarActiveMonth);
+            if (!monthData[orderName]) monthData[orderName] = getEmptyCalendarRow();
+            monthData[orderName][field] = safeValue;
+            saveProductionCalendar(calendar);
+            renderProductionCostCalendar();
+          });
+        }
         document.getElementById('production-workers-grid').addEventListener('click', function (e) {
           var startBtn = e.target && e.target.closest('.worker-start-btn');
           var stopBtn = e.target && e.target.closest('.worker-stop-btn');
@@ -3502,6 +4400,1107 @@
           if (Object.keys(timers).length === 0) return;
           updateAllTimerDisplays();
         }, 1000);
+      })();
+      (function () {
+        var SCHEDULER_KEY = 'cristal_weekly_scheduler';
+        var REMOTE_KEY = 'weekly_scheduler';
+        var DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        var WORKERS = [
+          { id: 'enzo', name: 'Enzo', cls: 'worker-enzo' },
+          { id: 'andre', name: 'Andre', cls: 'worker-andre' },
+          { id: 'enrique', name: 'Enrique', cls: 'worker-enrique' },
+          { id: 'scoth', name: 'Scoth', cls: 'worker-scoth' }
+        ];
+        var TASKS = [
+          { id: 'receiving', name: 'Receiving', cls: 'task-receiving' },
+          { id: 'qc', name: 'QC', cls: 'task-qc' },
+          { id: 'printing', name: 'Digital printing', cls: 'task-printing' },
+          { id: 'kitting', name: 'Kitting', cls: 'task-kitting' },
+          { id: 'shipping', name: 'Shipping', cls: 'task-shipping' },
+          { id: 'hatching', name: 'Hatching', cls: 'task-hatching' },
+          { id: 'painting', name: 'Painting', cls: 'task-painting' },
+          { id: 'cleaning', name: 'Cleaning', cls: 'task-cleaning' },
+          { id: 'maintenance', name: 'Maintenance', cls: 'task-maintenance' }
+        ];
+        var ORDERS = [
+          { id: 'ookla', name: 'OOKLA', cls: 'order-ookla' },
+          { id: 'wetrack', name: 'WE TRACK', cls: 'order-wetrack' },
+          { id: 'shopify', name: 'SHOPIFY', cls: 'order-shopify' }
+        ];
+        var MACHINES = [
+          { id: 'mimaki1', name: 'Mimaki 1', cls: 'machine-mimaki1' },
+          { id: 'mimaki2', name: 'Mimaki 2', cls: 'machine-mimaki2' },
+          { id: 'sand-blaster', name: 'Sand blaster', cls: 'machine-sand-blaster' }
+        ];
+        var DEFAULT_ORDER_ID = 'ookla';
+        var SLOT_MINUTES = 30;
+        var DEFAULT_DURATION_SLOTS = 2;
+        function makeTimes() {
+          var out = [];
+          for (var h = 10; h <= 18; h++) {
+            out.push(String(h).padStart(2, '0') + ':00');
+            if (h < 18) out.push(String(h).padStart(2, '0') + ':30');
+          }
+          out.push('18:30');
+          return out;
+        }
+        var TIMES = makeTimes();
+        var workersById = {};
+        WORKERS.forEach(function (w) { workersById[w.id] = w; });
+        var tasksById = {};
+        TASKS.forEach(function (t) { tasksById[t.id] = t; });
+        var ordersById = {};
+        ORDERS.forEach(function (o) { ordersById[o.id] = o; });
+        var machinesById = {};
+        MACHINES.forEach(function (m) { machinesById[m.id] = m; });
+
+        var activeDrag = null;
+        var syncTimer = null;
+        var highlightedSlot = null;
+        var resizeState = null;
+        var resizeRAF = null;
+        var resizeDidChange = false;
+        var idCounter = 1;
+        var weekOffset = 0;
+        var currentWeekKey = '';
+        var currentWeekData = { assignments: [], pending: {} };
+        var filters = { worker: 'all', task: 'all', order: 'all', machine: 'all' };
+        var bulkMode = false;
+        var bulkSelected = {};
+        var copiedAssignment = null;
+        var openPendingMetaKey = '';
+        var undoStack = [];
+        var redoStack = [];
+        var schedulerStore = { version: 4, weeks: {}, audit: [] };
+
+        var SUPABASE_URL = (typeof window !== 'undefined' && window.CRISTAL_SUPABASE_URL) ? window.CRISTAL_SUPABASE_URL.replace(/\/$/, '') : '';
+        var SUPABASE_KEY = (typeof window !== 'undefined' && window.CRISTAL_SUPABASE_ANON_KEY) || '';
+        var useRemote = !!(SUPABASE_URL && SUPABASE_KEY);
+
+        function schedulerEl(id) { return document.getElementById(id); }
+        function slotKey(day, time) { return day + '|' + time; }
+        function pad2(n) { return String(n).padStart(2, '0'); }
+        function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+        function timeIndex(time) { return TIMES.indexOf(time); }
+        function hasRequiredOrderMeta(meta) {
+          return !!(meta && meta.woId && Number(meta.plannedQty) > 0);
+        }
+        function slotHours() { return SLOT_MINUTES / 60; }
+        function formatHoursFromSlots(slots) {
+          var hours = (Number(slots) || 0) * slotHours();
+          return (Math.round(hours * 100) / 100).toFixed(hours % 1 === 0 ? 0 : 1) + 'h';
+        }
+        function clampDuration(startIndex, dur) {
+          var maxDur = TIMES.length - startIndex;
+          if (maxDur < 1) return 1;
+          return Math.max(1, Math.min(maxDur, dur));
+        }
+        function fmtKey(d) {
+          return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+        }
+        function getMonday(baseDate) {
+          var d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
+          var wd = d.getDay();
+          var diff = wd === 0 ? -6 : 1 - wd;
+          d.setDate(d.getDate() + diff);
+          d.setHours(0, 0, 0, 0);
+          return d;
+        }
+        function addDays(d, n) {
+          var x = new Date(d.getTime());
+          x.setDate(x.getDate() + n);
+          return x;
+        }
+        function weekStartByOffset(offset) {
+          return addDays(getMonday(new Date()), offset * 7);
+        }
+        function weekKeyByOffset(offset) { return fmtKey(weekStartByOffset(offset)); }
+        function weekDateLabel(d) {
+          var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          return pad2(d.getDate()) + ' ' + months[d.getMonth()];
+        }
+        function getWeekDaysMeta(offset) {
+          var start = weekStartByOffset(offset);
+          return DAYS.map(function (name, i) {
+            var d = addDays(start, i);
+            return { name: name, date: d, key: fmtKey(d), label: weekDateLabel(d) };
+          });
+        }
+        function showSchedulerSyncStatus(status) {
+          var el = schedulerEl('scheduler-sync-status');
+          if (!el) return;
+          el.textContent = status === 'synced' ? 'Synced' : (status === 'error' ? 'Sync failed' : (status || ''));
+          el.className = 'scheduler-sync-status' + (status === 'error' ? ' error' : '');
+          if (status === 'synced' || status === 'error') setTimeout(function () { el.textContent = ''; }, 2500);
+        }
+        function showSchedulerMessage(msg) {
+          showSchedulerSyncStatus(msg || '');
+          if (msg) setTimeout(function () { showSchedulerSyncStatus(''); }, 2200);
+        }
+        function logAction(msg) {
+          if (!msg) return;
+          schedulerStore.audit = Array.isArray(schedulerStore.audit) ? schedulerStore.audit : [];
+          schedulerStore.audit.unshift(new Date().toISOString() + ' - ' + msg);
+          if (schedulerStore.audit.length > 120) schedulerStore.audit = schedulerStore.audit.slice(0, 120);
+          renderAudit();
+        }
+        function pushUndo() {
+          undoStack.push(clone(currentWeekData));
+          if (undoStack.length > 80) undoStack.shift();
+          redoStack = [];
+          renderUndoRedoButtons();
+        }
+        function renderUndoRedoButtons() {
+          var undoBtn = schedulerEl('scheduler-undo');
+          var redoBtn = schedulerEl('scheduler-redo');
+          if (undoBtn) undoBtn.disabled = undoStack.length === 0;
+          if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+        }
+        function renderAudit() {
+          var el = schedulerEl('scheduler-audit');
+          if (!el) return;
+          var list = (schedulerStore.audit || []).slice(0, 20);
+          if (list.length === 0) {
+            el.innerHTML = '<div class="audit-item">No changes yet.</div>';
+            return;
+          }
+          el.innerHTML = list.map(function (line) {
+            return '<div class="audit-item">' + line + '</div>';
+          }).join('');
+        }
+        function supabaseFetch(path, options) {
+          var url = SUPABASE_URL + '/rest/v1' + path;
+          var headers = {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': (options && options.prefer) || ''
+          };
+          if (options && options.body !== undefined) headers['Prefer'] = 'resolution=merge-duplicates';
+          return fetch(url, {
+            method: (options && options.method) || 'GET',
+            headers: headers,
+            body: (options && options.body !== undefined) ? JSON.stringify(options.body) : undefined
+          });
+        }
+        function loadLocal() {
+          try {
+            var raw = localStorage.getItem(SCHEDULER_KEY);
+            return raw ? JSON.parse(raw) : {};
+          } catch (e) { return {}; }
+        }
+        function saveLocal(next) {
+          try { localStorage.setItem(SCHEDULER_KEY, JSON.stringify(next || {})); } catch (e) {}
+        }
+        function normalizePending(obj) {
+          if (!obj || typeof obj !== 'object') return {};
+          var out = {};
+          Object.keys(obj).forEach(function (k) {
+            var p = obj[k] || {};
+            var workers = Array.isArray(p.workers) ? p.workers.filter(function (w) { return !!workersById[w]; }) : [];
+            var tasks = Array.isArray(p.tasks) ? p.tasks.filter(function (t) { return !!tasksById[t]; }) : [];
+            var orders = Array.isArray(p.orders) ? p.orders.filter(function (o) { return !!ordersById[o]; }) : [];
+            var machines = Array.isArray(p.machines) ? p.machines.filter(function (m) { return !!machinesById[m]; }) : [];
+            var woId = p.woId ? String(p.woId).trim() : '';
+            var plannedQty = Number(p.plannedQty) > 0 ? Math.round(Number(p.plannedQty)) : 0;
+            if (tasks.length === 0 && p.taskId && tasksById[p.taskId]) tasks.push(p.taskId);
+            if (orders.length === 0 && p.orderId && ordersById[p.orderId]) orders.push(p.orderId);
+            if (machines.length === 0 && p.machineId && machinesById[p.machineId]) machines.push(p.machineId);
+            if (workers.length || tasks.length || orders.length || machines.length || woId || plannedQty > 0) {
+              out[k] = { workers: workers, tasks: tasks, orders: orders, machines: machines, woId: woId, plannedQty: plannedQty };
+            }
+          });
+          return out;
+        }
+        function normalizeAssignments(list, slotFactor) {
+          if (!Array.isArray(list)) return [];
+          var factor = Math.max(1, Number(slotFactor) || 1);
+          return list.map(function (a) {
+            if (!a || typeof a !== 'object') return null;
+            var day = DAYS.indexOf(a.day) >= 0 ? a.day : null;
+            var startTime = timeIndex(a.startTime) >= 0 ? a.startTime : null;
+            var workerId = workersById[a.workerId] ? a.workerId : null;
+            var taskId = tasksById[a.taskId] ? a.taskId : null;
+            var orderId = ordersById[a.orderId] ? a.orderId : '';
+            if (taskId && taskNeedsOrder(taskId) && !orderId) {
+              orderId = ordersById[DEFAULT_ORDER_ID] ? DEFAULT_ORDER_ID : null;
+            }
+            var machineId = machinesById[a.machineId] ? a.machineId : '';
+            if (!day || !startTime || !workerId || !taskId) return null;
+            if (taskNeedsOrder(taskId) && !orderId) return null;
+            var startIdx = timeIndex(startTime);
+            var duration = clampDuration(startIdx, Math.round((Number(a.duration) || 1) * factor));
+            return {
+              id: String(a.id || ('a-' + Date.now() + '-' + (idCounter++))),
+              day: day,
+              startTime: startTime,
+              duration: duration,
+              workerId: workerId,
+              taskId: taskId,
+              orderId: orderId,
+              machineId: machineId,
+              seriesId: (typeof a.seriesId === 'string' ? a.seriesId : ''),
+              woId: (typeof a.woId === 'string' ? a.woId : ''),
+              plannedQty: (Number(a.plannedQty) > 0 ? Math.round(Number(a.plannedQty)) : 0)
+            };
+          }).filter(Boolean);
+        }
+        function normalizeWeekData(wd) {
+          return normalizeWeekDataWithFactor(wd, 1);
+        }
+        function normalizeWeekDataWithFactor(wd, slotFactor) {
+          var out = { assignments: [], pending: {} };
+          if (!wd || typeof wd !== 'object') return out;
+          out.assignments = normalizeAssignments(wd.assignments, slotFactor);
+          out.pending = normalizePending(wd.pending);
+          return out;
+        }
+        function normalizeStore(data) {
+          var out = { version: 4, weeks: {}, audit: [] };
+          if (!data || typeof data !== 'object') return out;
+          if (data.version >= 3 && data.weeks && typeof data.weeks === 'object') {
+            var slotFactor = data.version >= 4 ? 1 : 2;
+            Object.keys(data.weeks).forEach(function (wk) { out.weeks[wk] = normalizeWeekDataWithFactor(data.weeks[wk], slotFactor); });
+            out.audit = Array.isArray(data.audit) ? data.audit.slice(0, 120) : [];
+            return out;
+          }
+          if (Array.isArray(data.assignments)) {
+            out.weeks[weekKeyByOffset(0)] = normalizeWeekDataWithFactor(data, 2);
+            return out;
+          }
+          var legacy = [];
+          Object.keys(data).forEach(function (k) {
+            var v = data[k];
+            if (!v || typeof v !== 'object') return;
+            var parts = k.split('|');
+            if (parts.length !== 2) return;
+            if (DAYS.indexOf(parts[0]) < 0 || timeIndex(parts[1]) < 0) return;
+            if (workersById[v.workerId] && tasksById[v.taskId]) {
+              legacy.push({
+                id: 'legacy-' + legacy.length + '-' + Date.now(),
+                day: parts[0],
+                startTime: parts[1],
+                duration: 2,
+                workerId: v.workerId,
+                taskId: v.taskId,
+                orderId: ordersById[v.orderId] ? v.orderId : DEFAULT_ORDER_ID,
+                machineId: machinesById[v.machineId] ? v.machineId : ''
+              });
+            }
+          });
+          out.weeks[weekKeyByOffset(0)] = { assignments: legacy, pending: {} };
+          return out;
+        }
+        function saveRemoteDebounced(next) {
+          if (!useRemote) return;
+          if (syncTimer) clearTimeout(syncTimer);
+          syncTimer = setTimeout(function () {
+            supabaseFetch('/production_data', { method: 'POST', body: [{ key: REMOTE_KEY, value: next || {} }] })
+              .then(function () { showSchedulerSyncStatus('synced'); })
+              .catch(function (err) { console.error('Scheduler sync failed:', err); showSchedulerSyncStatus('error'); });
+          }, 250);
+        }
+        function saveStore() {
+          schedulerStore.weeks[currentWeekKey] = clone(currentWeekData);
+          saveLocal(schedulerStore);
+          saveRemoteDebounced(schedulerStore);
+        }
+        function loadRemote(done) {
+          if (!useRemote) { if (done) done(loadLocal()); return; }
+          supabaseFetch('/production_data?key=eq.' + REMOTE_KEY)
+            .then(function (r) { if (!r.ok) throw new Error('Load failed: ' + r.status); return r.json(); })
+            .then(function (rows) {
+              var fromRemote = rows && rows[0] && rows[0].value && typeof rows[0].value === 'object' ? rows[0].value : null;
+              if (done) done(fromRemote || loadLocal());
+            })
+            .catch(function () { if (done) done(loadLocal()); });
+        }
+        function ensureCurrentWeek() {
+          currentWeekKey = weekKeyByOffset(weekOffset);
+          if (!schedulerStore.weeks[currentWeekKey]) schedulerStore.weeks[currentWeekKey] = { assignments: [], pending: {} };
+          currentWeekData = normalizeWeekData(schedulerStore.weeks[currentWeekKey]);
+          schedulerStore.weeks[currentWeekKey] = currentWeekData;
+        }
+        function renderWeekHeader() {
+          var labelEl = schedulerEl('scheduler-week-label');
+          if (!labelEl) return;
+          var meta = getWeekDaysMeta(weekOffset);
+          if (meta.length) labelEl.textContent = 'Week: ' + meta[0].label + ' - ' + meta[meta.length - 1].label;
+        }
+        function isFilteredIn(a) {
+          if (filters.worker !== 'all' && a.workerId !== filters.worker) return false;
+          if (filters.task !== 'all' && a.taskId !== filters.task) return false;
+          if (filters.order !== 'all' && a.orderId !== filters.order) return false;
+          if (filters.machine !== 'all' && a.machineId !== filters.machine) return false;
+          return true;
+        }
+        function getAssignmentsForSlot(day, slotIdx) {
+          return currentWeekData.assignments.filter(function (a) {
+            if (a.day !== day) return false;
+            var startIdx = timeIndex(a.startTime);
+            return startIdx >= 0 && slotIdx >= startIdx && slotIdx < (startIdx + a.duration) && isFilteredIn(a);
+          });
+        }
+        function clearHighlights() {
+          if (highlightedSlot) highlightedSlot.classList.remove('drag-over');
+          highlightedSlot = null;
+        }
+        function uniqPush(arr, value) { if (arr.indexOf(value) < 0) arr.push(value); }
+        function ensurePending(key) {
+          if (!currentWeekData.pending[key]) currentWeekData.pending[key] = { workers: [], tasks: [], orders: [], machines: [], woId: '', plannedQty: 0 };
+          return currentWeekData.pending[key];
+        }
+        function overlaps(start1, dur1, start2, dur2) {
+          var end1 = start1 + dur1;
+          var end2 = start2 + dur2;
+          return start1 < end2 && start2 < end1;
+        }
+        function hasWorkerConflict(workerId, day, startIdx, duration, ignoreId) {
+          return currentWeekData.assignments.some(function (a) {
+            if (a.id === ignoreId) return false;
+            if (a.day !== day || a.workerId !== workerId) return false;
+            var s = timeIndex(a.startTime);
+            if (s < 0) return false;
+            return overlaps(startIdx, duration, s, a.duration);
+          });
+        }
+        function taskNeedsOrder(taskId) {
+          return taskId !== 'maintenance';
+        }
+        function createAssignment(day, time, workerId, taskId, orderId, duration, machineId, woId, plannedQty) {
+          var startIdx = timeIndex(time);
+          if (startIdx < 0 || !workersById[workerId] || !tasksById[taskId]) return false;
+          var normalizedOrderId = '';
+          if (taskNeedsOrder(taskId)) {
+            if (!ordersById[orderId]) return false;
+            if (!woId || Number(plannedQty) <= 0) return false;
+            normalizedOrderId = orderId;
+          } else {
+            normalizedOrderId = ordersById[orderId] ? orderId : '';
+          }
+          var dur = clampDuration(startIdx, Math.round(duration || DEFAULT_DURATION_SLOTS));
+          if (hasWorkerConflict(workerId, day, startIdx, dur, null)) return false;
+          var exists = currentWeekData.assignments.some(function (a) {
+            return a.day === day && a.startTime === time && a.workerId === workerId && a.taskId === taskId && (a.orderId || '') === normalizedOrderId && (a.machineId || '') === (machineId || '') && (a.woId || '') === (woId || '') && (Number(a.plannedQty) || 0) === (Number(plannedQty) || 0);
+          });
+          if (exists) return false;
+          currentWeekData.assignments.push({
+            id: 'a-' + Date.now() + '-' + (idCounter++),
+            day: day,
+            startTime: time,
+            duration: dur,
+            workerId: workerId,
+            taskId: taskId,
+            orderId: normalizedOrderId,
+            machineId: machinesById[machineId] ? machineId : '',
+            seriesId: '',
+            woId: woId ? String(woId) : '',
+            plannedQty: Number(plannedQty) > 0 ? Math.round(Number(plannedQty)) : 0
+          });
+          return true;
+        }
+        function applyHorizontalSpan(baseAssignment, spanDays) {
+          if (!baseAssignment) return { changed: false, conflicts: 0 };
+          var baseDayIdx = DAYS.indexOf(baseAssignment.day);
+          if (baseDayIdx < 0) return { changed: false, conflicts: 0 };
+          var span = Math.max(1, Math.min(DAYS.length - baseDayIdx, Math.round(spanDays || 1)));
+          var seriesId = baseAssignment.seriesId || ('s-' + Date.now() + '-' + (idCounter++));
+          baseAssignment.seriesId = seriesId;
+          var targetDays = DAYS.slice(baseDayIdx, baseDayIdx + span);
+          var seriesItems = currentWeekData.assignments.filter(function (a) { return a.seriesId === seriesId; });
+          var byDay = {};
+          seriesItems.forEach(function (a) { byDay[a.day] = a; });
+          var startIdx = timeIndex(baseAssignment.startTime);
+          if (startIdx < 0) return { changed: false, conflicts: 0 };
+          var conflicts = 0;
+          var changed = false;
+          targetDays.forEach(function (day) {
+            var existing = byDay[day];
+            if (existing) {
+              existing.duration = baseAssignment.duration;
+              existing.workerId = baseAssignment.workerId;
+              existing.taskId = baseAssignment.taskId;
+              existing.orderId = baseAssignment.orderId;
+              existing.machineId = baseAssignment.machineId;
+              existing.woId = baseAssignment.woId || '';
+              existing.plannedQty = baseAssignment.plannedQty || 0;
+              return;
+            }
+            if (hasWorkerConflict(baseAssignment.workerId, day, startIdx, baseAssignment.duration, null)) {
+              conflicts++;
+              return;
+            }
+            currentWeekData.assignments.push({
+              id: 'a-' + Date.now() + '-' + (idCounter++),
+              day: day,
+              startTime: baseAssignment.startTime,
+              duration: baseAssignment.duration,
+              workerId: baseAssignment.workerId,
+              taskId: baseAssignment.taskId,
+              orderId: baseAssignment.orderId,
+              machineId: baseAssignment.machineId,
+              seriesId: seriesId,
+              woId: baseAssignment.woId || '',
+              plannedQty: baseAssignment.plannedQty || 0
+            });
+            changed = true;
+          });
+          var beforeLen = currentWeekData.assignments.length;
+          currentWeekData.assignments = currentWeekData.assignments.filter(function (a) {
+            if (a.seriesId !== seriesId) return true;
+            return targetDays.indexOf(a.day) >= 0;
+          });
+          if (currentWeekData.assignments.length !== beforeLen) changed = true;
+          return { changed: changed, conflicts: conflicts };
+        }
+        function getSeriesSpan(baseAssignment) {
+          if (!baseAssignment || !baseAssignment.seriesId) return 1;
+          var baseDayIdx = DAYS.indexOf(baseAssignment.day);
+          if (baseDayIdx < 0) return 1;
+          var maxIdx = baseDayIdx;
+          currentWeekData.assignments.forEach(function (a) {
+            if (a.seriesId !== baseAssignment.seriesId) return;
+            if (a.startTime !== baseAssignment.startTime) return;
+            var dIdx = DAYS.indexOf(a.day);
+            if (dIdx > maxIdx) maxIdx = dIdx;
+          });
+          return Math.max(1, maxIdx - baseDayIdx + 1);
+        }
+        function finalizePending(day, time, pending, defaultDur) {
+          if (!pending.workers.length || !pending.tasks.length) return { made: 0, conflicts: 0, missingOrders: 0, missingMeta: 0 };
+          var made = 0;
+          var conflicts = 0;
+          var missingOrders = 0;
+          var missingMeta = 0;
+          var machineList = (pending.machines && pending.machines.length > 0) ? pending.machines : [''];
+          var woId = pending.woId ? String(pending.woId).trim() : '';
+          var plannedQty = Number(pending.plannedQty) > 0 ? Math.round(Number(pending.plannedQty)) : 0;
+          pending.workers.forEach(function (wid) {
+            pending.tasks.forEach(function (tid) {
+              var orderList = taskNeedsOrder(tid)
+                ? ((pending.orders && pending.orders.length > 0) ? pending.orders : [])
+                : [''];
+              if (orderList.length === 0) {
+                missingOrders++;
+                return;
+              }
+              if (taskNeedsOrder(tid) && (!woId || plannedQty <= 0)) {
+                missingMeta++;
+                return;
+              }
+              orderList.forEach(function (oid) {
+                machineList.forEach(function (mid) {
+                  var ok = createAssignment(day, time, wid, tid, oid, defaultDur, mid, woId, plannedQty);
+                  if (ok) made++;
+                  else conflicts++;
+                });
+              });
+            });
+          });
+          return { made: made, conflicts: conflicts, missingOrders: missingOrders, missingMeta: missingMeta };
+        }
+        function slotInner(day, time, slotIdx) {
+          var key = slotKey(day, time);
+          var pending = currentWeekData.pending[key] || { workers: [], tasks: [], orders: [], machines: [], woId: '', plannedQty: 0 };
+          var inSlot = getAssignmentsForSlot(day, slotIdx);
+          if (inSlot.length > 0) {
+            var hasPending = (pending.workers && pending.workers.length) || (pending.tasks && pending.tasks.length) || (pending.orders && pending.orders.length) || (pending.machines && pending.machines.length);
+            var needsOrderMetaInline = (pending.tasks || []).some(function (tid) { return taskNeedsOrder(tid); });
+            var showMetaInline = openPendingMetaKey === key;
+            var pendingWoValue = pending.woId ? String(pending.woId).replace(/"/g, '&quot;') : '';
+            var pendingQtyValue = Number(pending.plannedQty) > 0 ? String(Math.round(Number(pending.plannedQty))) : '';
+            var cards = inSlot.map(function (a) {
+              var w = workersById[a.workerId];
+              var t = tasksById[a.taskId];
+              var o = ordersById[a.orderId];
+              var m = a.machineId ? machinesById[a.machineId] : null;
+              if (!w || !t) return '';
+              var startIdx = timeIndex(a.startTime);
+              var isStart = slotIdx === startIdx;
+              var taskClass = t.cls ? (' ' + t.cls) : '';
+              var orderClass = o ? (' ' + o.cls) : '';
+              return '<div class="scheduler-assignment ' + w.cls + taskClass + orderClass + (m ? (' ' + m.cls) : '') + (isStart ? ' is-start' : ' is-continued') + '" data-assignment-id="' + a.id + '">' +
+                (isStart ? '<button type="button" class="copy-btn" title="Copy assignment" data-copy="' + a.id + '">⧉</button>' : '') +
+                (isStart ? '<button type="button" class="remove-btn" title="Remove assignment" data-remove="' + a.id + '">&times;</button>' : '') +
+                (isStart ? '<span class="duration-tag">' + formatHoursFromSlots(a.duration) + '</span>' : '') +
+                '<p class="worker-name">' + w.name + '</p>' +
+                '<p class="task-name">' + t.name + '</p>' +
+                (o ? ('<p class="order-name">' + o.name + '</p>') : '') +
+                (m ? '<p class="machine-name">' + m.name + '</p>' : '') +
+                (((a.woId || '') || (Number(a.plannedQty) > 0)) ? ('<p class="wo-meta">' + (a.woId ? ('WO: ' + a.woId) : 'WO: -') + (Number(a.plannedQty) > 0 ? (' • Qty: ' + Number(a.plannedQty)) : '') + '</p>') : '') +
+                (isStart ? '<span class="resize-handle-x" title="Resize across days" data-resize-x="' + a.id + '"></span>' : '') +
+                (isStart ? '<span class="resize-handle" title="Resize duration" data-resize="' + a.id + '"></span>' : '') +
+                '</div>';
+            }).join('');
+            if (hasPending) {
+              cards += '<div class="scheduler-pending-inline">' +
+                '<span>Pending new assignment in this slot</span>' +
+                '<div class="scheduler-partial-controls">' +
+                (needsOrderMetaInline ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">WO + TOTAL</button>' : '') +
+                '<button type="button" class="scheduler-clear-pending-btn" data-clear-pending="' + key + '">Clear pending</button>' +
+                '</div>' +
+                (showMetaInline ? ('<div class="scheduler-slot-meta-pop">' +
+                  '<input class="scheduler-slot-meta-input" type="text" placeholder="WO for this slot" data-slot-wo-input="' + key + '" value="' + pendingWoValue + '">' +
+                  '<input class="scheduler-slot-meta-input qty" type="number" min="0" step="1" placeholder="TOTAL" data-slot-qty-input="' + key + '" value="' + pendingQtyValue + '">' +
+                  '<button type="button" class="scheduler-slot-meta-btn" data-slot-save="' + key + '">Save</button>' +
+                  '<button type="button" class="scheduler-clear-pending-btn" data-slot-cancel="' + key + '">Close</button>' +
+                  '</div>') : '') +
+                '</div>';
+            }
+            return '<div class="scheduler-slot-stack">' + cards + '</div>';
+          }
+          if ((pending.workers && pending.workers.length) || (pending.tasks && pending.tasks.length) || (pending.orders && pending.orders.length) || (pending.machines && pending.machines.length)) {
+            var workersText = (pending.workers || []).map(function (w) { return workersById[w] ? workersById[w].name : ''; }).filter(Boolean).join(', ');
+            var taskText = (pending.tasks || []).map(function (t) { return tasksById[t] ? tasksById[t].name : ''; }).filter(Boolean).join(', ');
+            var orderText = (pending.orders || []).map(function (o) { return ordersById[o] ? ordersById[o].name : ''; }).filter(Boolean).join(', ');
+            var machineText = (pending.machines || []).map(function (m) { return machinesById[m] ? machinesById[m].name : ''; }).filter(Boolean).join(', ');
+            var woValue = pending.woId ? String(pending.woId).replace(/"/g, '&quot;') : '';
+            var qtyValue = Number(pending.plannedQty) > 0 ? String(Math.round(Number(pending.plannedQty))) : '';
+            var needsOrderMeta = (pending.tasks || []).some(function (tid) { return taskNeedsOrder(tid); });
+            var showMetaEditor = openPendingMetaKey === key;
+            var metaLine = (pending.woId || pending.plannedQty > 0)
+              ? ('<span>WO: ' + (pending.woId || '-') + ' · Total: ' + (pending.plannedQty || '-') + '</span><br>')
+              : '';
+            return '<div class="scheduler-partial">' +
+              (workersText ? ('Workers: ' + workersText) : 'Drop worker') + '<br>' +
+              (taskText ? ('Tasks: ' + taskText) : 'Drop task') + '<br>' +
+              (orderText ? ('Orders: ' + orderText) : 'Drop order (not needed for Maintenance)') + '<br>' +
+              (machineText ? ('Machines: ' + machineText) : 'Drop machine (optional)') + '<br>' +
+              metaLine +
+              '<div class="scheduler-partial-controls">' +
+              (needsOrderMeta ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">WO + TOTAL</button>' : '') +
+              '<button type="button" class="scheduler-clear-pending-btn" data-clear-pending="' + key + '">Clear</button>' +
+              '</div>' +
+              (showMetaEditor ? ('<div class="scheduler-slot-meta-pop">' +
+                '<input class="scheduler-slot-meta-input" type="text" placeholder="WO for this slot" data-slot-wo-input="' + key + '" value="' + woValue + '">' +
+                '<input class="scheduler-slot-meta-input qty" type="number" min="0" step="1" placeholder="TOTAL" data-slot-qty-input="' + key + '" value="' + qtyValue + '">' +
+                '<button type="button" class="scheduler-slot-meta-btn" data-slot-save="' + key + '">Save</button>' +
+                '<button type="button" class="scheduler-clear-pending-btn" data-slot-cancel="' + key + '">Close</button>' +
+                '</div>') : '') +
+              '</div>';
+          }
+          return '<div class="scheduler-empty">Drop</div>';
+        }
+        function renderCapacity() {
+          var el = schedulerEl('scheduler-capacity');
+          if (!el) return;
+          var capPerWorker = {};
+          WORKERS.forEach(function (w) { capPerWorker[w.id] = 0; });
+          currentWeekData.assignments.forEach(function (a) {
+            if (capPerWorker[a.workerId] !== undefined) capPerWorker[a.workerId] += a.duration * slotHours();
+          });
+          var maxHours = TIMES.length * slotHours() * DAYS.length;
+          el.innerHTML = WORKERS.map(function (w) {
+            var h = capPerWorker[w.id] || 0;
+            var free = Math.max(0, maxHours - h);
+            return '<div class="scheduler-cap-card"><strong>' + w.name + '</strong><br>' +
+              'Assigned: ' + h.toFixed(1) + 'h<br>Free: ' + free.toFixed(1) + 'h</div>';
+          }).join('');
+        }
+        function renderScheduler() {
+          var table = schedulerEl('scheduler-table');
+          if (!table) return;
+          var meta = getWeekDaysMeta(weekOffset);
+          var thead = '<thead><tr><th class="scheduler-time-col">Time</th>' +
+            meta.map(function (d) { return '<th>' + d.name + '<br><span style="font-size:0.62rem;color:#888;">' + d.label + '</span></th>'; }).join('') +
+            '</tr></thead>';
+          var tbody = '<tbody>' + TIMES.map(function (time, idx) {
+            return '<tr><td class="scheduler-time-col">' + time + '</td>' +
+              meta.map(function (d) {
+                var key = slotKey(d.name, time);
+                var selectedClass = bulkMode && bulkSelected[key] ? ' bulk-selected' : '';
+                return '<td><div class="scheduler-slot' + selectedClass + '" data-day="' + d.name + '" data-time="' + time + '" data-index="' + idx + '">' + slotInner(d.name, time, idx) + '</div></td>';
+              }).join('') +
+              '</tr>';
+          }).join('') + '</tbody>';
+          table.innerHTML = thead + tbody;
+          renderWeekHeader();
+          renderCapacity();
+          renderUndoRedoButtons();
+        }
+        function renderPaletteAndControls() {
+          var workersEl = schedulerEl('scheduler-workers');
+          var tasksEl = schedulerEl('scheduler-tasks');
+          var ordersEl = schedulerEl('scheduler-orders');
+          var machinesEl = schedulerEl('scheduler-machines');
+          var filterW = schedulerEl('scheduler-filter-worker');
+          var filterT = schedulerEl('scheduler-filter-task');
+          var filterO = schedulerEl('scheduler-filter-order');
+          var filterM = schedulerEl('scheduler-filter-machine');
+          var bulkW = schedulerEl('scheduler-bulk-worker');
+          var bulkT = schedulerEl('scheduler-bulk-task');
+          var bulkO = schedulerEl('scheduler-bulk-order');
+          var bulkM = schedulerEl('scheduler-bulk-machine');
+          var cloneFrom = schedulerEl('scheduler-clone-from');
+          var cloneTo = schedulerEl('scheduler-clone-to');
+          if (workersEl) workersEl.innerHTML = WORKERS.map(function (w) { return '<div class="drag-chip ' + w.cls + '" draggable="true" data-kind="worker" data-id="' + w.id + '"><span class="dot"></span><span>' + w.name + '</span></div>'; }).join('');
+          if (tasksEl) tasksEl.innerHTML = TASKS.map(function (t) { return '<div class="drag-chip ' + (t.cls || '') + '" draggable="true" data-kind="task" data-id="' + t.id + '"><span class="dot"></span><span>' + t.name + '</span></div>'; }).join('');
+          if (ordersEl) ordersEl.innerHTML = ORDERS.map(function (o) { return '<div class="drag-chip ' + o.cls + '" draggable="true" data-kind="order" data-id="' + o.id + '"><span class="dot"></span><span>' + o.name + '</span></div>'; }).join('');
+          if (machinesEl) machinesEl.innerHTML = MACHINES.map(function (m) { return '<div class="drag-chip ' + m.cls + '" draggable="true" data-kind="machine" data-id="' + m.id + '"><span class="dot"></span><span>' + m.name + '</span></div>'; }).join('');
+          function fillSelect(el, list, withAll, currentValue) {
+            if (!el) return;
+            var html = withAll ? '<option value="all">All</option>' : '';
+            html += list.map(function (x) { return '<option value="' + x.id + '">' + x.name + '</option>'; }).join('');
+            el.innerHTML = html;
+            el.value = currentValue || (withAll ? 'all' : (list[0] ? list[0].id : ''));
+          }
+          fillSelect(filterW, WORKERS, true, filters.worker);
+          fillSelect(filterT, TASKS, true, filters.task);
+          fillSelect(filterO, ORDERS, true, filters.order);
+          fillSelect(filterM, MACHINES, true, filters.machine);
+          fillSelect(bulkW, WORKERS, false, (WORKERS[0] && WORKERS[0].id) || '');
+          fillSelect(bulkT, TASKS, false, (TASKS[0] && TASKS[0].id) || '');
+          fillSelect(bulkO, ORDERS, false, (ORDERS[0] && ORDERS[0].id) || '');
+          fillSelect(bulkM, MACHINES, false, '');
+          if (cloneFrom) cloneFrom.innerHTML = DAYS.map(function (d) { return '<option value="' + d + '">' + d + '</option>'; }).join('');
+          if (cloneTo) cloneTo.innerHTML = DAYS.map(function (d) { return '<option value="' + d + '">' + d + '</option>'; }).join('');
+          if (cloneFrom && cloneTo) { cloneFrom.value = 'Monday'; cloneTo.value = 'Tuesday'; }
+          renderAudit();
+        }
+        function initResize() {
+          if (window.__schedulerResizeBound) return;
+          window.__schedulerResizeBound = true;
+          window.addEventListener('mousemove', function (e) {
+            if (!resizeState) return;
+            var target = document.elementFromPoint(e.clientX, e.clientY);
+            var slot = target && target.closest ? target.closest('.scheduler-slot') : null;
+            if (!slot) return;
+            if (resizeState.mode === 'horizontal') {
+              var day = slot.getAttribute('data-day') || '';
+              var dayIdx = DAYS.indexOf(day);
+              if (dayIdx < 0 || dayIdx < resizeState.startDayIndex) return;
+              var nextSpan = dayIdx - resizeState.startDayIndex + 1;
+              if (nextSpan === resizeState.currentSpan) return;
+              var spanResult = applyHorizontalSpan(resizeState.assignment, nextSpan);
+              resizeState.currentSpan = nextSpan;
+              if (spanResult.conflicts > 0) showSchedulerMessage('Conflict on some days while extending');
+              if (spanResult.changed) resizeDidChange = true;
+              if (!resizeRAF) {
+                resizeRAF = requestAnimationFrame(function () {
+                  renderScheduler();
+                  resizeRAF = null;
+                });
+              }
+              return;
+            }
+            var day = slot.getAttribute('data-day') || '';
+            if (day !== resizeState.assignment.day) return;
+            var idx = parseInt(slot.getAttribute('data-index') || '', 10);
+            if (isNaN(idx)) return;
+            var nextDur = clampDuration(resizeState.startIndex, (idx - resizeState.startIndex + 1));
+            if (nextDur === resizeState.assignment.duration) return;
+            if (hasWorkerConflict(resizeState.assignment.workerId, resizeState.assignment.day, resizeState.startIndex, nextDur, resizeState.assignment.id)) {
+              showSchedulerMessage('Conflict: worker overlap');
+              return;
+            }
+            resizeState.assignment.duration = nextDur;
+            if (resizeState.assignment.seriesId) applyHorizontalSpan(resizeState.assignment, resizeState.currentSpan || 1);
+            resizeDidChange = true;
+            if (!resizeRAF) {
+              resizeRAF = requestAnimationFrame(function () {
+                renderScheduler();
+                resizeRAF = null;
+              });
+            }
+          });
+          window.addEventListener('mouseup', function () {
+            if (resizeRAF) { cancelAnimationFrame(resizeRAF); resizeRAF = null; }
+            if (resizeDidChange) {
+              saveStore();
+              renderScheduler();
+              resizeDidChange = false;
+            }
+            resizeState = null;
+          });
+        }
+        function exportWeekCsv() {
+          var lines = ['Day,Time,Duration(h),Worker,Task,Order,Machine,WO ID,Qty'];
+          currentWeekData.assignments.forEach(function (a) {
+            var w = workersById[a.workerId] ? workersById[a.workerId].name : a.workerId;
+            var t = tasksById[a.taskId] ? tasksById[a.taskId].name : a.taskId;
+            var o = ordersById[a.orderId] ? ordersById[a.orderId].name : a.orderId;
+            var m = machinesById[a.machineId] ? machinesById[a.machineId].name : '';
+            lines.push([a.day, a.startTime, (a.duration * slotHours()).toFixed(2), w, t, o, m, (a.woId || ''), (a.plannedQty || '')].join(','));
+          });
+          var csv = lines.join('\r\n');
+          var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'scheduler-' + currentWeekKey + '.csv';
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+        function cloneDay(fromDay, toDay) {
+          if (!fromDay || !toDay || fromDay === toDay) return;
+          pushUndo();
+          currentWeekData.assignments = currentWeekData.assignments.filter(function (a) { return a.day !== toDay; });
+          var src = currentWeekData.assignments.filter(function (a) { return a.day === fromDay; });
+          src.forEach(function (a) {
+            currentWeekData.assignments.push({
+              id: 'a-' + Date.now() + '-' + (idCounter++),
+              day: toDay,
+              startTime: a.startTime,
+              duration: a.duration,
+              workerId: a.workerId,
+              taskId: a.taskId,
+              orderId: a.orderId,
+              machineId: a.machineId || '',
+              seriesId: '',
+              woId: a.woId || '',
+              plannedQty: a.plannedQty || 0
+            });
+          });
+          logAction('Cloned ' + fromDay + ' to ' + toDay);
+          saveStore();
+          renderScheduler();
+        }
+        function clonePreviousWeek() {
+          var prevKey = weekKeyByOffset(weekOffset - 1);
+          var src = schedulerStore.weeks[prevKey];
+          if (!src) { showSchedulerMessage('No previous week data'); return; }
+          pushUndo();
+          currentWeekData = normalizeWeekData(src);
+          schedulerStore.weeks[currentWeekKey] = currentWeekData;
+          logAction('Cloned previous week into current week');
+          saveStore();
+          renderScheduler();
+        }
+        function initInteractions() {
+          var workersEl = schedulerEl('scheduler-workers');
+          var tasksEl = schedulerEl('scheduler-tasks');
+          var ordersEl = schedulerEl('scheduler-orders');
+          var machinesEl = schedulerEl('scheduler-machines');
+          var table = schedulerEl('scheduler-table');
+          if (!table) return;
+          initResize();
+          function bindDragStart(root) {
+            if (!root) return;
+            root.addEventListener('dragstart', function (e) {
+              var chip = e.target && e.target.closest ? e.target.closest('.drag-chip') : null;
+              if (!chip) return;
+              var payload = { kind: chip.getAttribute('data-kind') || '', id: chip.getAttribute('data-id') || '' };
+              activeDrag = payload;
+              if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'copy';
+                e.dataTransfer.setData('application/json', JSON.stringify(payload));
+                e.dataTransfer.setData('text/plain', JSON.stringify(payload));
+              }
+            });
+            root.addEventListener('dragend', function () {
+              activeDrag = null;
+              clearHighlights();
+            });
+          }
+          bindDragStart(workersEl);
+          bindDragStart(tasksEl);
+          bindDragStart(ordersEl);
+          bindDragStart(machinesEl);
+
+          table.addEventListener('dragover', function (e) {
+            var slot = e.target && e.target.closest ? e.target.closest('.scheduler-slot') : null;
+            if (!slot) return;
+            e.preventDefault();
+            if (highlightedSlot !== slot) {
+              clearHighlights();
+              slot.classList.add('drag-over');
+              highlightedSlot = slot;
+            }
+          });
+          table.addEventListener('drop', function (e) {
+            var slot = e.target && e.target.closest ? e.target.closest('.scheduler-slot') : null;
+            if (!slot) return;
+            e.preventDefault();
+            slot.classList.remove('drag-over');
+            var raw = '';
+            if (e.dataTransfer) raw = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/plain') || '';
+            var payload = activeDrag;
+            if (raw) { try { payload = JSON.parse(raw); } catch (err) {} }
+            if (!payload || !payload.kind || !payload.id) return;
+            var day = slot.getAttribute('data-day') || '';
+            var time = slot.getAttribute('data-time') || '';
+            if (!day || !time) return;
+            var key = slotKey(day, time);
+            var pending = ensurePending(key);
+            pushUndo();
+            if (payload.kind === 'worker' && workersById[payload.id]) uniqPush(pending.workers, payload.id);
+            if (payload.kind === 'task' && tasksById[payload.id]) uniqPush(pending.tasks, payload.id);
+            if (payload.kind === 'order' && ordersById[payload.id]) uniqPush(pending.orders, payload.id);
+            if (payload.kind === 'machine' && machinesById[payload.id]) uniqPush(pending.machines, payload.id);
+            var result = finalizePending(day, time, pending, DEFAULT_DURATION_SLOTS);
+            if (result.made > 0) {
+              delete currentWeekData.pending[key];
+              logAction('Created ' + result.made + ' assignment(s) at ' + day + ' ' + time);
+            }
+            if (result.missingOrders > 0) showSchedulerMessage('Order required for non-maintenance tasks');
+            if (result.missingMeta > 0) showSchedulerMessage('Add WO + TOTAL for this slot');
+            if (result.conflicts > 0) showSchedulerMessage('Conflicts skipped: ' + result.conflicts);
+            saveStore();
+            renderScheduler();
+          });
+          table.addEventListener('input', function (e) {
+            var input = e.target && e.target.matches ? e.target : null;
+            if (!input) return;
+            if (input.matches('input[data-slot-wo-input], input[data-slot-qty-input]')) {
+              var key = input.getAttribute('data-slot-wo-input') || input.getAttribute('data-slot-qty-input') || '';
+              if (!key) return;
+              var pending = ensurePending(key);
+              if (input.matches('input[data-slot-wo-input]')) pending.woId = String(input.value || '').trim();
+              if (input.matches('input[data-slot-qty-input]')) {
+                var n = Number(input.value);
+                pending.plannedQty = isFinite(n) && n > 0 ? Math.round(n) : 0;
+              }
+            }
+          });
+          table.addEventListener('click', function (e) {
+            var slot = e.target && e.target.closest ? e.target.closest('.scheduler-slot') : null;
+            var clearPendingBtn = e.target && e.target.closest ? e.target.closest('.scheduler-clear-pending-btn') : null;
+            var editMetaBtn = e.target && e.target.closest ? e.target.closest('.scheduler-slot-meta-btn[data-slot-edit]') : null;
+            var saveMetaBtn = e.target && e.target.closest ? e.target.closest('.scheduler-slot-meta-btn[data-slot-save]') : null;
+            var cancelMetaBtn = e.target && e.target.closest ? e.target.closest('.scheduler-clear-pending-btn[data-slot-cancel]') : null;
+            if (editMetaBtn) {
+              openPendingMetaKey = editMetaBtn.getAttribute('data-slot-edit') || '';
+              renderScheduler();
+              return;
+            }
+            if (cancelMetaBtn) {
+              openPendingMetaKey = '';
+              renderScheduler();
+              return;
+            }
+            if (saveMetaBtn) {
+              var saveKey = saveMetaBtn.getAttribute('data-slot-save') || '';
+              if (!saveKey) return;
+              var pendingSave = ensurePending(saveKey);
+              var woInput = table.querySelector('input[data-slot-wo-input="' + saveKey + '"]');
+              var qtyInput = table.querySelector('input[data-slot-qty-input="' + saveKey + '"]');
+              pendingSave.woId = woInput && woInput.value ? String(woInput.value).trim() : '';
+              var qtyNum = qtyInput ? Number(qtyInput.value) : 0;
+              pendingSave.plannedQty = isFinite(qtyNum) && qtyNum > 0 ? Math.round(qtyNum) : 0;
+              saveStore();
+              openPendingMetaKey = '';
+              renderScheduler();
+              return;
+            }
+            if (clearPendingBtn) {
+              var clearKey = clearPendingBtn.getAttribute('data-clear-pending') || '';
+              if (!clearKey) return;
+              pushUndo();
+              delete currentWeekData.pending[clearKey];
+              if (openPendingMetaKey === clearKey) openPendingMetaKey = '';
+              saveStore();
+              renderScheduler();
+              return;
+            }
+            if (e.target && e.target.closest && e.target.closest('.scheduler-slot-meta-input')) return;
+            if (bulkMode && slot) {
+              var k = slotKey(slot.getAttribute('data-day') || '', slot.getAttribute('data-time') || '');
+              if (k !== '|') {
+                if (bulkSelected[k]) delete bulkSelected[k];
+                else bulkSelected[k] = true;
+                renderScheduler();
+              }
+              return;
+            }
+            var copyBtn = e.target && e.target.closest ? e.target.closest('.copy-btn') : null;
+            if (copyBtn) {
+              var copyId = copyBtn.getAttribute('data-copy') || '';
+              var src = currentWeekData.assignments.find(function (a) { return a.id === copyId; });
+              if (src) {
+                copiedAssignment = {
+                  workerId: src.workerId,
+                  taskId: src.taskId,
+                  orderId: src.orderId || '',
+                  machineId: src.machineId || '',
+                  duration: src.duration,
+                  woId: src.woId || '',
+                  plannedQty: src.plannedQty || 0
+                };
+                showSchedulerMessage('Assignment copied');
+              }
+              return;
+            }
+            var btn = e.target && e.target.closest ? e.target.closest('.remove-btn') : null;
+            if (btn) {
+              var assignmentId = btn.getAttribute('data-remove') || '';
+              if (!assignmentId) return;
+              pushUndo();
+              currentWeekData.assignments = currentWeekData.assignments.filter(function (a) { return a.id !== assignmentId; });
+              logAction('Removed assignment');
+              saveStore();
+              renderScheduler();
+              return;
+            }
+            if (slot && copiedAssignment) {
+              var day = slot.getAttribute('data-day') || '';
+              var time = slot.getAttribute('data-time') || '';
+              if (!day || !time) return;
+              if (taskNeedsOrder(copiedAssignment.taskId) && !hasRequiredOrderMeta(copiedAssignment)) {
+                showSchedulerMessage('Copied assignment missing WO/TOTAL TO PRODUCE');
+                return;
+              }
+              pushUndo();
+              var pasted = createAssignment(
+                day,
+                time,
+                copiedAssignment.workerId,
+                copiedAssignment.taskId,
+                copiedAssignment.orderId,
+                copiedAssignment.duration,
+                copiedAssignment.machineId,
+                copiedAssignment.woId,
+                copiedAssignment.plannedQty
+              );
+              if (pasted) {
+                logAction('Pasted assignment at ' + day + ' ' + time);
+                saveStore();
+                renderScheduler();
+              } else {
+                showSchedulerMessage('Cannot paste here (conflict or missing order)');
+              }
+            }
+          });
+          table.addEventListener('mousedown', function (e) {
+            var handleX = e.target && e.target.closest ? e.target.closest('.resize-handle-x') : null;
+            if (handleX) {
+              var assignmentIdX = handleX.getAttribute('data-resize-x') || '';
+              if (!assignmentIdX) return;
+              var assignmentX = currentWeekData.assignments.find(function (a) { return a.id === assignmentIdX; });
+              if (!assignmentX) return;
+              var startDayIndex = DAYS.indexOf(assignmentX.day);
+              if (startDayIndex < 0) return;
+              pushUndo();
+              e.preventDefault();
+              e.stopPropagation();
+              resizeState = {
+                mode: 'horizontal',
+                assignment: assignmentX,
+                startDayIndex: startDayIndex,
+                currentSpan: getSeriesSpan(assignmentX)
+              };
+              return;
+            }
+            var handle = e.target && e.target.closest ? e.target.closest('.resize-handle') : null;
+            if (!handle) return;
+            var assignmentId = handle.getAttribute('data-resize') || '';
+            if (!assignmentId) return;
+            var assignment = currentWeekData.assignments.find(function (a) { return a.id === assignmentId; });
+            if (!assignment) return;
+            var startIdx = timeIndex(assignment.startTime);
+            if (startIdx < 0) return;
+            pushUndo();
+            e.preventDefault();
+            e.stopPropagation();
+            resizeState = { mode: 'vertical', assignment: assignment, startIndex: startIdx, currentSpan: getSeriesSpan(assignment) };
+          });
+
+          var prevBtn = schedulerEl('scheduler-prev-week');
+          var nextBtn = schedulerEl('scheduler-next-week');
+          var todayBtn = schedulerEl('scheduler-today-week');
+          if (prevBtn) prevBtn.addEventListener('click', function () { weekOffset -= 1; ensureCurrentWeek(); undoStack = []; redoStack = []; renderScheduler(); });
+          if (nextBtn) nextBtn.addEventListener('click', function () { weekOffset += 1; ensureCurrentWeek(); undoStack = []; redoStack = []; renderScheduler(); });
+          if (todayBtn) todayBtn.addEventListener('click', function () { weekOffset = 0; ensureCurrentWeek(); undoStack = []; redoStack = []; renderScheduler(); });
+
+          var cloneDayBtn = schedulerEl('scheduler-clone-day');
+          var cloneWeekBtn = schedulerEl('scheduler-clone-week');
+          if (cloneDayBtn) cloneDayBtn.addEventListener('click', function () {
+            var from = schedulerEl('scheduler-clone-from');
+            var to = schedulerEl('scheduler-clone-to');
+            cloneDay(from ? from.value : '', to ? to.value : '');
+          });
+          if (cloneWeekBtn) cloneWeekBtn.addEventListener('click', clonePreviousWeek);
+
+          var fw = schedulerEl('scheduler-filter-worker');
+          var ft = schedulerEl('scheduler-filter-task');
+          var fo = schedulerEl('scheduler-filter-order');
+          var fm = schedulerEl('scheduler-filter-machine');
+          if (fw) fw.addEventListener('change', function () { filters.worker = fw.value; renderScheduler(); });
+          if (ft) ft.addEventListener('change', function () { filters.task = ft.value; renderScheduler(); });
+          if (fo) fo.addEventListener('change', function () { filters.order = fo.value; renderScheduler(); });
+          if (fm) fm.addEventListener('change', function () { filters.machine = fm.value; renderScheduler(); });
+
+          var bulkToggle = schedulerEl('scheduler-bulk-toggle');
+          var bulkApply = schedulerEl('scheduler-bulk-apply');
+          if (bulkToggle) bulkToggle.addEventListener('click', function () {
+            bulkMode = !bulkMode;
+            bulkSelected = {};
+            bulkToggle.classList.toggle('active', bulkMode);
+            bulkToggle.textContent = bulkMode ? 'Bulk: On' : 'Bulk: Off';
+            renderScheduler();
+          });
+          if (bulkApply) bulkApply.addEventListener('click', function () {
+            var w = schedulerEl('scheduler-bulk-worker');
+            var t = schedulerEl('scheduler-bulk-task');
+            var o = schedulerEl('scheduler-bulk-order');
+            var m = schedulerEl('scheduler-bulk-machine');
+            var d = schedulerEl('scheduler-bulk-duration');
+            if (!w || !t || !o || !m || !d) return;
+            var duration = Math.max(1, Math.min(8, Number(d.value) || DEFAULT_DURATION_SLOTS));
+            var keys = Object.keys(bulkSelected);
+            if (keys.length === 0) return;
+            if (taskNeedsOrder(t.value)) {
+              showSchedulerMessage('Bulk ordered tasks disabled: WO/TOTAL are per slot');
+              return;
+            }
+            pushUndo();
+            var made = 0;
+            var conflicts = 0;
+            keys.forEach(function (k) {
+              var parts = k.split('|');
+              if (parts.length !== 2) return;
+              var orderForTask = taskNeedsOrder(t.value) ? o.value : '';
+              if (createAssignment(parts[0], parts[1], w.value, t.value, orderForTask, duration, m.value, '', 0)) made++;
+              else conflicts++;
+            });
+            bulkSelected = {};
+            bulkMode = false;
+            if (bulkToggle) { bulkToggle.classList.remove('active'); bulkToggle.textContent = 'Bulk: Off'; }
+            if (made > 0) logAction('Bulk created ' + made + ' assignment(s)');
+            if (conflicts > 0) showSchedulerMessage('Bulk conflicts skipped: ' + conflicts);
+            saveStore();
+            renderScheduler();
+          });
+
+          var undoBtn = schedulerEl('scheduler-undo');
+          var redoBtn = schedulerEl('scheduler-redo');
+          if (undoBtn) undoBtn.addEventListener('click', function () {
+            if (undoStack.length === 0) return;
+            redoStack.push(clone(currentWeekData));
+            currentWeekData = undoStack.pop();
+            schedulerStore.weeks[currentWeekKey] = currentWeekData;
+            saveStore();
+            logAction('Undo');
+            renderScheduler();
+          });
+          if (redoBtn) redoBtn.addEventListener('click', function () {
+            if (redoStack.length === 0) return;
+            undoStack.push(clone(currentWeekData));
+            currentWeekData = redoStack.pop();
+            schedulerStore.weeks[currentWeekKey] = currentWeekData;
+            saveStore();
+            logAction('Redo');
+            renderScheduler();
+          });
+
+          var exportBtn = schedulerEl('scheduler-export');
+          var printBtn = schedulerEl('scheduler-print');
+          if (exportBtn) exportBtn.addEventListener('click', exportWeekCsv);
+          if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
+        }
+        function initScheduler() {
+          if (!schedulerEl('scheduler-table')) return;
+          renderPaletteAndControls();
+          loadRemote(function (data) {
+            schedulerStore = normalizeStore(data);
+            ensureCurrentWeek();
+            saveLocal(schedulerStore);
+            renderScheduler();
+            renderAudit();
+          });
+          initInteractions();
+        }
+        if (typeof window !== 'undefined') window.refreshProductionScheduler = function () { ensureCurrentWeek(); renderScheduler(); };
+        initScheduler();
       })();
       document.getElementById('start-btn').addEventListener('click', function () {
         if (introPlayed) return;
