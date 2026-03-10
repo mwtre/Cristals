@@ -627,32 +627,45 @@
     }
     #top-steps-nav .top-step { flex-shrink: 0; }
     .top-step {
-      padding: 0.35rem 0.75rem;
+      padding: 0.42rem 0.85rem;
       border-radius: 999px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.03);
+      color: rgba(226,232,240,0.78);
       font: inherit;
-      font-size: 0.8rem;
+      font-size: 0.86rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.35rem;
+      transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+    .top-step:hover {
+      transform: translateY(-1px);
+      border-color: rgba(201,169,98,0.55);
+      background: rgba(201,169,98,0.08);
+      color: #e2e8f0;
+    }
+    .top-step:focus-visible {
+      outline: 2px solid rgba(96,165,250,0.55);
+      outline-offset: 2px;
     }
     .top-step span.step-index {
       width: 18px;
       height: 18px;
       border-radius: 999px;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.18);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.7rem;
+      font-size: 0.74rem;
+      color: rgba(226,232,240,0.85);
     }
     .top-step.active {
       border-color: var(--accent);
       background: rgba(201, 169, 98, 0.15);
       color: var(--accent);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
     }
     .top-step.active span.step-index {
       border-color: var(--accent);
@@ -2621,14 +2634,14 @@
    <script>window.CRISTAL_SUPABASE_URL='https://gimzlqbodxnriaqieetm.supabase.co';window.CRISTAL_SUPABASE_ANON_KEY='sb_publishable_fmHwMrvM6ccnMCJgFYpEAA_Pu-ydW5u';</script> 
   <nav id="top-steps-nav" aria-label="Configuration steps">
     <button type="button" class="top-step active" data-step="0"><span class="step-index">1</span> Intro</button>
-    <button type="button" class="top-step" data-step="1"><span class="step-index">2</span> Choose crystal</button>
-    <button type="button" class="top-step" data-step="2"><span class="step-index">3</span> Customize</button>
-    <button type="button" class="top-step" data-step="3"><span class="step-index">4</span> Plan production</button>
-    <button type="button" class="top-step" data-step="4"><span class="step-index">5</span> Checkout</button>
-    <button type="button" class="top-step" data-step="5"><span class="step-index">6</span> Innovation</button>
-    <button type="button" class="top-step" data-step="6"><span class="step-index">7</span> Production Stats</button>
-    <button type="button" class="top-step" data-step="7"><span class="step-index">8</span> Recruiting</button>
-    <button type="button" class="top-step" data-step="8"><span class="step-index">9</span> Factory map</button>
+    <button type="button" class="top-step" data-step="1"><span class="step-index">2</span> Production Schedule</button>
+    <button type="button" class="top-step" data-step="2"><span class="step-index">3</span> Factory map</button>
+    <button type="button" class="top-step" data-step="3"><span class="step-index">4</span> Choose crystal</button>
+    <button type="button" class="top-step" data-step="4"><span class="step-index">5</span> Customize</button>
+    <button type="button" class="top-step" data-step="5"><span class="step-index">6</span> Plan production</button>
+    <button type="button" class="top-step" data-step="6"><span class="step-index">7</span> Checkout</button>
+    <button type="button" class="top-step" data-step="7"><span class="step-index">8</span> Innovation</button>
+    <button type="button" class="top-step" data-step="8"><span class="step-index">9</span> Recruiting</button>
   </nav>
   <div id="step-intro" class="step-screen active">
     <div class="intro-video-wrap">
@@ -3468,7 +3481,7 @@
 
   <div id="step-production-stats" class="step-screen">
     <div class="production-stats-inner">
-      <h2 class="production-stats-title">Production Stats</h2>
+      <h2 class="production-stats-title">Production Schedule</h2>
       <section class="production-scheduler-wrap" aria-label="Weekly production scheduler">
         <div class="production-scheduler-layout" id="scheduler-layout">
           <aside class="scheduler-sidebar" id="scheduler-sidebar">
@@ -3905,7 +3918,7 @@
       function showStep(step) {
         currentStep = step;
         document.querySelectorAll('.step-screen').forEach(function (el) { el.classList.remove('active'); });
-        var stepIds = ['step-intro', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation', 'step-production-stats', 'step-recruiting', 'step-factory-map'];
+        var stepIds = ['step-intro', 'step-production-stats', 'step-factory-map', 'step-crystal-select', 'step-product', 'step-plan-production', 'step-checkout', 'step-innovation', 'step-recruiting'];
         var el = document.getElementById(stepIds[step] || 'step-product');
         if (el) el.classList.add('active');
         updateTopNav(step);
@@ -3913,21 +3926,21 @@
           var introV = document.getElementById('intro-video');
           if (introV) { introV.pause(); introV.currentTime = 0; }
           startIntroSequence();
-        } else if (step === 1) {
+        } else if (step === 3) {
           updateCarousel();
           playSlideVideo(currentSlide);
-        } else if (step === 2 && templatePresets.length > 0 && typeof renderTemplateGrid === 'function') {
+        } else if (step === 4 && templatePresets.length > 0 && typeof renderTemplateGrid === 'function') {
           renderTemplateGrid();
-        } else if (step === 3) {
+        } else if (step === 5) {
           if (editorSubtotal === 0 && crystalMeta[selectedCrystalIndex]) {
             var m = crystalMeta[selectedCrystalIndex];
             var pm = (m.price || '').match(/\$?\s*([\d.]+)/);
             editorSubtotal = pm ? parseFloat(pm[1], 10) : 49.99;
           }
           if (typeof renderProductionCalendar === 'function') renderProductionCalendar();
-        } else if (step === 4 && typeof updateCheckoutPage === 'function') {
+        } else if (step === 6 && typeof updateCheckoutPage === 'function') {
           updateCheckoutPage();
-        } else if (step === 6) {
+        } else if (step === 1) {
           if (window.CRISTAL_SUPABASE_URL && window.CRISTAL_SUPABASE_ANON_KEY && typeof window.loadProductionFromRemote === 'function') {
             window.loadProductionFromRemote(function () {
               if (typeof refreshProductionStats === 'function') refreshProductionStats();
@@ -5411,7 +5424,9 @@
               var isStart = slotIdx === startIdx;
               var taskClass = t.cls ? (' ' + t.cls) : '';
               var orderClass = o ? (' ' + o.cls) : '';
-              return '<div class="scheduler-assignment ' + w.cls + taskClass + orderClass + (m ? (' ' + m.cls) : '') + (isStart ? ' is-start' : ' is-continued') + '" data-assignment-id="' + a.id + '">' +
+              return '<div class="scheduler-assignment ' + w.cls + taskClass + orderClass + (m ? (' ' + m.cls) : '') + (isStart ? ' is-start' : ' is-continued') + '" data-assignment-id="' + a.id + '"' +
+                (isStart ? ' draggable="true" title="Drag to move"' : '') +
+                '>' +
                 (isStart ? '<button type="button" class="copy-btn" title="Copy assignment" data-copy="' + a.id + '">⧉</button>' : '') +
                 (isStart ? '<button type="button" class="remove-btn" title="Remove assignment" data-remove="' + a.id + '">&times;</button>' : '') +
                 (isStart ? '<span class="duration-tag">' + formatHoursFromSlots(a.duration) + '</span>' : '') +
@@ -6124,6 +6139,19 @@
           bindDragStart(tasksEl);
           bindDragStart(ordersEl);
           bindDragStart(machinesEl);
+          table.addEventListener('dragstart', function (e) {
+            var card = e.target && e.target.closest ? e.target.closest('.scheduler-assignment.is-start') : null;
+            if (!card) return;
+            var assignmentId = card.getAttribute('data-assignment-id') || '';
+            if (!assignmentId) return;
+            var payload = { kind: 'assignment', id: assignmentId };
+            activeDrag = payload;
+            if (e.dataTransfer) {
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('application/json', JSON.stringify(payload));
+              e.dataTransfer.setData('text/plain', JSON.stringify(payload));
+            }
+          });
 
           table.addEventListener('dragover', function (e) {
             var slot = e.target && e.target.closest ? e.target.closest('.scheduler-slot') : null;
@@ -6148,6 +6176,41 @@
             var day = slot.getAttribute('data-day') || '';
             var time = slot.getAttribute('data-time') || '';
             if (!day || !time) return;
+            if (payload.kind === 'assignment') {
+              var assignment = currentWeekData.assignments.find(function (a) { return a.id === payload.id; });
+              if (!assignment) return;
+              var startIdx = timeIndex(time);
+              if (startIdx < 0) return;
+              pushUndo();
+              /* Move single assignment or entire horizontal series. */
+              var moved = 0;
+              var conflicts = 0;
+              var outOfRange = 0;
+              var series = assignment.seriesId ? currentWeekData.assignments.filter(function (a) { return a.seriesId === assignment.seriesId; }) : [assignment];
+              var fromDayIdx = DAYS.indexOf(assignment.day);
+              var toDayIdx = DAYS.indexOf(day);
+              if (toDayIdx < 0) return;
+              series.forEach(function (a) {
+                var oldIdx = DAYS.indexOf(a.day);
+                if (oldIdx < 0) return;
+                var offset = oldIdx - fromDayIdx;
+                var nextDayIdx = assignment.seriesId ? (toDayIdx + offset) : toDayIdx;
+                if (nextDayIdx < 0 || nextDayIdx >= DAYS.length) { outOfRange++; return; }
+                var nextDay = DAYS[nextDayIdx];
+                var nextDur = clampDuration(startIdx, a.duration);
+                if (hasWorkerConflict(a.workerId, nextDay, startIdx, nextDur, a.id)) { conflicts++; return; }
+                a.day = nextDay;
+                a.startTime = time;
+                a.duration = nextDur;
+                moved++;
+              });
+              if (conflicts > 0) showSchedulerMessage('Conflict: some moves skipped');
+              if (outOfRange > 0) showSchedulerMessage('Some days out of range while moving series');
+              if (moved > 0) logAction('Moved assignment to ' + day + ' ' + time);
+              saveStore();
+              renderScheduler();
+              return;
+            }
             var key = slotKey(day, time);
             var pending = ensurePending(key);
             pushUndo();
@@ -6511,14 +6574,13 @@
           introEl.addEventListener('transitionend', function onLeave() {
             introEl.removeEventListener('transitionend', onLeave);
             introEl.classList.remove('leaving', 'active');
-            var nextEl = document.getElementById('step-crystal-select');
+            var nextEl = document.getElementById('step-production-stats');
             nextEl.classList.add('active', 'entering');
             requestAnimationFrame(function () {
               requestAnimationFrame(function () { nextEl.classList.remove('entering'); });
             });
             currentStep = 1;
-            updateCarousel();
-            playSlideVideo(currentSlide);
+            updateTopNav(1);
           }, { once: true });
         };
       });
@@ -6684,7 +6746,7 @@
         var basePrice = priceMatch ? parseFloat(priceMatch[1], 10) : 49.99;
         document.getElementById('product-base-price-value').textContent = basePrice.toFixed(2);
         buildEditorGallery(selected);
-        showStep(2);
+        showStep(4);
         if (typeof updateCart === 'function') updateCart();
       });
 
@@ -8730,7 +8792,7 @@
         var qtyEl = document.getElementById('qty');
         var planQtyEl = document.getElementById('plan-qty');
         if (qtyEl && planQtyEl) planQtyEl.value = qtyEl.value;
-        showStep(3);
+        showStep(5);
       });
       var selectedProductionSlot = null;
       var BASE_WEEKS = 3;
@@ -8914,7 +8976,7 @@
         if (!selectedProductionSlot) return;
         updateOrderTimeline({ design: 'done', production: 'active', expedition: 'pending' });
         updateCheckoutPage();
-        showStep(4);
+        showStep(6);
       });
       if (document.getElementById('order-timeline')) updateOrderTimeline({ design: 'pending', production: 'pending', expedition: 'pending' });
     })();
