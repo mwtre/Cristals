@@ -5372,20 +5372,44 @@
           return Math.max(1, maxIdx - baseDayIdx + 1);
         }
         function finalizePending(day, time, pending, defaultDur) {
-          if (!pending.workers.length || !pending.tasks.length) return { made: 0, conflicts: 0, missingOrders: 0, missingMeta: 0 };
+          var hasWorkers = pending.workers && pending.workers.length > 0;
+          var hasTasks = pending.tasks && pending.tasks.length > 0;
+          var hasMachines = pending.machines && pending.machines.length > 0;
+          /* Maintenance shortcut: Worker + Machine is enough.
+             If no task selected but worker+machine exist, auto-create maintenance. */
+          if (hasWorkers && !hasTasks && hasMachines) {
+            pending.tasks = ['maintenance'];
+            hasTasks = true;
+          }
+          if (!hasWorkers || !hasTasks) return { made: 0, conflicts: 0, missingOrders: 0, missingMeta: 0, missingMachines: 0 };
           var made = 0;
           var conflicts = 0;
           var missingOrders = 0;
           var missingMeta = 0;
+          var missingMachines = 0;
+          var maintenanceConflicts = 0;
           var machineList = (pending.machines && pending.machines.length > 0) ? pending.machines : [''];
           var woId = normalizeWoId(pending.woId || '');
           var plannedQty = Number(pending.plannedQty) > 0 ? Math.round(Number(pending.plannedQty)) : 0;
           pending.workers.forEach(function (wid) {
             pending.tasks.forEach(function (tid) {
+              if (tid === 'maintenance' && (!pending.machines || pending.machines.length === 0)) {
+                missingMachines++;
+                return;
+              }
+              if (tid === 'maintenance') {
+                var startIdx = timeIndex(time);
+                var dur = clampDuration(startIdx, Math.round(defaultDur || DEFAULT_DURATION_SLOTS));
+                if (hasWorkerConflict(wid, day, startIdx, dur, null)) {
+                  conflicts++;
+                  maintenanceConflicts++;
+                  return;
+                }
+              }
               var orderList = taskNeedsOrder(tid)
                 ? ((pending.orders && pending.orders.length > 0) ? pending.orders : [])
                 : [''];
-              if (orderList.length === 0) {
+              if (taskNeedsOrder(tid) && orderList.length === 0) {
                 missingOrders++;
                 return;
               }
@@ -5402,7 +5426,7 @@
               });
             });
           });
-          return { made: made, conflicts: conflicts, missingOrders: missingOrders, missingMeta: missingMeta };
+          return { made: made, conflicts: conflicts, missingOrders: missingOrders, missingMeta: missingMeta, missingMachines: missingMachines, maintenanceConflicts: maintenanceConflicts };
         }
         function slotInner(day, time, slotIdx) {
           var key = slotKey(day, time);
@@ -5468,11 +5492,12 @@
             var metaLine = (pending.woId || pending.plannedQty > 0)
               ? ('<span>WO: ' + (pending.woId || '-') + ' · Total: ' + (pending.plannedQty || '-') + '</span><br>')
               : '';
+            var needsMachineForMaint = (pending.tasks || []).some(function (tid) { return tid === 'maintenance'; });
             return '<div class="scheduler-partial">' +
               (workersText ? ('Workers: ' + workersText) : 'Drop worker') + '<br>' +
               (taskText ? ('Tasks: ' + taskText) : 'Drop task') + '<br>' +
               (orderText ? ('Orders: ' + orderText) : 'Drop order (not needed for Maintenance)') + '<br>' +
-              (machineText ? ('Machines: ' + machineText) : 'Drop machine (optional)') + '<br>' +
+              (machineText ? ('Machines: ' + machineText) : (needsMachineForMaint ? 'Drop machine (required for Maintenance)' : 'Drop machine (optional)')) + '<br>' +
               metaLine +
               '<div class="scheduler-partial-controls">' +
               (needsOrderMeta ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">WO + TOTAL</button>' : '') +
@@ -6223,8 +6248,10 @@
               delete currentWeekData.pending[key];
               logAction('Created ' + result.made + ' assignment(s) at ' + day + ' ' + time);
             }
-            if (result.missingOrders > 0) showSchedulerMessage('Order required for non-maintenance tasks');
+            if (result.missingOrders > 0) showSchedulerMessage('Order required for ordered tasks');
             if (result.missingMeta > 0) showSchedulerMessage('Add WO + TOTAL for this slot');
+            if (result.missingMachines > 0) showSchedulerMessage('Maintenance needs a machine');
+            if (result.maintenanceConflicts > 0) showSchedulerMessage('Maintenance blocked: worker already booked in this slot');
             if (result.conflicts > 0) showSchedulerMessage('Conflicts skipped: ' + result.conflicts);
             saveStore();
             renderScheduler();
