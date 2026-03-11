@@ -2605,6 +2605,8 @@
     .route-card .route-time { font-size: 0.95rem; color: var(--accent); font-weight: 600; }
     .route-card .route-steps-preview { font-size: 0.85rem; color: var(--muted); }
     .route-card-actions { display: flex; gap: 0.5rem; }
+    /* Inventory board UI is now a TSX component (see cristals/inventory-board/). */
+
     .routes-editor { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-top: 1rem; }
     .routes-editor-title { margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--text); }
     .routes-editor-name-wrap { margin-bottom: 1rem; }
@@ -3854,52 +3856,9 @@
     <div class="factory-map-inner">
       <h2 class="factory-map-title">Inventory movements</h2>
       <p class="factory-map-subtitle">Log where items were picked from. New box numbers / pods / storage locations are saved and can be reused.</p>
-      <div class="routes-editor" style="margin-top:0.5rem;">
-        <div class="routes-add-step-wrap" style="margin-bottom:0.5rem;flex-wrap:wrap;">
-          <label style="font-size:0.9rem;color:var(--muted);min-width:80px;">Picked from</label>
-          <select id="inv-type" class="routes-select" aria-label="Pick source type" style="min-width:120px;">
-            <option value="box">Box #</option>
-            <option value="pod">Pod</option>
-            <option value="storage">Storage location</option>
-          </select>
-          <input id="inv-from" class="routes-input" list="inv-from-list" placeholder="e.g. Box 12 / Pod A / Rack 2" aria-label="Pick source value">
-          <datalist id="inv-from-list"></datalist>
-        </div>
-        <div class="routes-add-step-wrap" style="margin-bottom:0.75rem;flex-wrap:wrap;">
-          <label style="font-size:0.9rem;color:var(--muted);min-width:80px;">Send to</label>
-          <select id="inv-to-type" class="routes-select" aria-label="Destination type" style="min-width:120px;">
-            <option value="storage">Storage location</option>
-            <option value="box">Box #</option>
-            <option value="pod">Pod</option>
-          </select>
-          <input id="inv-to" class="routes-input" list="inv-to-list" placeholder="e.g. Rack 3 / Pod B / Box 5" aria-label="Destination value">
-          <datalist id="inv-to-list"></datalist>
-          <input id="inv-qty" class="routes-input routes-input-num" type="number" min="0" step="1" placeholder="Qty" aria-label="Quantity (optional)">
-          <input id="inv-note" class="routes-input" style="max-width:420px;" placeholder="Note (optional)" aria-label="Note (optional)">
-          <button type="button" class="cta" id="inv-add">Add movement</button>
-          <button type="button" class="cta secondary" id="inv-clear">Clear</button>
-          <span id="inv-status" style="font-size:0.9rem;color:var(--muted);"></span>
-        </div>
-        <div style="margin-bottom:0.75rem;">
-          <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.35rem;">Saved sources (click to reuse)</div>
-          <div id="inv-saved" style="display:flex;flex-wrap:wrap;gap:0.5rem;"></div>
-        </div>
-        <div class="summary-tables-wrap" style="margin-bottom:0;">
-          <table class="production-summary-table" id="inv-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Picked from</th>
-                <th>Send to</th>
-                <th>Qty</th>
-                <th>Note</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
+      <link rel="stylesheet" href="cristals/inventory-board/inventory-board.css" />
+      <div id="inventory-board-root" class="factory-map-react-root"></div>
+      <script type="module" src="cristals/inventory-board/inventory-board.js"></script>
     </div>
   </div>
 
@@ -4125,8 +4084,6 @@
         var PRODUCTION_STORAGE_KEY = 'cristal_production_logs';
         var TIMERS_STORAGE_KEY = 'cristal_production_timers';
         var PRODUCTION_CALENDAR_STORAGE_KEY = 'cristal_production_calendar';
-        var INVENTORY_SOURCES_KEY = 'cristal_inventory_sources';
-        var INVENTORY_MOVEMENTS_KEY = 'cristal_inventory_movements';
         var INVENTORY_REMOTE_KEY = 'inventory_movements';
         /* Online saving (Supabase): set before loading the page, e.g. in a script tag:
            window.CRISTAL_SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
@@ -4964,213 +4921,7 @@
           });
         }
 
-        function loadInvLocalSources() {
-          try { return JSON.parse(localStorage.getItem(INVENTORY_SOURCES_KEY) || '{}') || {}; } catch (e) { return {}; }
-        }
-        function loadInvLocalMovements() {
-          try { return JSON.parse(localStorage.getItem(INVENTORY_MOVEMENTS_KEY) || '[]') || []; } catch (e) { return []; }
-        }
-        function saveInvLocal(sources, movements) {
-          try { localStorage.setItem(INVENTORY_SOURCES_KEY, JSON.stringify(sources || {})); } catch (e) {}
-          try { localStorage.setItem(INVENTORY_MOVEMENTS_KEY, JSON.stringify(movements || [])); } catch (e) {}
-        }
-        function normalizeSources(src) {
-          var s = (src && typeof src === 'object') ? src : {};
-          function arr(v) { return Array.isArray(v) ? v.map(function (x) { return String(x || '').trim(); }).filter(Boolean) : []; }
-          return {
-            box: arr(s.box),
-            pod: arr(s.pod),
-            storage: arr(s.storage)
-          };
-        }
-        function normalizeMovements(list) {
-          if (!Array.isArray(list)) return [];
-          return list.map(function (m) {
-            if (!m || typeof m !== 'object') return null;
-            var type = (m.type === 'box' || m.type === 'pod' || m.type === 'storage') ? m.type : 'box';
-            var toType = (m.toType === 'box' || m.toType === 'pod' || m.toType === 'storage') ? m.toType : (m.to ? 'storage' : '');
-            var from = String(m.from || '').trim();
-            if (!from) return null;
-            var qty = Number(m.qty);
-            return {
-              id: String(m.id || ('inv-' + Date.now() + '-' + Math.random().toString(16).slice(2))),
-              ts: m.ts ? String(m.ts) : new Date().toISOString(),
-              type: type,
-              from: from,
-              toType: toType,
-              to: m.to ? String(m.to).trim() : '',
-              qty: (isFinite(qty) && qty > 0) ? Math.round(qty) : 0,
-              note: m.note ? String(m.note).trim() : ''
-            };
-          }).filter(Boolean).slice(0, 500);
-        }
-
-        var invState = { sources: normalizeSources(loadInvLocalSources()), movements: normalizeMovements(loadInvLocalMovements()), loadedRemote: false };
-        function invSetStatus(msg) {
-          var el = document.getElementById('inv-status');
-          if (!el) return;
-          el.textContent = msg || '';
-          if (msg) setTimeout(function () { if (el.textContent === msg) el.textContent = ''; }, 2200);
-        }
-        function invSaveRemoteDebounced() {
-          if (!useRemote) return;
-          clearTimeout(window.__invSyncTimer);
-          window.__invSyncTimer = setTimeout(function () {
-            invFetch('/production_data', { method: 'POST', body: [{ key: INVENTORY_REMOTE_KEY, value: { sources: invState.sources, movements: invState.movements } }] })
-              .then(function () { invSetStatus('Synced'); })
-              .catch(function () { invSetStatus('Sync failed'); });
-          }, 250);
-        }
-        function invLoadRemoteOnce(done) {
-          if (!useRemote || invState.loadedRemote) { if (done) done(); return; }
-          invState.loadedRemote = true;
-          invFetch('/production_data?key=eq.' + INVENTORY_REMOTE_KEY)
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(function (rows) {
-              var v = rows && rows[0] && rows[0].value && typeof rows[0].value === 'object' ? rows[0].value : null;
-              if (v) {
-                invState.sources = normalizeSources(v.sources);
-                invState.movements = normalizeMovements(v.movements);
-                saveInvLocal(invState.sources, invState.movements);
-              }
-              if (done) done();
-            })
-            .catch(function () { if (done) done(); });
-        }
-
-        function invRender() {
-          var typeEl = document.getElementById('inv-type');
-          var listEl = document.getElementById('inv-from-list');
-          var toTypeEl = document.getElementById('inv-to-type');
-          var toListEl = document.getElementById('inv-to-list');
-          var savedEl = document.getElementById('inv-saved');
-          var table = document.getElementById('inv-table');
-          if (!typeEl || !listEl || !toTypeEl || !toListEl || !savedEl || !table) return;
-          var type = typeEl.value || 'box';
-          var toType = toTypeEl.value || 'storage';
-          listEl.innerHTML = (invState.sources[type] || []).map(function (v) { return '<option value="' + v.replace(/"/g, '&quot;') + '"></option>'; }).join('');
-          toListEl.innerHTML = (invState.sources[toType] || []).map(function (v) { return '<option value="' + v.replace(/"/g, '&quot;') + '"></option>'; }).join('');
-          var chips = (invState.sources[type] || []).slice(0, 60).map(function (v) {
-            return '<button type="button" class="cta secondary" data-inv-chip="' + v.replace(/"/g, '&quot;') + '" style="padding:0.35rem 0.6rem;font-size:0.9rem;">' + v + '</button>';
-          }).join('');
-          savedEl.innerHTML = chips || '<span style="color:var(--muted);font-size:0.9rem;">No saved sources yet.</span>';
-          var tbody = table.querySelector('tbody');
-          if (!tbody) return;
-          tbody.innerHTML = invState.movements.slice().reverse().map(function (m) {
-            var d = new Date(m.ts);
-            var ds = isFinite(d.getTime()) ? d.toLocaleString() : m.ts;
-            var fromLabel = (m.type === 'box' ? 'Box' : (m.type === 'pod' ? 'Pod' : 'Storage'));
-            var toLabel = m.to ? (m.toType === 'box' ? 'Box' : (m.toType === 'pod' ? 'Pod' : 'Storage')) : '';
-            return '<tr>' +
-              '<td>' + ds + '</td>' +
-              '<td><span style="opacity:0.7;font-size:0.8rem;margin-right:0.25rem;">' + fromLabel + '</span><strong style="color:var(--accent);">' + m.from + '</strong></td>' +
-              '<td>' + (m.to ? ('<span style="opacity:0.7;font-size:0.8rem;margin-right:0.25rem;">' + toLabel + '</span><strong>' + m.to + '</strong>') : '–') + '</td>' +
-              '<td>' + (m.qty ? m.qty : '–') + '</td>' +
-              '<td>' + (m.note ? m.note : '–') + '</td>' +
-              '<td><button type="button" class="cta secondary" data-inv-del="' + m.id + '" style="padding:0.3rem 0.55rem;">Delete</button></td>' +
-              '</tr>';
-          }).join('') || '<tr><td colspan="6" style="color:var(--muted);">No movements yet.</td></tr>';
-        }
-
-        function invEnsureSource(type, value) {
-          var v = String(value || '').trim();
-          if (!v) return false;
-          invState.sources[type] = invState.sources[type] || [];
-          if (invState.sources[type].indexOf(v) < 0) {
-            invState.sources[type].unshift(v);
-            invState.sources[type] = invState.sources[type].slice(0, 120);
-            return true;
-          }
-          return false;
-        }
-
-        function invAddMovement() {
-          var typeEl = document.getElementById('inv-type');
-          var fromEl = document.getElementById('inv-from');
-          var toTypeEl = document.getElementById('inv-to-type');
-          var toEl = document.getElementById('inv-to');
-          var qtyEl = document.getElementById('inv-qty');
-          var noteEl = document.getElementById('inv-note');
-          if (!typeEl || !fromEl || !toTypeEl || !toEl) return;
-          var type = typeEl.value || 'box';
-          var from = String(fromEl.value || '').trim();
-          var toType = toTypeEl.value || 'storage';
-          var to = String(toEl.value || '').trim();
-          if (!from) { invSetStatus('Add where it was picked from'); return; }
-          if (!to) { invSetStatus('Add where it is sent to'); return; }
-          var qty = qtyEl ? Number(qtyEl.value) : 0;
-          var note = noteEl ? String(noteEl.value || '').trim() : '';
-          invEnsureSource(type, from);
-          invEnsureSource(toType, to);
-          invState.movements.push({
-            id: 'inv-' + Date.now() + '-' + Math.random().toString(16).slice(2),
-            ts: new Date().toISOString(),
-            type: type,
-            from: from,
-            toType: toType,
-            to: to,
-            qty: (isFinite(qty) && qty > 0) ? Math.round(qty) : 0,
-            note: note
-          });
-          invState.movements = normalizeMovements(invState.movements);
-          saveInvLocal(invState.sources, invState.movements);
-          invSaveRemoteDebounced();
-          if (fromEl) fromEl.value = '';
-          if (toEl) toEl.value = '';
-          if (qtyEl) qtyEl.value = '';
-          if (noteEl) noteEl.value = '';
-          invRender();
-          invSetStatus('Saved');
-        }
-
-        function invBind() {
-          var wrap = document.getElementById('step-inventory-movements');
-          if (!wrap || wrap.__invBound) return;
-          wrap.__invBound = true;
-          var typeEl = document.getElementById('inv-type');
-          var toTypeEl = document.getElementById('inv-to-type');
-          var addBtn = document.getElementById('inv-add');
-          var clearBtn = document.getElementById('inv-clear');
-          var fromEl = document.getElementById('inv-from');
-          var toEl = document.getElementById('inv-to');
-          if (typeEl) typeEl.addEventListener('change', invRender);
-          if (toTypeEl) toTypeEl.addEventListener('change', invRender);
-          if (addBtn) addBtn.addEventListener('click', invAddMovement);
-          if (fromEl) fromEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); invAddMovement(); } });
-          if (toEl) toEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); invAddMovement(); } });
-          if (clearBtn) clearBtn.addEventListener('click', function () {
-            var fromEl2 = document.getElementById('inv-from');
-            var toEl2 = document.getElementById('inv-to');
-            var qtyEl2 = document.getElementById('inv-qty');
-            var noteEl2 = document.getElementById('inv-note');
-            if (fromEl2) fromEl2.value = '';
-            if (toEl2) toEl2.value = '';
-            if (qtyEl2) qtyEl2.value = '';
-            if (noteEl2) noteEl2.value = '';
-          });
-          wrap.addEventListener('click', function (e) {
-            var chip = e.target && e.target.closest ? e.target.closest('[data-inv-chip]') : null;
-            if (chip) {
-              var v = chip.getAttribute('data-inv-chip') || '';
-              var fromEl3 = document.getElementById('inv-from');
-              if (fromEl3) fromEl3.value = v;
-              return;
-            }
-            var del = e.target && e.target.closest ? e.target.closest('[data-inv-del]') : null;
-            if (del) {
-              var id = del.getAttribute('data-inv-del') || '';
-              invState.movements = invState.movements.filter(function (m) { return m.id !== id; });
-              saveInvLocal(invState.sources, invState.movements);
-              invSaveRemoteDebounced();
-              invRender();
-            }
-          });
-        }
-
-        window.refreshInventoryMovements = function () {
-          invBind();
-          invLoadRemoteOnce(function () { invRender(); });
-        };
+        window.refreshInventoryMovements = function () {};
 
         function schedulerEl(id) { return document.getElementById(id); }
         function readSchedulerUi() {
