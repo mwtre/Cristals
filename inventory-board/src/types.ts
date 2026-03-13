@@ -22,6 +22,20 @@ export type LocationState = {
   itemsById: Record<Id, ItemCard>;
   // locationId -> group key (optional override)
   locationGroupById?: Record<Id, string>;
+  // work order id -> status
+  woById?: Record<
+    string,
+    {
+      id: string;
+      status: 'incoming' | 'inProduction' | 'finished' | 'shipping' | 'archived';
+      createdAt: string;
+      // Optional recipe: what this WO is expected to use (does NOT move stock)
+      // required: planned qty, filled: how much we already allocated/matched
+      requirements?: Array<{ label: string; required: number; filled: number }>;
+      // Current stage location for the WO card
+      locationId?: Id;
+    }
+  >;
 };
 
 export type Movement = {

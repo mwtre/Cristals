@@ -53,6 +53,11 @@ export function InventoryBoardApp() {
   const syncTimer = useRef<number | null>(null);
   const isOnlineRef = useRef<boolean>(hasSupabaseEnv());
   const activeItemDrag = useRef<DragPayloadV2 | null>(null);
+  const activeWoDrag = useRef<{ woId: string } | null>(null);
+  const [scanValue, setScanValue] = useState('');
+  const [isWoCreateOpen, setIsWoCreateOpen] = useState(false);
+  const [woDraftId, setWoDraftId] = useState('');
+  const [woDraftItems, setWoDraftItems] = useState<Array<{ label: string; qty: number }>>([]);
 
   const selectedLocation = useMemo(
     () => (selectedLocationId ? findLocationById(state, selectedLocationId) : undefined),
@@ -66,12 +71,18 @@ export function InventoryBoardApp() {
   }, [selectedLocationId, state]);
 
   const totalsReport = useMemo(() => {
+    const woById = state.woById ?? {};
+    const isArchivedWo = (label: string) => {
+      const wo = extractWoId(label);
+      return !!(wo && woById[wo]?.status === 'archived');
+    };
+    const isArchiveLocation = (locName: string) => normName(locName) === 'archive';
     const groupsOrder = [
       { key: 'floor', title: 'FLOOR' },
       { key: 'processing', title: 'PROCESSING' },
-      { key: 'pod', title: 'POD' },
+      { key: 'pod', title: 'SHOPIFY W/ KIT' },
       { key: 'storage', title: 'STORAGE' },
-      { key: 'shopifyRacks', title: 'SHOPIFY RACKS' },
+      { key: 'shopifyRacks', title: 'SHOPIFY W/ FEEDER' },
       { key: 'waste', title: 'WASTE' },
       { key: 'other', title: 'OTHER' },
     ] as const;
@@ -87,19 +98,45 @@ export function InventoryBoardApp() {
     for (const g of groupsOrder) perGroup[g.key] = 0;
     for (const loc of perLocation) perGroup[loc.group] = (perGroup[loc.group] ?? 0) + loc.total;
 
-    const grandTotal = Object.values(perGroup).reduce((a, b) => a + (b || 0), 0);
+    // Quantities currently inside WOs (allocated, not archived)
+    let woTotal = 0;
+    const woByItem: Record<string, { label: string; qty: number }> = {};
+    for (const wo of Object.values(woById)) {
+      if (wo.status === 'archived') continue;
+      for (const r of wo.requirements ?? []) {
+        const required = r.required ?? (r as any).qty ?? 0;
+        const filled = r.filled ?? 0;
+        const used = Math.max(0, Math.min(required, filled));
+        if (used <= 0) continue;
+        woTotal += used;
+        const key = r.label.trim().toLowerCase();
+        if (!key) continue;
+        if (!woByItem[key]) woByItem[key] = { label: r.label, qty: 0 };
+        woByItem[key].qty += used;
+      }
+    }
+
+    const stockTotal = Object.values(perGroup).reduce((a, b) => a + (b || 0), 0);
+    const grandTotal = stockTotal + woTotal;
 
     const byItem: Record<string, { label: string; qty: number; color?: string }> = {};
     for (const loc of state.locations) {
+      if (isArchiveLocation(loc.name)) continue;
       const itemIds = state.locationItemIds[loc.id] ?? [];
       for (const id of itemIds) {
         const it = state.itemsById[id];
         if (!it) continue;
+        if (isArchivedWo(it.label)) continue;
         const key = it.label.trim().toLowerCase();
         if (!key) continue;
         if (!byItem[key]) byItem[key] = { label: it.label, qty: 0, color: it.color };
         byItem[key].qty += it.qty;
       }
+    }
+    // Merge WO allocations into top items
+    for (const [key, v] of Object.entries(woByItem)) {
+      if (!byItem[key]) byItem[key] = { label: v.label, qty: 0 };
+      byItem[key].qty += v.qty;
     }
     const topItems = Object.values(byItem).sort((a, b) => b.qty - a.qty).slice(0, 25);
 
@@ -109,9 +146,337 @@ export function InventoryBoardApp() {
       perLocation: perLocation.sort((a, b) => b.total - a.total),
       grandTotal,
       topItems,
+      woTotal,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, state.locations, state.locationItemIds, state.itemsById, state.locationGroupById]);
+
+  function normalizeWoId(v: string): string {
+    return (v || '').trim().toUpperCase();
+  }
+
+  function extractWoId(label: string): string | '' {
+    const s = (label || '').trim().toUpperCase();
+    // expected "CX1234-0023" or "CX1234"
+    const m = s.match(/^([A-Z]{1,4}\d{2,})\b/);
+    return m ? m[1] : '';
+  }
+
+  function parseScan(code: string): { woId: string; line: string } | null {
+    const raw = (code || '').trim().toUpperCase();
+    const m = raw.match(/^([A-Z]{1,4}\d{2,})-(\d{1,6})$/);
+    if (!m) return null;
+    return { woId: m[1], line: m[2].padStart(4, '0') };
+  }
+
+  function ensureLocationByName(name: string): Id {
+    const n = name.trim();
+    const existing = state.locations.find((l) => l.name.trim().toLowerCase() === n.toLowerCase());
+    if (existing) return existing.id;
+    const id = uid('loc');
+    const loc: Location = { id, name: n, createdAt: new Date().toISOString() };
+    const nextState: LocationState = {
+      ...state,
+      locations: [...state.locations, loc],
+      locationItemIds: { ...state.locationItemIds, [id]: [] },
+      locationGroupById: { ...(state.locationGroupById ?? {}), [id]: 'floor' },
+    };
+    setState(nextState);
+    persist(nextState, movements);
+    return id;
+  }
+
+  useEffect(() => {
+    // Always keep these two FLOOR buckets.
+    if (!state.locations.length) return;
+    const hasNewWo = state.locations.some((l) => l.name.trim().toLowerCase() === 'new wo');
+    const hasArchive = state.locations.some((l) => l.name.trim().toLowerCase() === 'archive');
+    if (hasNewWo && hasArchive) return;
+    const nextLocations = state.locations.slice();
+    const nextLocationItemIds = { ...state.locationItemIds };
+    const nextGroupMap = { ...(state.locationGroupById ?? {}) };
+    function addIfMissing(nm: string) {
+      const ex = nextLocations.find((l) => l.name.trim().toLowerCase() === nm.toLowerCase());
+      if (ex) { nextGroupMap[ex.id] = 'floor'; return; }
+      const id = uid('loc');
+      nextLocations.push({ id, name: nm, createdAt: new Date().toISOString() });
+      nextLocationItemIds[id] = nextLocationItemIds[id] ?? [];
+      nextGroupMap[id] = 'floor';
+    }
+    addIfMissing('NEW WO');
+    addIfMissing('ARCHIVE');
+    const nextState: LocationState = { ...state, locations: nextLocations, locationItemIds: nextLocationItemIds, locationGroupById: nextGroupMap };
+    setState(nextState);
+    persist(nextState, movements);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.locations]);
+
+  type WoStatus = 'incoming' | 'inProduction' | 'finished' | 'shipping' | 'archived';
+
+  function ensureWo(woId: string, status: WoStatus = 'incoming') {
+    const id = normalizeWoId(woId);
+    const woById = { ...(state.woById ?? {}) };
+    if (!woById[id]) {
+      woById[id] = { id, status, createdAt: new Date().toISOString() };
+      const nextState: LocationState = { ...state, woById };
+      setState(nextState);
+      persist(nextState, movements);
+    }
+  }
+
+  function setWoStatus(woId: string, status: WoStatus) {
+    const id = normalizeWoId(woId);
+    const woById = { ...(state.woById ?? {}) };
+    if (!woById[id]) woById[id] = { id, status, createdAt: new Date().toISOString() };
+    woById[id] = { ...woById[id], status };
+    const nextState: LocationState = { ...state, woById };
+    setState(nextState);
+    persist(nextState, movements);
+  }
+
+  function getStockPoolLocationIds(): Id[] {
+    // Only allow pulling items from "stored inventory" groups.
+    const allowedGroups = new Set(['storage', 'shopifyRacks', 'pod']);
+    return state.locations.filter((l) => allowedGroups.has(groupForLocation(l))).map((l) => l.id);
+  }
+
+  function consumeStock(label: string, qty: number): { ok: boolean; nextState: LocationState } {
+    const want = clampQty(qty);
+    if (want <= 0) return { ok: false, nextState: state };
+    const targetLabel = label.trim().toLowerCase();
+    let remaining = want;
+    const nextItemsById: Record<Id, ItemCard> = { ...state.itemsById };
+    const nextLocItemIds: Record<Id, Id[]> = { ...state.locationItemIds };
+
+    for (const locId of getStockPoolLocationIds()) {
+      if (remaining <= 0) break;
+      const ids = (nextLocItemIds[locId] ?? []).slice();
+      const out: Id[] = [];
+      for (const itemId of ids) {
+        if (remaining <= 0) { out.push(itemId); continue; }
+        const it = nextItemsById[itemId];
+        if (!it) continue;
+        // Do not consume WO-tracked items.
+        if (extractWoId(it.label)) { out.push(itemId); continue; }
+        if (it.label.trim().toLowerCase() !== targetLabel) { out.push(itemId); continue; }
+
+        if (it.qty <= remaining) {
+          remaining -= it.qty;
+          delete nextItemsById[itemId];
+          // remove from location
+        } else {
+          nextItemsById[itemId] = { ...it, qty: it.qty - remaining };
+          remaining = 0;
+          out.push(itemId);
+        }
+      }
+      nextLocItemIds[locId] = out;
+    }
+
+    if (remaining > 0) return { ok: false, nextState: state };
+    return { ok: true, nextState: { ...state, itemsById: nextItemsById, locationItemIds: nextLocItemIds } };
+  }
+
+  function addWoMaterialLine(woId: string, locId: Id, materialLabel: string, qty: number, baseState: LocationState): LocationState {
+    const loc = findLocationById(baseState, locId);
+    if (!loc) return baseState;
+    const label = `${normalizeWoId(woId)}: ${materialLabel.trim()}`;
+    const item: ItemCard = { id: uid('item'), label, qty: clampQty(qty), color: colorForLabel(label), createdAt: new Date().toISOString() };
+    return {
+      ...baseState,
+      itemsById: { ...baseState.itemsById, [item.id]: item },
+      locationItemIds: { ...baseState.locationItemIds, [locId]: [...(baseState.locationItemIds[locId] ?? []), item.id] },
+      woById: { ...(baseState.woById ?? {}), [normalizeWoId(woId)]: (baseState.woById ?? {})[normalizeWoId(woId)] ?? { id: normalizeWoId(woId), status: 'incoming', createdAt: new Date().toISOString() } },
+    };
+  }
+
+  function addScannedLineToLocation(locId: Id, woId: string, line: string) {
+    const loc = findLocationById(state, locId);
+    if (!loc) return;
+    const qtyRaw = window.prompt('Qty to add for this line?', '1');
+    if (qtyRaw === null) return;
+    const qty = clampQty(Number(qtyRaw));
+    if (qty <= 0) return;
+    const label = `${normalizeWoId(woId)}-${line}`;
+    const color = colorForLabel(label);
+    const item: ItemCard = { id: uid('item'), label, qty, color, createdAt: new Date().toISOString() };
+    const nextState: LocationState = {
+      ...state,
+      itemsById: { ...state.itemsById, [item.id]: item },
+      locationItemIds: { ...state.locationItemIds, [locId]: [...(state.locationItemIds[locId] ?? []), item.id] },
+      woById: {
+        ...(state.woById ?? {}),
+        [normalizeWoId(woId)]: (state.woById ?? {})[normalizeWoId(woId)] ?? {
+          id: normalizeWoId(woId),
+          status: 'inProduction',
+          createdAt: new Date().toISOString(),
+        },
+      },
+    };
+    const mv: Movement = {
+      id: uid('mv'),
+      ts: new Date().toISOString(),
+      fromLocationId: 'incoming',
+      fromLocationName: 'Incoming',
+      toLocationId: locId,
+      toLocationName: loc.name,
+      itemId: item.id,
+      itemLabel: item.label,
+      qty: item.qty,
+    };
+    const nextMovements = [...movements, mv].slice(-500);
+    setState(nextState);
+    setMovements(nextMovements);
+    persist(nextState, nextMovements);
+    setStatusFlash('Scanned');
+  }
+
+  function moveWoAllItems(woId: string, toLocId: Id) {
+    const id = normalizeWoId(woId);
+    const toLoc = findLocationById(state, toLocId);
+    if (!toLoc) return;
+    const nextLocationItemIds: Record<Id, Id[]> = { ...state.locationItemIds };
+    const movedItemIds: { itemId: Id; fromLocId: Id }[] = [];
+    for (const loc of state.locations) {
+      const ids = nextLocationItemIds[loc.id] ?? [];
+      const remain: Id[] = [];
+      for (const itemId of ids) {
+        const it = state.itemsById[itemId];
+        const w = it ? extractWoId(it.label) : '';
+        if (w && w === id) {
+          movedItemIds.push({ itemId, fromLocId: loc.id });
+        } else {
+          remain.push(itemId);
+        }
+      }
+      nextLocationItemIds[loc.id] = remain;
+    }
+    if (movedItemIds.length === 0) {
+      setStatusFlash('No items for this WO');
+      return;
+    }
+    nextLocationItemIds[toLocId] = [...(nextLocationItemIds[toLocId] ?? []), ...movedItemIds.map((x) => x.itemId)];
+    const nextState: LocationState = { ...state, locationItemIds: nextLocationItemIds };
+    const newMoves: Movement[] = [];
+    for (const m of movedItemIds) {
+      const fromLoc = findLocationById(state, m.fromLocId);
+      const it = state.itemsById[m.itemId];
+      if (!it) continue;
+      newMoves.push({
+        id: uid('mv'),
+        ts: new Date().toISOString(),
+        fromLocationId: m.fromLocId,
+        fromLocationName: fromLoc?.name ?? 'Unknown',
+        toLocationId: toLocId,
+        toLocationName: toLoc.name,
+        itemId: it.id,
+        itemLabel: it.label,
+        qty: it.qty,
+      });
+    }
+    const nextMovements = [...movements, ...newMoves].slice(-500);
+    const woById = { ...(nextState.woById ?? {}) };
+    const existing = woById[id] ?? { id, status: 'inProduction', createdAt: new Date().toISOString() };
+    woById[id] = { ...existing, status: 'inProduction', locationId: toLocId };
+    const withWo: LocationState = { ...nextState, woById };
+    setState(withWo);
+    setMovements(nextMovements);
+    persist(withWo, nextMovements);
+    setStatusFlash('WO moved');
+  }
+
+  function archiveWoAndMoveToArchive(woId: string) {
+    const archiveLoc =
+      state.locations.find((l) => l.name.trim().toLowerCase() === 'archive') ??
+      state.locations.find((l) => l.name.trim().toLowerCase() === 'archive');
+    const archiveId = archiveLoc ? archiveLoc.id : ensureLocationByName('ARCHIVE');
+    moveWoAllItems(woId, archiveId);
+    const id = normalizeWoId(woId);
+    const woById = { ...(state.woById ?? {}) };
+    const existing = woById[id] ?? { id, status: 'archived', createdAt: new Date().toISOString() };
+    woById[id] = { ...existing, status: 'archived', locationId: archiveId };
+    const nextState: LocationState = { ...state, woById };
+    setState(nextState);
+    persist(nextState, movements);
+  }
+
+  function assignItemToWo(woId: string) {
+    const payload = activeItemDrag.current;
+    if (!payload) return;
+    const item = state.itemsById[payload.itemId];
+    if (!item) return;
+    const maxQty = item.qty;
+    if (maxQty <= 0) return;
+
+    let qtyStr = window.prompt(
+      `Quantity from "${item.label}" to assign to WO ${woId}? (max ${maxQty})`,
+      String(maxQty),
+    );
+    if (!qtyStr) return;
+    let qty = Number(qtyStr);
+    if (!Number.isFinite(qty) || qty <= 0) return;
+    if (qty > maxQty) qty = maxQty;
+
+    // Consume from stock: update items and locationItemIds
+    const fromLocId = payload.fromLocationId;
+    const fromLoc = findLocationById(state, fromLocId);
+    const nextItemsById = { ...state.itemsById };
+    const nextLocationItemIds: Record<Id, Id[]> = { ...state.locationItemIds };
+
+    if (qty === maxQty) {
+      delete nextItemsById[payload.itemId];
+      const ids = (nextLocationItemIds[fromLocId] ?? []).filter((id) => id !== payload.itemId);
+      nextLocationItemIds[fromLocId] = ids;
+    } else {
+      nextItemsById[payload.itemId] = { ...item, qty: item.qty - qty };
+    }
+
+    // Record movement into virtual WO location for chronology
+    const move: Movement = {
+      id: uid('mv'),
+      ts: new Date().toISOString(),
+      fromLocationId: fromLocId,
+      fromLocationName: fromLoc?.name ?? 'Unknown',
+      toLocationId: (`wo-${woId}`) as Id,
+      toLocationName: `WO ${woId}`,
+      itemId: item.id,
+      itemLabel: item.label,
+      qty,
+    };
+    const nextMovements = [...movements, move].slice(-500);
+
+    const woById = { ...(state.woById ?? {}) };
+    const currentWo = woById[woId];
+    if (!currentWo) return;
+    const newReqs = (currentWo.requirements ?? []).map((r: any) => {
+      const required = r.required ?? r.qty ?? 0;
+      const filled = r.filled ?? 0;
+      if (r.label === item.label) {
+        return { label: r.label, required, filled: filled + qty };
+      }
+      return { label: r.label, required, filled };
+    });
+
+    const allFull = newReqs.length > 0 && newReqs.every((r) => r.filled >= r.required && r.required > 0);
+
+    woById[woId] = {
+      ...currentWo,
+      requirements: newReqs,
+                              status: allFull ? 'inProduction' : currentWo.status,
+    };
+
+    const nextState: LocationState = {
+      ...state,
+      itemsById: nextItemsById,
+      locationItemIds: nextLocationItemIds,
+      woById,
+    };
+    setState(nextState);
+    setMovements(nextMovements);
+    persist(nextState, nextMovements);
+    activeItemDrag.current = null;
+    setStatusFlash(`Assigned ${qty} of ${item.label} to WO ${woId}`);
+  }
 
   function setStatusFlash(msg: string) {
     setStatus(msg);
@@ -684,8 +1049,42 @@ export function InventoryBoardApp() {
       <div className="ib-topbar">
         <div className="ib-title">Inventory board</div>
         <div className="ib-actions">
+          <input
+            className="ib-input"
+            style={{ maxWidth: 220 }}
+            value={scanValue}
+            onChange={(e) => setScanValue(e.target.value)}
+            placeholder="Scan CX1234-0023"
+            onKeyDown={(e) => {
+              if (e.key !== 'Enter') return;
+              const parsed = parseScan(scanValue);
+              if (!parsed) {
+                setStatusFlash('Invalid scan');
+                return;
+              }
+              const woId = normalizeWoId(parsed.woId);
+              ensureWo(woId, 'inProduction');
+              const locId = selectedLocationId || (state.locations[0]?.id ?? '');
+              if (!locId) {
+                setStatusFlash('Create a location first');
+                return;
+              }
+              addScannedLineToLocation(locId, woId, parsed.line);
+              setScanValue('');
+            }}
+          />
           <button className="ib-btn" onClick={createLocation}>
             + Create location
+          </button>
+          <button
+            className="ib-btn"
+            onClick={() => {
+              setWoDraftId('');
+              setWoDraftItems([]);
+              setIsWoCreateOpen(true);
+            }}
+          >
+            + New WO
           </button>
           <button className="ib-btn" onClick={() => setIsManualOpen(true)}>
             + Manual movement
@@ -697,6 +1096,107 @@ export function InventoryBoardApp() {
       </div>
 
       <div className="ib-grid">
+        <div className="ib-wo-pipeline">
+          <div className="ib-wo-pipeline-title">Work order timeline</div>
+          <div className="ib-wo-stages">
+            {[
+              { key: 'incoming', title: 'INCOMING', status: 'incoming' as WoStatus },
+              { key: 'inProd', title: 'IN PRODUCTION', status: 'inProduction' as WoStatus },
+              { key: 'finished', title: 'PRODUCTION FINISHED', status: 'finished' as WoStatus },
+              { key: 'shipping', title: 'SHIPPING', status: 'shipping' as WoStatus },
+            ].map((stage) => {
+              const list = Object.values(state.woById ?? {}).filter((w) => w.status === stage.status);
+              return (
+                <div
+                  key={stage.key}
+                  className="ib-wo-stage"
+                  onDragOver={(e) => {
+                    if (activeWoDrag.current) e.preventDefault();
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (!activeWoDrag.current) return;
+                    const woId = activeWoDrag.current.woId;
+                    activeWoDrag.current = null;
+                    // Move WO between timeline stages
+                    setWoStatus(woId, stage.status);
+                  }}
+                >
+                  <div className="ib-wo-stage-title">
+                    {stage.title} {list.length ? `(${list.length})` : ''}
+                  </div>
+                  <div
+                    className="ib-wo-stage-body"
+                    onDragOver={(e) => {
+                      if (activeItemDrag.current) e.preventDefault();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (activeItemDrag.current && list.length === 1) {
+                        assignItemToWo(list[0].id);
+                      }
+                    }}
+                  >
+                    {list.length === 0 ? (
+                      <div className="ib-panel-muted" style={{ fontSize: '0.8rem' }}>
+                        –
+                      </div>
+                    ) : (
+                      list.map((wo) => {
+                        const reqs = (wo.requirements ?? []).map((r: any) => ({
+                          label: r.label,
+                          required: r.required ?? r.qty ?? 0,
+                          filled: r.filled ?? 0,
+                        }));
+                        const isFull = reqs.length > 0 && reqs.every((r) => r.filled >= r.required && r.required > 0);
+                        return (
+                          <div
+                            key={wo.id}
+                            className={`ib-wo-card ib-wo-card-${wo.status}`}
+                            draggable
+                            onDragStart={() => {
+                              activeWoDrag.current = { woId: wo.id };
+                            }}
+                            onDragEnd={() => {
+                              activeWoDrag.current = null;
+                            }}
+                            title={`WO ${wo.id}`}
+                            onDragOver={(e) => {
+                              if (activeItemDrag.current) {
+                                e.preventDefault();
+                              }
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              if (activeItemDrag.current) assignItemToWo(wo.id);
+                            }}
+                          >
+                            <div className="ib-wo-id">
+                              {wo.id}
+                              {isFull ? ' ✓' : ''}
+                            </div>
+                            {reqs.length > 0 ? (
+                              <div className="ib-wo-req">
+                                {reqs
+                                  .slice(0, 2)
+                                  .map((r) => `${r.label} ${r.filled}/${r.required}`)
+                                  .join(' · ')}
+                                {reqs.length > 2 ? ' …' : ''}
+                              </div>
+                            ) : (
+                              <div className="ib-wo-req ib-wo-req-empty">No recipe set</div>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="ib-locations">
           {state.locations.length === 0 ? (
             <div className="ib-empty">
@@ -706,9 +1206,9 @@ export function InventoryBoardApp() {
             ([
               { key: 'floor', title: 'FLOOR' },
               { key: 'processing', title: 'PROCESSING' },
-              { key: 'pod', title: 'POD' },
+              { key: 'pod', title: 'SHOPIFY W/ KIT' },
               { key: 'storage', title: 'STORAGE' },
-              { key: 'shopifyRacks', title: 'SHOPIFY RACKS' },
+              { key: 'shopifyRacks', title: 'SHOPIFY W/ FEEDER' },
               { key: 'waste', title: 'WASTE' },
               { key: 'other', title: 'OTHER' },
             ] as const).map((g) => {
@@ -738,10 +1238,21 @@ export function InventoryBoardApp() {
                             className={`ib-loc ${selectedLocationId === loc.id ? 'is-selected' : ''}`}
                             onClick={() => setSelectedLocationId(loc.id)}
                             onDragOver={(e) => {
-                              if (activeItemDrag.current) e.preventDefault();
+                              if (activeItemDrag.current || activeWoDrag.current) e.preventDefault();
                             }}
                             onDrop={(e) => {
                               e.preventDefault();
+                              if (activeWoDrag.current) {
+                                const woId = activeWoDrag.current.woId;
+                                activeWoDrag.current = null;
+                                const isArchive = loc.name.trim().toLowerCase() === 'archive';
+                                if (isArchive) {
+                                  archiveWoAndMoveToArchive(woId);
+                                } else {
+                                  moveWoAllItems(woId, loc.id);
+                                }
+                                return;
+                              }
                               const p = activeItemDrag.current;
                               if (!p) return;
                               moveItem(p, loc.id);
@@ -922,7 +1433,7 @@ export function InventoryBoardApp() {
             <div className="ib-panel-title">Totals report</div>
             <div className="ib-kpis">
               <div className="ib-kpi">
-                <div className="ib-kpi-label">Total items</div>
+                <div className="ib-kpi-label">Total items (stock + WO)</div>
                 <div className="ib-kpi-value">{totalsReport.grandTotal}</div>
               </div>
               <div className="ib-kpi">
@@ -944,6 +1455,10 @@ export function InventoryBoardApp() {
                     <div className="ib-report-val">{totalsReport.perGroup[g.key] ?? 0}</div>
                   </div>
                 ))}
+                <div className="ib-report-row">
+                  <div className="ib-report-name">WO (allocated)</div>
+                  <div className="ib-report-val">{totalsReport.woTotal}</div>
+                </div>
               </div>
             </div>
 
@@ -973,6 +1488,78 @@ export function InventoryBoardApp() {
                 ))}
               </div>
             </div>
+          </div>
+
+          <div className="ib-panel">
+            <div className="ib-panel-title">Work orders</div>
+            {Object.keys(state.woById ?? {}).length === 0 ? (
+              <div className="ib-panel-muted">No work orders yet. Use “New WO” or scan `CX1234-0023`.</div>
+            ) : (
+              <>
+                {(
+                  [
+                    { key: 'incoming', label: 'Incoming (NEW WO)', status: 'incoming' as WoStatus },
+                    { key: 'inProduction', label: 'In production', status: 'inProduction' as WoStatus },
+                    { key: 'finished', label: 'Production finished', status: 'finished' as WoStatus },
+                    { key: 'shipping', label: 'Shipping', status: 'shipping' as WoStatus },
+                    { key: 'archived', label: 'Archived', status: 'archived' as WoStatus },
+                  ] as const
+                ).map((group) => {
+                  const list = Object.values(state.woById ?? {})
+                    .filter((w) => w.status === group.status)
+                    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+                  return (
+                    <div key={group.key} className="ib-report-section">
+                      <div className="ib-report-title">{group.label}</div>
+                      {list.length === 0 ? (
+                        <div className="ib-panel-muted">None.</div>
+                      ) : (
+                        <div className="ib-report-grid">
+                          {list.slice(0, 20).map((wo) => (
+                            <div key={wo.id} className="ib-report-row">
+                              <div className="ib-report-name">{wo.id}</div>
+                              <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                                {group.status !== 'archived' ? (
+                                  <button
+                                    className="ib-mini-btn"
+                                    onClick={() => {
+                                      const to = window.prompt('Move WO to location name? (must exist)');
+                                      if (!to) return;
+                                      const match = state.locations.find(
+                                        (l) => l.name.trim().toLowerCase() === to.trim().toLowerCase(),
+                                      );
+                                      if (!match) {
+                                        setStatusFlash('Location not found');
+                                        return;
+                                      }
+                                      moveWoAllItems(wo.id, match.id);
+                                    }}
+                                  >
+                                    Move
+                                  </button>
+                                ) : null}
+                                {group.status !== 'archived' ? (
+                                  <button className="ib-mini-btn" onClick={() => archiveWoAndMoveToArchive(wo.id)}>
+                                    Archive
+                                  </button>
+                                ) : (
+                                  <button className="ib-mini-btn" onClick={() => setWoStatus(wo.id, 'inProduction')}>
+                                    Restore
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div className="ib-panel-muted" style={{ marginTop: '0.6rem' }}>
+                  Archived WOs are excluded from totals (treated as used/shipped).
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1147,6 +1734,168 @@ export function InventoryBoardApp() {
               </div>
               <div className="ib-panel-muted">
                 Manual movements update totals. Deleting movement records does not change totals.
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isWoCreateOpen ? (
+        <div className="ib-modal" onClick={() => setIsWoCreateOpen(false)}>
+          <div className="ib-modal-inner" onClick={(e) => e.stopPropagation()}>
+            <div className="ib-modal-head">
+              <div className="ib-panel-title">New work order (Incoming)</div>
+              <button className="ib-mini-btn" onClick={() => setIsWoCreateOpen(false)}>
+                Close
+              </button>
+            </div>
+
+            <div className="ib-form">
+              <div className="ib-form-row">
+                <label className="ib-form-label">WO</label>
+                <input
+                  className="ib-input"
+                  value={woDraftId}
+                  onChange={(e) => setWoDraftId(e.target.value)}
+                  autoFocus
+                  placeholder="CX1234"
+                />
+              </div>
+
+              <div className="ib-report-section" style={{ marginTop: 0 }}>
+                <div className="ib-report-title">Items needed for production (from stock)</div>
+                <div className="ib-panel-muted">
+                  Select items that already exist in inventory stock (Storage / Shopify W/ KIT / Shopify W/ FEEDER).
+                </div>
+
+                <div className="ib-wo-stock-wrap">
+                  <div className="ib-wo-stock">
+                    <div className="ib-report-title">Stock items</div>
+                    <div className="ib-report-grid">
+                      {(() => {
+                        const pool: Record<string, number> = {};
+                        for (const locId of getStockPoolLocationIds()) {
+                          const ids = state.locationItemIds[locId] ?? [];
+                          for (const id of ids) {
+                            const it = state.itemsById[id];
+                            if (!it) continue;
+                            if (extractWoId(it.label)) continue;
+                            const k = it.label.trim();
+                            if (!k) continue;
+                            pool[k] = (pool[k] ?? 0) + it.qty;
+                          }
+                        }
+                        const labels = Object.keys(pool).sort();
+                        if (labels.length === 0) {
+                          return (
+                            <div className="ib-panel-muted" style={{ marginTop: '0.3rem' }}>
+                              No stock items available.
+                            </div>
+                          );
+                        }
+                        return labels.map((label) => (
+                          <div
+                            key={label}
+                            className="ib-report-row"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => {
+                              setWoDraftItems((prev) => {
+                                const existingIdx = prev.findIndex((p) => p.label === label);
+                                if (existingIdx >= 0) {
+                                  const next = prev.slice();
+                                  next[existingIdx] = { ...next[existingIdx], qty: next[existingIdx].qty + 1 };
+                                  return next;
+                                }
+                                return [...prev, { label, qty: 1 }];
+                              });
+                            }}
+                          >
+                            <div className="ib-report-name">{label}</div>
+                            <div className="ib-report-val">{pool[label]}</div>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="ib-wo-draft">
+                    <div className="ib-report-title">Required for this WO</div>
+                    {woDraftItems.length === 0 ? (
+                      <div className="ib-panel-muted" style={{ marginTop: '0.3rem' }}>
+                        Click a stock item to add it here.
+                      </div>
+                    ) : (
+                      <div className="ib-report-grid" style={{ marginTop: '0.3rem' }}>
+                        {woDraftItems.map((it, idx) => (
+                          <div key={idx} className="ib-report-row">
+                            <div className="ib-report-name">{it.label}</div>
+                            <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                              <input
+                                className="ib-input ib-input-qty"
+                                type="number"
+                                min={1}
+                                value={it.qty}
+                                onChange={(e) => {
+                                  const q = clampQty(Number(e.target.value));
+                                  setWoDraftItems((prev) => {
+                                    const next = prev.slice();
+                                    next[idx] = { ...next[idx], qty: q || 1 };
+                                    return next;
+                                  });
+                                }}
+                                style={{ maxWidth: '70px' }}
+                              />
+                              <button
+                                className="ib-mini-btn"
+                                onClick={() => setWoDraftItems((p) => p.filter((_, i) => i !== idx))}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="ib-panel-actions">
+                <button
+                  className="ib-btn"
+                  onClick={() => {
+                    const wo = normalizeWoId(woDraftId);
+                    if (!wo) { setStatusFlash('Enter WO'); return; }
+
+                    // Ensure locations
+                    const newWoLoc = state.locations.find((l) => l.name.trim().toLowerCase() === 'new wo') ?? state.locations.find((l) => l.name.trim().toLowerCase() === 'new wo');
+                    const newWoLocId = newWoLoc ? newWoLoc.id : ensureLocationByName('NEW WO');
+
+                    // Do NOT consume stock here; just record recipe and initial location (NEW WO).
+                    const woById = { ...(state.woById ?? {}) };
+                    const existing = woById[wo] ?? { id: wo, status: 'incoming', createdAt: new Date().toISOString() };
+                    woById[wo] = {
+                      ...existing,
+                      status: 'incoming',
+                      locationId: newWoLocId,
+                      requirements: woDraftItems.map((it) => ({
+                        label: it.label,
+                        required: it.qty,
+                        filled: 0,
+                      })),
+                    };
+                    const nextState: LocationState = { ...state, woById };
+
+                    setState(nextState);
+                    persist(nextState, movements);
+                    setIsWoCreateOpen(false);
+                    setWoDraftId('');
+                    setWoDraftItems([]);
+                    setStatusFlash('WO created');
+                  }}
+                >
+                  Create WO
+                </button>
               </div>
             </div>
           </div>
