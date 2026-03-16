@@ -1717,6 +1717,7 @@
     .drag-chip.order-ookla .dot { background: #60a5fa; }
     .drag-chip.order-wetrack .dot { background: #34d399; }
     .drag-chip.order-shopify .dot { background: #f59e0b; }
+    .drag-chip.order-wpt .dot { background: #a78bfa; }
     .drag-chip.task-receiving .dot { background: #22c55e; }
     .drag-chip.task-qc .dot { background: #06b6d4; }
     .drag-chip.task-printing .dot { background: #a78bfa; }
@@ -1736,6 +1737,7 @@
     .drag-chip.order-ookla { border-color: rgba(59,130,246,0.55); }
     .drag-chip.order-wetrack { border-color: rgba(16,185,129,0.55); }
     .drag-chip.order-shopify { border-color: rgba(245,158,11,0.55); }
+    .drag-chip.order-wpt { border-color: rgba(167,139,250,0.55); }
     .drag-chip.task-receiving { border-color: rgba(34,197,94,0.55); }
     .drag-chip.task-qc { border-color: rgba(6,182,212,0.55); }
     .drag-chip.task-printing { border-color: rgba(167,139,250,0.55); }
@@ -2012,9 +2014,11 @@
     .scheduler-assignment.order-ookla { --order-accent: #2563eb; }
     .scheduler-assignment.order-wetrack { --order-accent: #059669; }
     .scheduler-assignment.order-shopify { --order-accent: #d97706; }
+    .scheduler-assignment.order-wpt { --order-accent: #7c3aed; }
     .scheduler-assignment.order-ookla .order-name { background: #1d4ed8; }
     .scheduler-assignment.order-wetrack .order-name { background: #047857; }
     .scheduler-assignment.order-shopify .order-name { background: #b45309; }
+    .scheduler-assignment.order-wpt .order-name { background: #6d28d9; }
     .scheduler-assignment.task-receiving { --task-accent: #22c55e; --task-bg: rgba(22, 163, 74, 0.42); }
     .scheduler-assignment.task-qc { --task-accent: #06b6d4; --task-bg: rgba(8, 145, 178, 0.44); }
     .scheduler-assignment.task-printing { --task-accent: #a78bfa; --task-bg: rgba(124, 58, 237, 0.44); }
@@ -4846,7 +4850,8 @@
         var ORDERS = [
           { id: 'ookla', name: 'OOKLA', cls: 'order-ookla' },
           { id: 'wetrack', name: 'WE TRACK', cls: 'order-wetrack' },
-          { id: 'shopify', name: 'SHOPIFY', cls: 'order-shopify' }
+          { id: 'shopify', name: 'SHOPIFY', cls: 'order-shopify' },
+          { id: 'wpt', name: 'WPT', cls: 'order-wpt' }
         ];
         var MACHINES = [
           { id: 'mimaki1', name: 'Mimaki 1', cls: 'machine-mimaki1' },
@@ -4898,7 +4903,8 @@
         var DEFAULT_WO_PRICING = {
           ookla: { sl: { revenue: 0, material: 0 }, lg: { revenue: 0, material: 0 } },
           shopify: { std: { revenue: 0, material: 0 } },
-          wetrack: { std: { revenue: 0, material: 0 } }
+          wetrack: { std: { revenue: 0, material: 0 } },
+          wpt: { std: { revenue: 0, material: 0 } }
         };
         var schedulerStore = { version: 6, weeks: {}, audit: [], woFinance: {}, woPricing: clone(DEFAULT_WO_PRICING) };
 
@@ -5093,6 +5099,12 @@
               std: {
                 revenue: cleanNum(inData.wetrack && inData.wetrack.std && inData.wetrack.std.revenue),
                 material: cleanNum(inData.wetrack && inData.wetrack.std && inData.wetrack.std.material)
+              }
+            },
+            wpt: {
+              std: {
+                revenue: cleanNum(inData.wpt && inData.wpt.std && inData.wpt.std.revenue),
+                material: cleanNum(inData.wpt && inData.wpt.std && inData.wpt.std.material)
               }
             }
           };
@@ -5694,7 +5706,7 @@
             if (!task || task === 'shipping') return false;
             /* Count produced on the last step before shipping for each order path. */
             if (order === 'ookla') return task === 'cleaning';
-            if (order === 'shopify' || order === 'wetrack') return task === 'printing';
+            if (order === 'shopify' || order === 'wetrack' || order === 'wpt') return task === 'printing';
             /* Fallback for legacy rows without order info */
             return task === 'printing';
           }
@@ -5843,6 +5855,12 @@
                 material: Number(pricing.wetrack.std.material) || 0
               };
             }
+            if (row.orderId === 'wpt') {
+              return {
+                revenue: Number(pricing.wpt.std.revenue) || 0,
+                material: Number(pricing.wpt.std.material) || 0
+              };
+            }
             return { revenue: row.unitRevenue, material: row.unitMaterial };
           }
           function rowTotalsFor(row, shippedQty) {
@@ -5958,6 +5976,8 @@
                 '<div class="scheduler-pricing-row">Shopify Cost/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="shopify.std.material" value="' + pricing.shopify.std.material.toFixed(2) + '"></div>' +
                 '<div class="scheduler-pricing-row">WeTrack Rev/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="wetrack.std.revenue" value="' + pricing.wetrack.std.revenue.toFixed(2) + '"></div>' +
                 '<div class="scheduler-pricing-row">WeTrack Cost/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="wetrack.std.material" value="' + pricing.wetrack.std.material.toFixed(2) + '"></div>' +
+                '<div class="scheduler-pricing-row">WPT Rev/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="wpt.std.revenue" value="' + (pricing.wpt ? pricing.wpt.std.revenue.toFixed(2) : '0.00') + '"></div>' +
+                '<div class="scheduler-pricing-row">WPT Cost/u <input class="scheduler-wo-profit-input" type="number" min="0" step="0.01" data-pricing="wpt.std.material" value="' + (pricing.wpt ? pricing.wpt.std.material.toFixed(2) : '0.00') + '"></div>' +
               '</div>' +
             '</div>' +
             '<div class="scheduler-report-block">' +
@@ -6555,6 +6575,8 @@
                 else if (pricingKey === 'shopify.std.material') schedulerStore.woPricing.shopify.std.material = clean;
                 else if (pricingKey === 'wetrack.std.revenue') schedulerStore.woPricing.wetrack.std.revenue = clean;
                 else if (pricingKey === 'wetrack.std.material') schedulerStore.woPricing.wetrack.std.material = clean;
+                else if (pricingKey === 'wpt.std.revenue') { schedulerStore.woPricing.wpt = schedulerStore.woPricing.wpt || { std: { revenue: 0, material: 0 } }; schedulerStore.woPricing.wpt.std.revenue = clean; }
+                else if (pricingKey === 'wpt.std.material') { schedulerStore.woPricing.wpt = schedulerStore.woPricing.wpt || { std: { revenue: 0, material: 0 } }; schedulerStore.woPricing.wpt.std.material = clean; }
                 saveStore();
                 renderSchedulerInfographic();
                 return;

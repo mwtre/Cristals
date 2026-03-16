@@ -29,6 +29,8 @@ export type LocationState = {
       id: string;
       status: 'incoming' | 'inProduction' | 'finished' | 'shipping' | 'archived';
       createdAt: string;
+      // Client brand for WO card image (ookla, shopify_gold, shopify_silver, shopify_white, wetrack, wpt)
+      client?: string;
       // Optional recipe: what this WO is expected to use (does NOT move stock)
       // required: planned qty, filled: how much we already allocated/matched
       requirements?: Array<{ label: string; required: number; filled: number }>;

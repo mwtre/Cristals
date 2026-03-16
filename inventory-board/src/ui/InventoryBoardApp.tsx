@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Id, ItemCard, Location, LocationState, Movement, RemotePayload } from '../types';
 import { hasSupabaseEnv, loadLocal, loadRemote, newEmptyState, saveLocal, saveRemote } from '../lib/storage';
+import { CLIENT_OPTIONS, getClientImage, PLACEHOLDER_IMAGE, type ClientKey } from '../lib/clientImages';
 
 function uid(prefix: string): Id {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -41,13 +42,13 @@ export function InventoryBoardApp() {
   const [manualLabel, setManualLabel] = useState('');
   const [manualQty, setManualQty] = useState<number>(1);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({
-    floor: false,
-    processing: false,
-    pod: false,
-    storage: false,
-    shopifyRacks: false,
-    waste: false,
-    other: false,
+    floor: true,
+    processing: true,
+    pod: true,
+    storage: true,
+    shopifyRacks: true,
+    waste: true,
+    other: true,
   });
 
   const syncTimer = useRef<number | null>(null);
@@ -57,7 +58,10 @@ export function InventoryBoardApp() {
   const [scanValue, setScanValue] = useState('');
   const [isWoCreateOpen, setIsWoCreateOpen] = useState(false);
   const [woDraftId, setWoDraftId] = useState('');
+  const [woDraftClient, setWoDraftClient] = useState<ClientKey>('ookla');
   const [woDraftItems, setWoDraftItems] = useState<Array<{ label: string; qty: number }>>([]);
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   const selectedLocation = useMemo(
     () => (selectedLocationId ? findLocationById(state, selectedLocationId) : undefined),
@@ -87,16 +91,25 @@ export function InventoryBoardApp() {
       { key: 'other', title: 'OTHER' },
     ] as const;
 
-    const perLocation = state.locations.map((loc) => ({
-      id: loc.id,
-      name: loc.name,
-      group: groupForLocation(loc),
-      total: locationTotal(loc.id, state),
-    }));
+    const isInternalLocation = (name: string) => {
+      const n = (name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      return n === 'new wo' || n === 'archive';
+    };
+    const perLocation = state.locations
+      .filter((loc) => !isInternalLocation(loc.name))
+      .map((loc) => ({
+        id: loc.id,
+        name: loc.name,
+        group: groupForLocation(loc),
+        total: locationTotal(loc.id, state),
+      }));
 
     const perGroup: Record<string, number> = {};
     for (const g of groupsOrder) perGroup[g.key] = 0;
     for (const loc of perLocation) perGroup[loc.group] = (perGroup[loc.group] ?? 0) + loc.total;
+
+    const archiveLoc = state.locations.find((l) => isInternalLocation(l.name) && (l.name || '').toLowerCase().includes('archive'));
+    const archivedTotal = archiveLoc ? locationTotal(archiveLoc.id, state) : 0;
 
     // Quantities currently inside WOs (allocated, not archived)
     let woTotal = 0;
@@ -139,6 +152,7 @@ export function InventoryBoardApp() {
       byItem[key].qty += v.qty;
     }
     const topItems = Object.values(byItem).sort((a, b) => b.qty - a.qty).slice(0, 25);
+    const allItems = Object.values(byItem).sort((a, b) => b.qty - a.qty);
 
     return {
       groupsOrder,
@@ -146,7 +160,9 @@ export function InventoryBoardApp() {
       perLocation: perLocation.sort((a, b) => b.total - a.total),
       grandTotal,
       topItems,
+      allItems,
       woTotal,
+      archivedTotal,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, state.locations, state.locationItemIds, state.itemsById, state.locationGroupById]);
@@ -1017,7 +1033,12 @@ export function InventoryBoardApp() {
       waste: [],
       other: [],
     };
+    const skipAsLocation = (name: string) => {
+      const n = (name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      return n === 'new wo' || n === 'archive';
+    };
     for (const loc of state.locations) {
+      if (skipAsLocation(loc.name)) continue;
       const g = groupForLocation(loc);
       (byGroup[g] ?? (byGroup[g] = [])).push(loc);
     }
@@ -1095,15 +1116,34 @@ export function InventoryBoardApp() {
         </div>
       </div>
 
-      <div className="ib-grid">
-        <div className="ib-wo-pipeline">
-          <div className="ib-wo-pipeline-title">Work order timeline</div>
-          <div className="ib-wo-stages">
+      <div
+        className={`ib-grid ${!leftPanelOpen ? 'ib-grid--left-closed' : ''} ${!rightPanelOpen ? 'ib-grid--right-closed' : ''}`}
+      >
+        <div className={`ib-panel-side ib-panel-side--left ${leftPanelOpen ? 'ib-panel-side--open' : 'ib-panel-side--closed'}`}>
+          {leftPanelOpen ? (
+            <>
+              <div className="ib-panel-side-header">
+                <span className="ib-panel-side-title">WO timeline & items</span>
+                <button
+                  type="button"
+                  className="ib-panel-side-toggle"
+                  onClick={() => setLeftPanelOpen(false)}
+                  title="Close left panel"
+                  aria-label="Close left panel"
+                >
+                  ◀
+                </button>
+              </div>
+              <div className="ib-left-col">
+          <div className="ib-wo-pipeline">
+            <div className="ib-wo-pipeline-title">Work order timeline</div>
+            <div className="ib-wo-stages">
             {[
               { key: 'incoming', title: 'INCOMING', status: 'incoming' as WoStatus },
               { key: 'inProd', title: 'IN PRODUCTION', status: 'inProduction' as WoStatus },
               { key: 'finished', title: 'PRODUCTION FINISHED', status: 'finished' as WoStatus },
               { key: 'shipping', title: 'SHIPPING', status: 'shipping' as WoStatus },
+              { key: 'archived', title: 'ARCHIVED', status: 'archived' as WoStatus },
             ].map((stage) => {
               const list = Object.values(state.woById ?? {}).filter((w) => w.status === stage.status);
               return (
@@ -1118,8 +1158,11 @@ export function InventoryBoardApp() {
                     if (!activeWoDrag.current) return;
                     const woId = activeWoDrag.current.woId;
                     activeWoDrag.current = null;
-                    // Move WO between timeline stages
-                    setWoStatus(woId, stage.status);
+                    if (stage.status === 'archived') {
+                      archiveWoAndMoveToArchive(woId);
+                    } else {
+                      setWoStatus(woId, stage.status);
+                    }
                   }}
                 >
                   <div className="ib-wo-stage-title">
@@ -1149,6 +1192,16 @@ export function InventoryBoardApp() {
                           filled: r.filled ?? 0,
                         }));
                         const isFull = reqs.length > 0 && reqs.every((r) => r.filled >= r.required && r.required > 0);
+                        const statusLabel =
+                          wo.status === 'incoming'
+                            ? 'Incoming'
+                            : wo.status === 'inProduction'
+                              ? 'In production'
+                              : wo.status === 'finished'
+                                ? 'Finished'
+                                : wo.status === 'shipping'
+                                  ? 'Shipping'
+                                  : 'Archived';
                         return (
                           <div
                             key={wo.id}
@@ -1160,7 +1213,7 @@ export function InventoryBoardApp() {
                             onDragEnd={() => {
                               activeWoDrag.current = null;
                             }}
-                            title={`WO ${wo.id}`}
+                            title={`WO ${wo.id} · ${statusLabel}`}
                             onDragOver={(e) => {
                               if (activeItemDrag.current) {
                                 e.preventDefault();
@@ -1171,17 +1224,34 @@ export function InventoryBoardApp() {
                               if (activeItemDrag.current) assignItemToWo(wo.id);
                             }}
                           >
-                            <div className="ib-wo-id">
-                              {wo.id}
-                              {isFull ? ' ✓' : ''}
+                            <div className="ib-wo-card-top">
+                              <img
+                                src={getClientImage(wo.client) ?? PLACEHOLDER_IMAGE}
+                                alt=""
+                                className="ib-wo-card-img"
+                              />
+                              <div className="ib-wo-card-head">
+                                <span className="ib-wo-id">
+                                  {wo.id}
+                                  {isFull ? ' ✓' : ''}
+                                </span>
+                                <span className="ib-wo-card-status">{statusLabel}</span>
+                              </div>
                             </div>
                             {reqs.length > 0 ? (
                               <div className="ib-wo-req">
-                                {reqs
-                                  .slice(0, 2)
-                                  .map((r) => `${r.label} ${r.filled}/${r.required}`)
-                                  .join(' · ')}
-                                {reqs.length > 2 ? ' …' : ''}
+                                <div className="ib-wo-req-list">
+                                  {reqs.map((r, i) => (
+                                    <div key={i} className="ib-wo-req-line">
+                                      <span className="ib-wo-req-line-label" title={r.label}>
+                                        {r.label}
+                                      </span>
+                                      <span className="ib-wo-req-line-qty">
+                                        {r.filled}/{r.required}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             ) : (
                               <div className="ib-wo-req ib-wo-req-empty">No recipe set</div>
@@ -1194,7 +1264,37 @@ export function InventoryBoardApp() {
                 </div>
               );
             })}
+            </div>
           </div>
+
+          <div className="ib-item-overview">
+            <div className="ib-item-overview-title">Item overview</div>
+            <div className="ib-item-overview-grid">
+              {totalsReport.allItems.length === 0 ? (
+                <div className="ib-panel-muted" style={{ fontSize: '0.8rem' }}>No items yet</div>
+              ) : (
+                totalsReport.allItems.map((it) => (
+                  <div key={it.label} className="ib-item-overview-cell" title={it.label}>
+                    <span className="ib-item-overview-label">{it.label}</span>
+                    <span className="ib-item-overview-qty">{it.qty}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+              </div>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="ib-panel-side-tab"
+              onClick={() => setLeftPanelOpen(true)}
+              title="Open WO timeline & items"
+              aria-label="Open left panel"
+            >
+              WO
+            </button>
+          )}
         </div>
 
         <div className="ib-locations">
@@ -1213,7 +1313,8 @@ export function InventoryBoardApp() {
               { key: 'other', title: 'OTHER' },
             ] as const).map((g) => {
               const list = groups[g.key] ?? [];
-              const collapsed = !!collapsedGroups[g.key];
+              /* Start closed: treat missing/undefined as collapsed (true) */
+              const collapsed = collapsedGroups[g.key] !== false;
               return (
                 <div key={g.key} className="ib-group">
                   <div
@@ -1322,7 +1423,22 @@ export function InventoryBoardApp() {
           )}
         </div>
 
-        <div className="ib-side">
+        <div className={`ib-panel-side ib-panel-side--right ${rightPanelOpen ? 'ib-panel-side--open' : 'ib-panel-side--closed'}`}>
+          {rightPanelOpen ? (
+            <>
+              <div className="ib-panel-side-header">
+                <span className="ib-panel-side-title">Details & reports</span>
+                <button
+                  type="button"
+                  className="ib-panel-side-toggle"
+                  onClick={() => setRightPanelOpen(false)}
+                  title="Close right panel"
+                  aria-label="Close right panel"
+                >
+                  ▶
+                </button>
+              </div>
+              <div className="ib-side">
           <div className="ib-panel">
             <div className="ib-panel-title">Location details</div>
             {!selectedLocation ? (
@@ -1459,6 +1575,10 @@ export function InventoryBoardApp() {
                   <div className="ib-report-name">WO (allocated)</div>
                   <div className="ib-report-val">{totalsReport.woTotal}</div>
                 </div>
+                <div className="ib-report-row">
+                  <div className="ib-report-name">Archived (excl. from totals)</div>
+                  <div className="ib-report-val">{totalsReport.archivedTotal ?? 0}</div>
+                </div>
               </div>
             </div>
 
@@ -1469,21 +1589,6 @@ export function InventoryBoardApp() {
                   <div key={l.id} className="ib-report-row">
                     <div className="ib-report-name">{l.name}</div>
                     <div className="ib-report-val">{l.total}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="ib-report-section">
-              <div className="ib-report-title">Top items</div>
-              <div className="ib-report-grid">
-                {totalsReport.topItems.slice(0, 12).map((it) => (
-                  <div key={it.label} className="ib-report-row">
-                    <div className="ib-report-name">
-                      <span className="ib-dot" style={{ background: it.color || '#c9a962' }} />
-                      {it.label}
-                    </div>
-                    <div className="ib-report-val">{it.qty}</div>
                   </div>
                 ))}
               </div>
@@ -1561,6 +1666,19 @@ export function InventoryBoardApp() {
               </>
             )}
           </div>
+              </div>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="ib-panel-side-tab ib-panel-side-tab--right"
+              onClick={() => setRightPanelOpen(true)}
+              title="Open details & reports"
+              aria-label="Open right panel"
+            >
+              Details
+            </button>
+          )}
         </div>
       </div>
 
@@ -1762,6 +1880,28 @@ export function InventoryBoardApp() {
                 />
               </div>
 
+              <div className="ib-form-row">
+                <label className="ib-form-label">Client</label>
+                <div className="ib-client-picker">
+                  {CLIENT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      className={`ib-client-btn ${woDraftClient === opt.key ? 'is-selected' : ''}`}
+                      onClick={() => setWoDraftClient(opt.key)}
+                      title={opt.label}
+                    >
+                      {opt.img ? (
+                        <img src={opt.img} alt={opt.label} className="ib-client-thumb" />
+                      ) : (
+                        <img src={PLACEHOLDER_IMAGE} alt={opt.label} className="ib-client-thumb" />
+                      )}
+                      <span className="ib-client-label">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="ib-report-section" style={{ marginTop: 0 }}>
                 <div className="ib-report-title">Items needed for production (from stock)</div>
                 <div className="ib-panel-muted">
@@ -1878,6 +2018,7 @@ export function InventoryBoardApp() {
                       ...existing,
                       status: 'incoming',
                       locationId: newWoLocId,
+                      client: woDraftClient,
                       requirements: woDraftItems.map((it) => ({
                         label: it.label,
                         required: it.qty,
@@ -1890,6 +2031,7 @@ export function InventoryBoardApp() {
                     persist(nextState, movements);
                     setIsWoCreateOpen(false);
                     setWoDraftId('');
+                    setWoDraftClient('ookla');
                     setWoDraftItems([]);
                     setStatusFlash('WO created');
                   }}
