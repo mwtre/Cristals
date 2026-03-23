@@ -347,17 +347,28 @@ export function InventoryBoardApp() {
     setStatusFlash('Scanned');
   }
 
-  function moveWoAllItems(woId: string, toLocId: Id) {
+  /**
+   * Move all physical items for a WO to one location and set WO row (status + locationId).
+   * Used by both "move WO" and "archive" so we only persist once with a consistent snapshot
+   * (avoids overwriting Supabase with stale state + stale movements after archive).
+   */
+  function computeMoveWoAllItems(
+    baseState: LocationState,
+    baseMovements: Movement[],
+    woId: string,
+    toLocId: Id,
+    woStatusAfterMove: 'inProduction' | 'archived',
+  ): { withWo: LocationState; nextMovements: Movement[] } | null {
     const id = normalizeWoId(woId);
-    const toLoc = findLocationById(state, toLocId);
-    if (!toLoc) return;
-    const nextLocationItemIds: Record<Id, Id[]> = { ...state.locationItemIds };
+    const toLoc = findLocationById(baseState, toLocId);
+    if (!toLoc) return null;
+    const nextLocationItemIds: Record<Id, Id[]> = { ...baseState.locationItemIds };
     const movedItemIds: { itemId: Id; fromLocId: Id }[] = [];
-    for (const loc of state.locations) {
+    for (const loc of baseState.locations) {
       const ids = nextLocationItemIds[loc.id] ?? [];
       const remain: Id[] = [];
       for (const itemId of ids) {
-        const it = state.itemsById[itemId];
+        const it = baseState.itemsById[itemId];
         const w = it ? extractWoId(it.label) : '';
         if (w && w === id) {
           movedItemIds.push({ itemId, fromLocId: loc.id });
@@ -367,16 +378,14 @@ export function InventoryBoardApp() {
       }
       nextLocationItemIds[loc.id] = remain;
     }
-    if (movedItemIds.length === 0) {
-      setStatusFlash('No items for this WO');
-      return;
-    }
+    if (movedItemIds.length === 0) return null;
+
     nextLocationItemIds[toLocId] = [...(nextLocationItemIds[toLocId] ?? []), ...movedItemIds.map((x) => x.itemId)];
-    const nextState: LocationState = { ...state, locationItemIds: nextLocationItemIds };
+    const nextState: LocationState = { ...baseState, locationItemIds: nextLocationItemIds };
     const newMoves: Movement[] = [];
     for (const m of movedItemIds) {
-      const fromLoc = findLocationById(state, m.fromLocId);
-      const it = state.itemsById[m.itemId];
+      const fromLoc = findLocationById(baseState, m.fromLocId);
+      const it = baseState.itemsById[m.itemId];
       if (!it) continue;
       newMoves.push({
         id: uid('mv'),
@@ -390,30 +399,39 @@ export function InventoryBoardApp() {
         qty: it.qty,
       });
     }
-    const nextMovements = [...movements, ...newMoves].slice(-500);
+    const nextMovements = [...baseMovements, ...newMoves].slice(-500);
     const woById = { ...(nextState.woById ?? {}) };
-    const existing = woById[id] ?? { id, status: 'inProduction', createdAt: new Date().toISOString() };
-    woById[id] = { ...existing, status: 'inProduction', locationId: toLocId };
+    const defaultNewStatus = woStatusAfterMove === 'archived' ? 'archived' : 'inProduction';
+    const existing = woById[id] ?? { id, status: defaultNewStatus, createdAt: new Date().toISOString() };
+    woById[id] = { ...existing, status: woStatusAfterMove, locationId: toLocId };
     const withWo: LocationState = { ...nextState, woById };
-    setState(withWo);
-    setMovements(nextMovements);
-    persist(withWo, nextMovements);
+    return { withWo, nextMovements };
+  }
+
+  function moveWoAllItems(woId: string, toLocId: Id) {
+    const built = computeMoveWoAllItems(state, movements, woId, toLocId, 'inProduction');
+    if (!built) {
+      setStatusFlash('No items for this WO');
+      return;
+    }
+    setState(built.withWo);
+    setMovements(built.nextMovements);
+    persist(built.withWo, built.nextMovements);
     setStatusFlash('WO moved');
   }
 
   function archiveWoAndMoveToArchive(woId: string) {
-    const archiveLoc =
-      state.locations.find((l) => l.name.trim().toLowerCase() === 'archive') ??
-      state.locations.find((l) => l.name.trim().toLowerCase() === 'archive');
+    const archiveLoc = state.locations.find((l) => l.name.trim().toLowerCase() === 'archive');
     const archiveId = archiveLoc ? archiveLoc.id : ensureLocationByName('ARCHIVE');
-    moveWoAllItems(woId, archiveId);
-    const id = normalizeWoId(woId);
-    const woById = { ...(state.woById ?? {}) };
-    const existing = woById[id] ?? { id, status: 'archived', createdAt: new Date().toISOString() };
-    woById[id] = { ...existing, status: 'archived', locationId: archiveId };
-    const nextState: LocationState = { ...state, woById };
-    setState(nextState);
-    persist(nextState, movements);
+    const built = computeMoveWoAllItems(state, movements, woId, archiveId, 'archived');
+    if (!built) {
+      setStatusFlash('No items for this WO');
+      return;
+    }
+    setState(built.withWo);
+    setMovements(built.nextMovements);
+    persist(built.withWo, built.nextMovements);
+    setStatusFlash('Archived');
   }
 
   function assignItemToWo(woId: string) {
