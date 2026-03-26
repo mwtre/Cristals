@@ -367,6 +367,35 @@
   font-size: 1.05rem;
 }
 
+.ib-card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  border-left: 6px solid var(--accent, #c9a962);
+  border-radius: 10px;
+  padding: 0.35rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border, #2d2d2d);
+  border-left-width: 6px;
+}
+.ib-card--box-head {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(201, 169, 98, 0.12);
+}
+.ib-box-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.25rem 0 0.15rem 0.5rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+.ib-card-nested {
+  border-left-color: #94a3b8;
+  font-size: 0.95rem;
+  padding: 0.45rem 0.65rem;
+}
 .ib-wo-cards {
   margin-top: 0.45rem;
   display: flex;

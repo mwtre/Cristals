@@ -12,6 +12,12 @@ export type ItemCard = {
   qty: number;
   color: string;
   createdAt: string;
+  /** Shipping / storage box: holds other items; moving the box keeps contents together. */
+  kind?: 'box';
+  /** When set, this card lives inside a box (not listed in locationItemIds). */
+  parentBoxItemId?: Id;
+  /** For `kind === 'box'`, ordered item ids inside the box. */
+  containedItemIds?: Id[];
 };
 
 export type LocationState = {

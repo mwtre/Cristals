@@ -1,6 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import type { Id, ItemCard, Location, LocationState, Movement, RemotePayload } from '../types';
-import { hasSupabaseEnv, loadLocal, loadRemote, newEmptyState, saveLocal, saveRemote } from '../lib/storage';
+import { containedPiecesQty, detachFromParentBox, isBoxItem, locationTotal } from '../lib/boxHelpers';
+import {
+  hasSupabaseEnv,
+  loadLocal,
+  loadRemote,
+  newEmptyState,
+  saveLocal,
+  saveRemote,
+  syncInventoryBoardStats,
+  syncWorkOrdersToSupabase,
+} from '../lib/storage';
 import { CLIENT_OPTIONS, getClientImage, PLACEHOLDER_IMAGE, type ClientKey } from '../lib/clientImages';
 
 function uid(prefix: string): Id {
@@ -12,13 +22,34 @@ function clampQty(n: number): number {
   return Math.max(0, Math.round(n));
 }
 
-function locationTotal(locId: Id, st: LocationState): number {
-  const itemIds = st.locationItemIds[locId] ?? [];
-  return itemIds.reduce((sum, itemId) => sum + (st.itemsById[itemId]?.qty ?? 0), 0);
-}
-
 function findLocationById(st: LocationState, id: Id): Location | undefined {
   return st.locations.find((l) => l.id === id);
+}
+
+/** Include box shell qty plus each nested card in totals-by-label. */
+function accumulatePhysicalItem(
+  byItem: Record<string, { label: string; qty: number; color?: string }>,
+  it: ItemCard,
+  st: LocationState,
+  isArchivedWo: (label: string) => boolean,
+) {
+  if (isArchivedWo(it.label)) return;
+  if (it.kind === 'box') {
+    const bk = it.label.trim().toLowerCase();
+    if (bk) {
+      if (!byItem[bk]) byItem[bk] = { label: it.label, qty: 0, color: it.color };
+      byItem[bk].qty += it.qty;
+    }
+    for (const cid of it.containedItemIds ?? []) {
+      const c = st.itemsById[cid];
+      if (c) accumulatePhysicalItem(byItem, c, st, isArchivedWo);
+    }
+    return;
+  }
+  const key = it.label.trim().toLowerCase();
+  if (!key) return;
+  if (!byItem[key]) byItem[key] = { label: it.label, qty: 0, color: it.color };
+  byItem[key].qty += it.qty;
 }
 
 function sortMovementsDesc(a: Movement, b: Movement) {
@@ -139,11 +170,7 @@ export function InventoryBoardApp() {
       for (const id of itemIds) {
         const it = state.itemsById[id];
         if (!it) continue;
-        if (isArchivedWo(it.label)) continue;
-        const key = it.label.trim().toLowerCase();
-        if (!key) continue;
-        if (!byItem[key]) byItem[key] = { label: it.label, qty: 0, color: it.color };
-        byItem[key].qty += it.qty;
+        accumulatePhysicalItem(byItem, it, state, isArchivedWo);
       }
     }
     // Merge WO allocations into top items
@@ -363,13 +390,39 @@ export function InventoryBoardApp() {
     const toLoc = findLocationById(baseState, toLocId);
     if (!toLoc) return null;
     const nextLocationItemIds: Record<Id, Id[]> = { ...baseState.locationItemIds };
+    const nextItemsById: Record<Id, ItemCard> = { ...baseState.itemsById };
     const movedItemIds: { itemId: Id; fromLocId: Id }[] = [];
     for (const loc of baseState.locations) {
       const ids = nextLocationItemIds[loc.id] ?? [];
       const remain: Id[] = [];
       for (const itemId of ids) {
-        const it = baseState.itemsById[itemId];
-        const w = it ? extractWoId(it.label) : '';
+        const it = nextItemsById[itemId];
+        if (!it) {
+          remain.push(itemId);
+          continue;
+        }
+        if (it.kind === 'box') {
+          const contained = [...(it.containedItemIds ?? [])];
+          const kept: Id[] = [];
+          let boxTouched = false;
+          for (const cid of contained) {
+            const c = nextItemsById[cid];
+            const w = c ? extractWoId(c.label) : '';
+            if (w && w === id) {
+              movedItemIds.push({ itemId: cid, fromLocId: loc.id });
+              nextItemsById[cid] = c ? { ...c, parentBoxItemId: undefined } : c;
+              boxTouched = true;
+            } else {
+              kept.push(cid);
+            }
+          }
+          if (boxTouched) {
+            nextItemsById[itemId] = { ...it, containedItemIds: kept };
+          }
+          remain.push(itemId);
+          continue;
+        }
+        const w = extractWoId(it.label);
         if (w && w === id) {
           movedItemIds.push({ itemId, fromLocId: loc.id });
         } else {
@@ -381,7 +434,7 @@ export function InventoryBoardApp() {
     if (movedItemIds.length === 0) return null;
 
     nextLocationItemIds[toLocId] = [...(nextLocationItemIds[toLocId] ?? []), ...movedItemIds.map((x) => x.itemId)];
-    const nextState: LocationState = { ...baseState, locationItemIds: nextLocationItemIds };
+    const nextState: LocationState = { ...baseState, locationItemIds: nextLocationItemIds, itemsById: nextItemsById };
     const newMoves: Movement[] = [];
     for (const m of movedItemIds) {
       const fromLoc = findLocationById(baseState, m.fromLocId);
@@ -451,18 +504,33 @@ export function InventoryBoardApp() {
     if (!Number.isFinite(qty) || qty <= 0) return;
     if (qty > maxQty) qty = maxQty;
 
-    // Consume from stock: update items and locationItemIds
+    // Consume from stock: update items and locationItemIds (or parent box)
     const fromLocId = payload.fromLocationId;
     const fromLoc = findLocationById(state, fromLocId);
     const nextItemsById = { ...state.itemsById };
     const nextLocationItemIds: Record<Id, Id[]> = { ...state.locationItemIds };
 
-    if (qty === maxQty) {
-      delete nextItemsById[payload.itemId];
-      const ids = (nextLocationItemIds[fromLocId] ?? []).filter((id) => id !== payload.itemId);
-      nextLocationItemIds[fromLocId] = ids;
+    if (item.parentBoxItemId) {
+      const boxId = item.parentBoxItemId;
+      const box = nextItemsById[boxId];
+      if (!box || box.kind !== 'box') return;
+      if (qty === maxQty) {
+        delete nextItemsById[payload.itemId];
+        nextItemsById[boxId] = {
+          ...box,
+          containedItemIds: (box.containedItemIds ?? []).filter((id) => id !== payload.itemId),
+        };
+      } else {
+        nextItemsById[payload.itemId] = { ...item, qty: item.qty - qty };
+      }
     } else {
-      nextItemsById[payload.itemId] = { ...item, qty: item.qty - qty };
+      if (qty === maxQty) {
+        delete nextItemsById[payload.itemId];
+        const ids = (nextLocationItemIds[fromLocId] ?? []).filter((id) => id !== payload.itemId);
+        nextLocationItemIds[fromLocId] = ids;
+      } else {
+        nextItemsById[payload.itemId] = { ...item, qty: item.qty - qty };
+      }
     }
 
     // Record movement into virtual WO location for chronology
@@ -529,6 +597,8 @@ export function InventoryBoardApp() {
       try {
         setIsSyncing(true);
         await saveRemote(payload);
+        await syncWorkOrdersToSupabase(nextState.woById);
+        await syncInventoryBoardStats(nextState, payload.movements.length);
         setStatusFlash('Synced');
       } catch {
         setStatusFlash('Sync failed');
@@ -554,6 +624,7 @@ export function InventoryBoardApp() {
       const hasRemoteData =
         (remote.state?.locations?.length ?? 0) > 0 ||
         Object.keys(remote.state?.itemsById ?? {}).length > 0 ||
+        Object.keys(remote.state?.woById ?? {}).length > 0 ||
         (remote.movements?.length ?? 0) > 0;
       if (!hasRemoteData) return;
       setState(remote.state);
@@ -763,7 +834,15 @@ export function InventoryBoardApp() {
 
     const itemIds = state.locationItemIds[locId] ?? [];
     const nextItemsById = { ...state.itemsById };
-    for (const id of itemIds) delete nextItemsById[id];
+    for (const id of itemIds) {
+      const it = nextItemsById[id];
+      if (it?.kind === 'box') {
+        for (const cid of it.containedItemIds ?? []) {
+          delete nextItemsById[cid];
+        }
+      }
+      delete nextItemsById[id];
+    }
 
     const nextState: LocationState = {
       locations: state.locations.filter((l) => l.id !== locId),
@@ -822,8 +901,20 @@ export function InventoryBoardApp() {
     if (!ok) return;
 
     const nextItemsById = { ...state.itemsById };
-    delete nextItemsById[itemId];
-    const nextLocItemIds = (state.locationItemIds[selectedLocationId] ?? []).filter((id) => id !== itemId);
+    let nextLocItemIds = (state.locationItemIds[selectedLocationId] ?? []).filter((id) => id !== itemId);
+
+    if (item.kind === 'box') {
+      const contained = [...(item.containedItemIds ?? [])];
+      for (const cid of contained) {
+        const c = nextItemsById[cid];
+        if (c) nextItemsById[cid] = { ...c, parentBoxItemId: undefined };
+      }
+      delete nextItemsById[itemId];
+      nextLocItemIds = [...nextLocItemIds, ...contained];
+    } else {
+      delete nextItemsById[itemId];
+    }
+
     const nextState: LocationState = {
       ...state,
       itemsById: nextItemsById,
@@ -851,11 +942,192 @@ export function InventoryBoardApp() {
     return a.label.trim().toLowerCase() === b.label.trim().toLowerCase();
   }
 
+  function mergeIntoTargetSameBox(payload: DragPayload, targetItemId: Id) {
+    const source = state.itemsById[payload.itemId];
+    const target = state.itemsById[targetItemId];
+    if (!source || !target) return;
+    if (payload.itemId === targetItemId) return;
+    if (!sameKind(source, target)) return;
+    const boxId = source.parentBoxItemId;
+    if (!boxId || boxId !== target.parentBoxItemId) return;
+    const box = state.itemsById[boxId];
+    if (!box || box.kind !== 'box') return;
+
+    const qtyToMove = promptMoveQty(source.qty);
+    if (!qtyToMove) return;
+
+    const nextItemsById: Record<Id, ItemCard> = { ...state.itemsById };
+    nextItemsById[targetItemId] = { ...target, qty: target.qty + qtyToMove };
+
+    if (qtyToMove === source.qty) {
+      delete nextItemsById[payload.itemId];
+      nextItemsById[boxId] = {
+        ...box,
+        containedItemIds: (box.containedItemIds ?? []).filter((id) => id !== payload.itemId),
+      };
+    } else {
+      nextItemsById[payload.itemId] = { ...source, qty: source.qty - qtyToMove };
+    }
+
+    const fromLoc = findLocationById(state, payload.fromLocationId);
+    const toLoc = findLocationById(state, payload.fromLocationId);
+    const nextState: LocationState = { ...state, itemsById: nextItemsById };
+    const mv: Movement = {
+      id: uid('mv'),
+      ts: new Date().toISOString(),
+      fromLocationId: fromLoc?.id ?? payload.fromLocationId,
+      fromLocationName: fromLoc?.name ?? 'Unknown',
+      toLocationId: toLoc?.id ?? payload.fromLocationId,
+      toLocationName: toLoc?.name ?? 'Unknown',
+      itemId: targetItemId,
+      itemLabel: target.label,
+      qty: qtyToMove,
+    };
+    const nextMovements = [...movements, mv].slice(-500);
+    setState(nextState);
+    setMovements(nextMovements);
+    persist(nextState, nextMovements);
+    setStatusFlash('Merged');
+  }
+
+  function putItemInBox(payload: DragPayload, boxItemId: Id) {
+    const source = state.itemsById[payload.itemId];
+    const box = state.itemsById[boxItemId];
+    if (!source || !box || box.kind !== 'box') return;
+    if (isBoxItem(source)) {
+      setStatusFlash('Cannot nest a box inside a box');
+      return;
+    }
+    if (payload.itemId === boxItemId) return;
+
+    let nextState = state;
+    if (source.parentBoxItemId && source.parentBoxItemId !== boxItemId) {
+      nextState = detachFromParentBox(nextState, payload.itemId);
+    }
+
+    const src = nextState.itemsById[payload.itemId];
+    const bx = nextState.itemsById[boxItemId];
+    if (!src || !bx || bx.kind !== 'box') return;
+
+    const nextLocIds: Record<Id, Id[]> = { ...nextState.locationItemIds };
+    for (const lk of Object.keys(nextLocIds)) {
+      const list = nextLocIds[lk] ?? [];
+      if (list.includes(payload.itemId)) {
+        nextLocIds[lk] = list.filter((id) => id !== payload.itemId);
+      }
+    }
+
+    const contained = [...(bx.containedItemIds ?? [])];
+    if (!contained.includes(payload.itemId)) contained.push(payload.itemId);
+
+    const nextItems: Record<Id, ItemCard> = {
+      ...nextState.itemsById,
+      [boxItemId]: { ...bx, containedItemIds: contained },
+      [payload.itemId]: { ...src, parentBoxItemId: boxItemId },
+    };
+
+    nextState = { ...nextState, itemsById: nextItems, locationItemIds: nextLocIds };
+
+    const fromLoc = findLocationById(state, payload.fromLocationId);
+    const boxLocId = Object.keys(nextState.locationItemIds).find((lk) =>
+      (nextState.locationItemIds[lk] ?? []).includes(boxItemId),
+    );
+    const boxLoc = boxLocId ? findLocationById(nextState, boxLocId) : undefined;
+
+    const mv: Movement = {
+      id: uid('mv'),
+      ts: new Date().toISOString(),
+      fromLocationId: fromLoc?.id ?? payload.fromLocationId,
+      fromLocationName: fromLoc?.name ?? 'Unknown',
+      toLocationId: boxLoc?.id ?? 'box',
+      toLocationName: boxLoc ? `${boxLoc.name} → ${bx.label}` : bx.label,
+      itemId: src.id,
+      itemLabel: src.label,
+      qty: src.qty,
+    };
+    const nextMovements = [...movements, mv].slice(-500);
+    setState(nextState);
+    setMovements(nextMovements);
+    persist(nextState, nextMovements);
+    activeItemDrag.current = null;
+    setStatusFlash(`Packed in ${bx.label}`);
+  }
+
+  function reorderItemInBox(boxItemId: Id, itemId: Id, toIndex: number) {
+    const box = state.itemsById[boxItemId];
+    if (!box || box.kind !== 'box') return;
+    const ids = [...(box.containedItemIds ?? [])];
+    const fromIndex = ids.indexOf(itemId);
+    if (fromIndex < 0) return;
+    ids.splice(fromIndex, 1);
+    const safeIndex = Math.max(0, Math.min(ids.length, toIndex));
+    ids.splice(safeIndex, 0, itemId);
+    const nextState: LocationState = {
+      ...state,
+      itemsById: { ...state.itemsById, [boxItemId]: { ...box, containedItemIds: ids } },
+    };
+    setState(nextState);
+    persist(nextState, movements);
+    setStatusFlash('Reordered');
+  }
+
+  function createBox() {
+    if (!selectedLocationId) {
+      setStatusFlash('Select a location');
+      return;
+    }
+    const loc = findLocationById(state, selectedLocationId);
+    if (!loc) return;
+    const raw = window.prompt('Box ID / label (e.g. BOX-A12)', 'BOX-');
+    if (!raw?.trim()) return;
+    const label = raw.trim();
+    const item: ItemCard = {
+      id: uid('box'),
+      label,
+      qty: 1,
+      color: colorForLabel(label),
+      kind: 'box',
+      containedItemIds: [],
+      createdAt: new Date().toISOString(),
+    };
+    const nextState: LocationState = {
+      ...state,
+      itemsById: { ...state.itemsById, [item.id]: item },
+      locationItemIds: {
+        ...state.locationItemIds,
+        [selectedLocationId]: [...(state.locationItemIds[selectedLocationId] ?? []), item.id],
+      },
+    };
+    const mv: Movement = {
+      id: uid('mv'),
+      ts: new Date().toISOString(),
+      fromLocationId: 'incoming',
+      fromLocationName: 'Incoming',
+      toLocationId: selectedLocationId,
+      toLocationName: loc.name,
+      itemId: item.id,
+      itemLabel: item.label,
+      qty: 1,
+    };
+    const nextMovements = [...movements, mv].slice(-500);
+    setState(nextState);
+    setMovements(nextMovements);
+    persist(nextState, nextMovements);
+    setStatusFlash('Box created');
+  }
+
   function mergeIntoTarget(payload: DragPayload, targetLocationId: Id, targetItemId: Id) {
     const source = state.itemsById[payload.itemId];
     const target = state.itemsById[targetItemId];
     if (!source || !target) return;
     if (payload.itemId === targetItemId) return;
+
+    if (source.parentBoxItemId && target.parentBoxItemId && source.parentBoxItemId === target.parentBoxItemId) {
+      mergeIntoTargetSameBox(payload, targetItemId);
+      return;
+    }
+
+    if (isBoxItem(source) || isBoxItem(target)) return;
     if (!sameKind(source, target)) return;
 
     const fromLoc = findLocationById(state, payload.fromLocationId);
@@ -920,11 +1192,62 @@ export function InventoryBoardApp() {
     const toLoc = findLocationById(state, toLocationId);
     if (!fromLoc || !toLoc) return;
 
-    const qtyToMove = promptMoveQty(item.qty);
+    const qtyToMove =
+      isBoxItem(item) && (item.containedItemIds?.length ?? 0) > 0
+        ? item.qty
+        : promptMoveQty(item.qty);
     if (!qtyToMove) return;
+    if (isBoxItem(item) && (item.containedItemIds?.length ?? 0) > 0 && qtyToMove !== item.qty) {
+      setStatusFlash('Move the whole box when it has contents');
+      return;
+    }
 
     let nextState: LocationState = state;
-    if (qtyToMove === item.qty) {
+    let moveLabel = item.label;
+    let moveId = payload.itemId;
+
+    if (item.parentBoxItemId) {
+      if (qtyToMove === item.qty) {
+        const st = detachFromParentBox(state, payload.itemId);
+        const fromIds = (st.locationItemIds[payload.fromLocationId] ?? []).filter((id) => id !== payload.itemId);
+        const toIds = [...(st.locationItemIds[toLocationId] ?? []), payload.itemId];
+        nextState = {
+          ...st,
+          locationItemIds: {
+            ...st.locationItemIds,
+            [payload.fromLocationId]: fromIds,
+            [toLocationId]: toIds,
+          },
+        };
+      } else {
+        const newItemId = uid('item');
+        const newItem: ItemCard = {
+          ...item,
+          id: newItemId,
+          qty: qtyToMove,
+          parentBoxItemId: undefined,
+          createdAt: new Date().toISOString(),
+        };
+        const reduced: ItemCard = { ...item, qty: item.qty - qtyToMove };
+        const boxId = item.parentBoxItemId;
+        const box = state.itemsById[boxId];
+        if (!box || box.kind !== 'box') return;
+        nextState = {
+          ...state,
+          itemsById: {
+            ...state.itemsById,
+            [payload.itemId]: reduced,
+            [newItemId]: newItem,
+          },
+          locationItemIds: {
+            ...state.locationItemIds,
+            [toLocationId]: [...(state.locationItemIds[toLocationId] ?? []), newItemId],
+          },
+        };
+        moveId = newItemId;
+        moveLabel = newItem.label;
+      }
+    } else if (qtyToMove === item.qty) {
       const fromIds = (state.locationItemIds[payload.fromLocationId] ?? []).filter((id) => id !== payload.itemId);
       const toIds = [...(state.locationItemIds[toLocationId] ?? []), payload.itemId];
       nextState = {
@@ -942,6 +1265,9 @@ export function InventoryBoardApp() {
         ...item,
         id: newItemId,
         qty: qtyToMove,
+        parentBoxItemId: undefined,
+        containedItemIds: undefined,
+        kind: item.kind === 'box' ? undefined : item.kind,
         createdAt: new Date().toISOString(),
       };
       const fromIds = (state.locationItemIds[payload.fromLocationId] ?? []).slice();
@@ -960,7 +1286,10 @@ export function InventoryBoardApp() {
           [toLocationId]: toIds,
         },
       };
+      moveId = newItemId;
+      moveLabel = newItem.label;
     }
+
     const mv: Movement = {
       id: uid('mv'),
       ts: new Date().toISOString(),
@@ -968,8 +1297,8 @@ export function InventoryBoardApp() {
       fromLocationName: fromLoc.name,
       toLocationId: toLoc.id,
       toLocationName: toLoc.name,
-      itemId: item.id,
-      itemLabel: item.label,
+      itemId: moveId,
+      itemLabel: moveLabel,
       qty: qtyToMove,
     };
     const nextMovements = [...movements, mv].slice(-500);
@@ -1124,6 +1453,9 @@ export function InventoryBoardApp() {
             }}
           >
             + New WO
+          </button>
+          <button className="ib-btn" type="button" onClick={createBox}>
+            + Create box
           </button>
           <button className="ib-btn" onClick={() => setIsManualOpen(true)}>
             + Manual movement
@@ -1387,40 +1719,149 @@ export function InventoryBoardApp() {
                                 const item = state.itemsById[itemId];
                                 if (!item) return null;
                                 const index = itemIds.indexOf(itemId);
+
+                                const startDrag = (e: DragEvent, id: Id) => {
+                                  const payload: DragPayloadV2 = { type: 'item', itemId: id, fromLocationId: loc.id };
+                                  e.dataTransfer.setData('application/json', JSON.stringify(payload));
+                                  e.dataTransfer.effectAllowed = 'move';
+                                  activeItemDrag.current = payload;
+                                };
+
+                                const dropOnTopCard = (e: DragEvent, target: ItemCard, atIndex: number) => {
+                                  e.preventDefault();
+                                  const p = activeItemDrag.current;
+                                  if (!p) return;
+                                  const source = state.itemsById[p.itemId];
+                                  if (!source) return;
+                                  if (target.kind === 'box' && !isBoxItem(source) && p.itemId !== target.id) {
+                                    putItemInBox(p, target.id);
+                                    return;
+                                  }
+                                  if (
+                                    source &&
+                                    target &&
+                                    sameKind(source, target) &&
+                                    !isBoxItem(source) &&
+                                    !isBoxItem(target)
+                                  ) {
+                                    if (source.parentBoxItemId) {
+                                      setStatusFlash('Drag the line out of the box before merging with a shelf card');
+                                      return;
+                                    }
+                                    mergeIntoTarget(p, loc.id, target.id);
+                                    return;
+                                  }
+                                  if (p.fromLocationId === loc.id && !source.parentBoxItemId) {
+                                    reorderItemInLocation(loc.id, p.itemId, atIndex);
+                                    return;
+                                  }
+                                  moveItem(p, loc.id);
+                                };
+
+                                if (item.kind === 'box') {
+                                  const inside = item.containedItemIds ?? [];
+                                  const innerCount = containedPiecesQty(state.itemsById, item);
+                                  return (
+                                    <div
+                                      key={item.id}
+                                      className="ib-card-stack"
+                                      style={{ borderLeftColor: item.color || '#c9a962' }}
+                                    >
+                                      <div
+                                        className="ib-card ib-card--box-head"
+                                        draggable
+                                        data-item-id={item.id}
+                                        onDragStart={(e) => startDrag(e, item.id)}
+                                        onDragEnd={() => {
+                                          activeItemDrag.current = null;
+                                        }}
+                                        onDragOver={(e) => {
+                                          if (activeItemDrag.current) e.preventDefault();
+                                        }}
+                                        onDrop={(e) => dropOnTopCard(e, item, index)}
+                                        title="Drag box — contents move with it. Drop items here to pack."
+                                      >
+                                        <div className="ib-card-label">{item.label}</div>
+                                        <div className="ib-card-qty">
+                                          {item.qty} box · {inside.length} line(s) · {innerCount} pc
+                                        </div>
+                                      </div>
+                                      {inside.length > 0 ? (
+                                        <div className="ib-box-inner">
+                                          {inside.map((cid, cidx) => {
+                                            const child = state.itemsById[cid];
+                                            if (!child) return null;
+                                            return (
+                                              <div
+                                                key={child.id}
+                                                className="ib-card ib-card-nested"
+                                                draggable
+                                                onDragStart={(e) => {
+                                                  e.stopPropagation();
+                                                  startDrag(e, child.id);
+                                                }}
+                                                onDragEnd={() => {
+                                                  activeItemDrag.current = null;
+                                                }}
+                                                onDragOver={(e) => {
+                                                  if (activeItemDrag.current) e.preventDefault();
+                                                }}
+                                                onDrop={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  const p = activeItemDrag.current;
+                                                  if (!p) return;
+                                                  const source = state.itemsById[p.itemId];
+                                                  if (!source) return;
+                                                  if (
+                                                    source &&
+                                                    sameKind(source, child) &&
+                                                    !isBoxItem(source) &&
+                                                    !isBoxItem(child) &&
+                                                    source.parentBoxItemId === item.id &&
+                                                    child.parentBoxItemId === item.id
+                                                  ) {
+                                                    mergeIntoTargetSameBox(p, child.id);
+                                                    return;
+                                                  }
+                                                  if (
+                                                    p.fromLocationId === loc.id &&
+                                                    source.parentBoxItemId === item.id &&
+                                                    child.parentBoxItemId === item.id
+                                                  ) {
+                                                    reorderItemInBox(item.id, p.itemId, cidx);
+                                                    return;
+                                                  }
+                                                  moveItem(p, loc.id);
+                                                }}
+                                                title="Drag out to a location or onto another box"
+                                                style={{ borderLeftColor: child.color || '#94a3b8' }}
+                                              >
+                                                <div className="ib-card-label">{child.label}</div>
+                                                <div className="ib-card-qty">{child.qty}</div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                  );
+                                }
+
                                 return (
                                   <div
                                     key={item.id}
                                     className="ib-card"
                                     draggable
                                     data-item-id={item.id}
-                                    onDragStart={(e) => {
-                                      const payload: DragPayloadV2 = { type: 'item', itemId: item.id, fromLocationId: loc.id };
-                                      e.dataTransfer.setData('application/json', JSON.stringify(payload));
-                                      e.dataTransfer.effectAllowed = 'move';
-                                      activeItemDrag.current = payload;
-                                    }}
+                                    onDragStart={(e) => startDrag(e, item.id)}
                                     onDragEnd={() => {
                                       activeItemDrag.current = null;
                                     }}
                                     onDragOver={(e) => {
                                       if (activeItemDrag.current) e.preventDefault();
                                     }}
-                                    onDrop={(e) => {
-                                      e.preventDefault();
-                                      const p = activeItemDrag.current;
-                                      if (!p) return;
-                                      const source = state.itemsById[p.itemId];
-                                      const target = state.itemsById[item.id];
-                                      if (source && target && sameKind(source, target)) {
-                                        mergeIntoTarget(p, loc.id, item.id);
-                                        return;
-                                      }
-                                      if (p.fromLocationId === loc.id) {
-                                        reorderItemInLocation(loc.id, p.itemId, index);
-                                        return;
-                                      }
-                                      moveItem(p, loc.id);
-                                    }}
+                                    onDrop={(e) => dropOnTopCard(e, item, index)}
                                     title="Drag to another location"
                                     style={{ borderLeftColor: item.color || '#c9a962' }}
                                   >
@@ -1474,6 +1915,9 @@ export function InventoryBoardApp() {
                 <div className="ib-panel-actions">
                   <button className="ib-btn" onClick={() => addItemToLocation(selectedLocation.id)}>
                     + Add item
+                  </button>
+                  <button className="ib-btn" type="button" onClick={createBox}>
+                    + Create box
                   </button>
                   <button className="ib-btn ib-btn-danger" onClick={() => deleteLocation(selectedLocation.id)}>
                     Delete location

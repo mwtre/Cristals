@@ -3,6 +3,9 @@ create table production_data (
   value jsonb
 );
 
+-- inventory_movements: { v:1, state, movements } — state.itemsById includes boxes
+-- (kind, parentBoxItemId, containedItemIds), locations, WO rows, etc.
+
 alter table production_data enable row level security;
 
 create policy "Allow anon read and write"
