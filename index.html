@@ -2253,6 +2253,37 @@
     .scheduler-assignment.compact .wo-meta {
       display: none;
     }
+    .scheduler-assignment .batch-id-slot {
+      margin: 0 0 0.06rem 0;
+      font-size: 0.56rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: 0.04em;
+      color: #fffbeb;
+      background: linear-gradient(90deg, rgba(180, 83, 9, 0.72), rgba(146, 64, 14, 0.55));
+      border: 1px solid rgba(251, 191, 36, 0.45);
+      padding: 0.06rem 0.28rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: calc(100% - 18px);
+      text-transform: uppercase;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    }
+    .scheduler-assignment.compact .batch-id-slot {
+      font-size: 0.5rem;
+      padding: 0.04rem 0.2rem;
+      max-width: calc(100% - 14px);
+    }
+    .scheduler-assignment .batch-id-slot-full {
+      text-transform: none;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+    }
+    .scheduler-assignment.is-continued .batch-id-slot {
+      display: none;
+    }
     .scheduler-assignment.compact .duration-tag {
       font-size: 0.48rem;
       right: 14px;
@@ -5980,6 +6011,17 @@
           }
           return idPart;
         }
+        function assignmentBatchSlotHtml(a, compact) {
+          var wo = normalizeWoId(a.woId || '');
+          var qty = Number(a.plannedQty) > 0 ? Math.round(Number(a.plannedQty)) : 0;
+          if (!wo && qty <= 0) return '';
+          if (compact) {
+            var short = wo || String(qty);
+            if (wo && qty > 0) short = wo + ' · ' + qty + ' pcs';
+            return '<p class="batch-id-slot" title="' + formatSchedulerBatchMeta(a.woId, a.plannedQty).replace(/"/g, '&quot;') + '">' + short + '</p>';
+          }
+          return '<p class="batch-id-slot batch-id-slot-full">' + formatSchedulerBatchMeta(a.woId, a.plannedQty) + '</p>';
+        }
         function schedulerBatchMetaButtonLabel() {
           return SCHEDULER_BATCH_ID_LABEL + ' + ' + SCHEDULER_TOTAL_PIECES_LABEL;
         }
@@ -6525,7 +6567,8 @@
           var isStart = slotIdx === startIdx;
           var taskClass = t.cls ? (' ' + t.cls) : '';
           var orderClass = o ? (' ' + o.cls) : '';
-          var title = w.name + ' · ' + t.name + (o ? (' · ' + o.name) : '');
+          var woTitle = normalizeWoId(a.woId || '');
+          var title = w.name + ' · ' + t.name + (o ? (' · ' + o.name) : '') + (woTitle ? (' · ' + woTitle) : '');
           var compactClass = compact ? ' compact' : '';
           return '<div class="scheduler-assignment ' + w.cls + taskClass + orderClass + (m ? (' ' + m.cls) : '') + compactClass + (isStart ? ' is-start' : ' is-continued') + '" data-assignment-id="' + a.id + '"' +
             (isStart ? ' draggable="true"' : '') +
@@ -6533,12 +6576,12 @@
             (isStart ? '<button type="button" class="copy-btn" title="Copy assignment" data-copy="' + a.id + '">⧉</button>' : '') +
             '<button type="button" class="remove-btn" title="Remove from schedule" data-remove="' + a.id + '" aria-label="Remove">&times;</button>' +
             (isStart ? '<span class="duration-tag">' + formatHoursFromSlots(a.duration) + '</span>' : '') +
+            (isStart ? assignmentBatchSlotHtml(a, compact) : '') +
             '<p class="worker-name">' + w.name + '</p>' +
             '<p class="task-name">' + t.name + '</p>' +
             (compact ? '' : (
               (o ? ('<p class="order-name">' + o.name + '</p>') : '') +
-              (m ? ('<p class="machine-name">' + m.name + '</p>') : '') +
-              (((a.woId || '') || (Number(a.plannedQty) > 0)) ? ('<p class="wo-meta">' + formatSchedulerBatchMeta(a.woId, a.plannedQty) + '</p>') : '')
+              (m ? ('<p class="machine-name">' + m.name + '</p>') : '')
             )) +
             (isStart ? '<span class="resize-handle-x" title="Resize across days" data-resize-x="' + a.id + '"></span>' : '') +
             (isStart ? '<span class="resize-handle" title="Resize duration" data-resize="' + a.id + '"></span>' : '') +
