@@ -1811,7 +1811,7 @@
     .drag-chip.worker-enzo .dot { background: #60a5fa; }
     .drag-chip.worker-andre .dot { background: #f59e0b; }
     .drag-chip.worker-maurizio .dot { background: #34d399; }
-    .drag-chip.worker-scoth .dot { background: #f472b6; }
+    .drag-chip.worker-scott .dot { background: #f472b6; }
     .drag-chip.order-ookla .dot { background: #60a5fa; }
     .drag-chip.order-wetrack .dot { background: #34d399; }
     .drag-chip.order-shopify .dot { background: #f59e0b; }
@@ -1831,7 +1831,7 @@
     .drag-chip.worker-enzo { border-color: rgba(96,165,250,0.55); background: linear-gradient(180deg, rgba(30,58,138,0.35), rgba(15,23,42,0.95)); }
     .drag-chip.worker-andre { border-color: rgba(245,158,11,0.55); background: linear-gradient(180deg, rgba(120,53,15,0.38), rgba(15,23,42,0.95)); }
     .drag-chip.worker-maurizio { border-color: rgba(16,185,129,0.55); background: linear-gradient(180deg, rgba(6,78,59,0.4), rgba(15,23,42,0.95)); }
-    .drag-chip.worker-scoth { border-color: rgba(236,72,153,0.55); background: linear-gradient(180deg, rgba(131,24,67,0.38), rgba(15,23,42,0.95)); }
+    .drag-chip.worker-scott { border-color: rgba(236,72,153,0.55); background: linear-gradient(180deg, rgba(131,24,67,0.38), rgba(15,23,42,0.95)); }
     .drag-chip.order-ookla { border-color: rgba(59,130,246,0.55); }
     .drag-chip.order-wetrack { border-color: rgba(16,185,129,0.55); }
     .drag-chip.order-shopify { border-color: rgba(245,158,11,0.55); }
@@ -2204,7 +2204,7 @@
     .scheduler-assignment.worker-enzo { --worker-accent: #60a5fa; }
     .scheduler-assignment.worker-andre { --worker-accent: #f59e0b; }
     .scheduler-assignment.worker-maurizio { --worker-accent: #34d399; }
-    .scheduler-assignment.worker-scoth { --worker-accent: #f472b6; }
+    .scheduler-assignment.worker-scott { --worker-accent: #f472b6; }
     .scheduler-assignment.order-ookla { --order-accent: #2563eb; }
     .scheduler-assignment.order-wetrack { --order-accent: #059669; }
     .scheduler-assignment.order-shopify { --order-accent: #d97706; }
@@ -3926,11 +3926,11 @@
           </div>
           <p class="worker-total" id="worker-total-maurizio">Total: 0 min</p>
         </div>
-        <div class="worker-card" data-worker-id="scot">
+        <div class="worker-card" data-worker-id="scott">
           <div class="worker-avatar" aria-hidden="true">S</div>
-          <h3 class="worker-name">Scoth</h3>
-          <div class="worker-start-row worker-log-form" id="worker-start-scot">
-            <select id="log-task-scot" class="log-task-select" aria-label="Task for Scoth">
+          <h3 class="worker-name">Scott</h3>
+          <div class="worker-start-row worker-log-form" id="worker-start-scott">
+            <select id="log-task-scott" class="log-task-select" aria-label="Task for Scott">
               <option value="">Select task…</option>
               <option value="receiving">Receiving</option>
               <option value="qc">QC</option>
@@ -3940,20 +3940,20 @@
               <option value="kitting">Kitting</option>
               <option value="expedition">Expedition</option>
             </select>
-            <select id="log-workorder-scot" class="log-workorder-select" aria-label="Work order for Scoth">
+            <select id="log-workorder-scott" class="log-workorder-select" aria-label="Work order for Scott">
               <option value="">Work order…</option>
               <option value="OOKLA">OOKLA</option>
               <option value="SHOPIFY">SHOPIFY</option>
               <option value="WE TRACK">WE TRACK</option>
             </select>
-            <button type="button" class="cta worker-start-btn" data-worker-id="scot">Start</button>
+            <button type="button" class="cta worker-start-btn" data-worker-id="scott">Start</button>
           </div>
-          <div class="worker-running-row worker-log-form" id="worker-running-scot" style="display: none;">
-            <span class="worker-running-task" id="worker-running-task-scot"></span>
-            <span class="worker-elapsed" id="worker-elapsed-scot">0:00</span>
-            <button type="button" class="cta secondary worker-stop-btn" data-worker-id="scot">Stop</button>
+          <div class="worker-running-row worker-log-form" id="worker-running-scott" style="display: none;">
+            <span class="worker-running-task" id="worker-running-task-scott"></span>
+            <span class="worker-elapsed" id="worker-elapsed-scott">0:00</span>
+            <button type="button" class="cta secondary worker-stop-btn" data-worker-id="scott">Stop</button>
           </div>
-          <p class="worker-total" id="worker-total-scot">Total: 0 min</p>
+          <p class="worker-total" id="worker-total-scott">Total: 0 min</p>
         </div>
       </div>
       <section class="production-calendar-panel" aria-label="Monthly production calendar and cost results">
@@ -4063,7 +4063,7 @@
             <li>Create 1–2 standard job profiles (Production Worker, Line Operator) and keep them live on Indeed and local boards.</li>
             <li>Use clear shift windows and real pictures from the factory so expectations match reality.</li>
             <li>Screen quickly: short phone or WhatsApp call, then invite for a paid trial shift.</li>
-            <li>Feed accepted workers directly into our production stats system (Enzo / Andre / Maurizio / Scoth cards).</li>
+            <li>Feed accepted workers directly into our production stats system (Enzo / Andre / Maurizio / Scott cards).</li>
           </ul>
           <p class="recruiting-metric">Goal: 3–5 hires / month purely from online channels once tuned.</p>
         </article>
@@ -4471,10 +4471,11 @@
           { id: 'enzo', name: 'Enzo' },
           { id: 'andre', name: 'Andre' },
           { id: 'maurizio', name: 'Maurizio' },
-          { id: 'scot', name: 'Scoth' }
+          { id: 'scott', name: 'Scott' }
         ];
         function normalizeWorkerId(id) {
           if (id === 'enrique') return 'maurizio';
+          if (id === 'scoth' || id === 'scot') return 'scott';
           return id;
         }
         function normalizeProductionLogs(logs) {
@@ -5154,10 +5155,11 @@
           { id: 'enzo', name: 'Enzo', cls: 'worker-enzo' },
           { id: 'andre', name: 'Andre', cls: 'worker-andre' },
           { id: 'maurizio', name: 'Maurizio', cls: 'worker-maurizio' },
-          { id: 'scoth', name: 'Scoth', cls: 'worker-scoth' }
+          { id: 'scott', name: 'Scott', cls: 'worker-scott' }
         ];
         function normalizeWorkerId(id) {
           if (id === 'enrique') return 'maurizio';
+          if (id === 'scoth' || id === 'scot') return 'scott';
           return id;
         }
         var TASKS = [
