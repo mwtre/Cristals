@@ -5418,6 +5418,20 @@
           if (value === null || value === undefined) return '';
           return String(value).trim().toUpperCase();
         }
+        var SCHEDULER_BATCH_ID_LABEL = 'Batch ID';
+        var SCHEDULER_TOTAL_PIECES_LABEL = 'Total pieces';
+        function formatSchedulerBatchMeta(batchId, pieces) {
+          var idPart = batchId
+            ? (SCHEDULER_BATCH_ID_LABEL + ': ' + batchId)
+            : (SCHEDULER_BATCH_ID_LABEL + ': —');
+          if (Number(pieces) > 0) {
+            return idPart + ' • ' + SCHEDULER_TOTAL_PIECES_LABEL + ': ' + Number(pieces);
+          }
+          return idPart;
+        }
+        function schedulerBatchMetaButtonLabel() {
+          return SCHEDULER_BATCH_ID_LABEL + ' + ' + SCHEDULER_TOTAL_PIECES_LABEL;
+        }
         function normalizeTaskId(value) {
           var raw = (value === null || value === undefined) ? '' : String(value).trim().toLowerCase();
           if (!raw) return '';
@@ -5982,7 +5996,7 @@
                 '<p class="task-name">' + t.name + '</p>' +
                 (o ? ('<p class="order-name">' + o.name + '</p>') : '') +
                 (m ? '<p class="machine-name">' + m.name + '</p>' : '') +
-                (((a.woId || '') || (Number(a.plannedQty) > 0)) ? ('<p class="wo-meta">' + (a.woId ? ('WO: ' + a.woId) : 'WO: -') + (Number(a.plannedQty) > 0 ? (' • Qty: ' + Number(a.plannedQty)) : '') + '</p>') : '') +
+                (((a.woId || '') || (Number(a.plannedQty) > 0)) ? ('<p class="wo-meta">' + formatSchedulerBatchMeta(a.woId, a.plannedQty) + '</p>') : '') +
                 (isStart ? '<span class="resize-handle-x" title="Resize across days" data-resize-x="' + a.id + '"></span>' : '') +
                 (isStart ? '<span class="resize-handle" title="Resize duration" data-resize="' + a.id + '"></span>' : '') +
                 '</div>';
@@ -5991,12 +6005,12 @@
               cards += '<div class="scheduler-pending-inline">' +
                 '<span>Pending new assignment in this slot</span>' +
                 '<div class="scheduler-partial-controls">' +
-                (needsOrderMetaInline ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">WO + TOTAL</button>' : '') +
+                (needsOrderMetaInline ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">' + schedulerBatchMetaButtonLabel() + '</button>' : '') +
                 '<button type="button" class="scheduler-clear-pending-btn" data-clear-pending="' + key + '">Clear pending</button>' +
                 '</div>' +
                 (showMetaInline ? ('<div class="scheduler-slot-meta-pop">' +
-                  '<input class="scheduler-slot-meta-input" type="text" placeholder="WO for this slot" data-slot-wo-input="' + key + '" value="' + pendingWoValue + '">' +
-                  '<input class="scheduler-slot-meta-input qty" type="number" min="0" step="1" placeholder="TOTAL" data-slot-qty-input="' + key + '" value="' + pendingQtyValue + '">' +
+                  '<input class="scheduler-slot-meta-input" type="text" placeholder="' + SCHEDULER_BATCH_ID_LABEL + '" data-slot-wo-input="' + key + '" value="' + pendingWoValue + '">' +
+                  '<input class="scheduler-slot-meta-input qty" type="number" min="0" step="1" placeholder="' + SCHEDULER_TOTAL_PIECES_LABEL + '" data-slot-qty-input="' + key + '" value="' + pendingQtyValue + '">' +
                   '<button type="button" class="scheduler-slot-meta-btn" data-slot-save="' + key + '">Save</button>' +
                   '<button type="button" class="scheduler-clear-pending-btn" data-slot-cancel="' + key + '">Close</button>' +
                   '</div>') : '') +
@@ -6014,7 +6028,7 @@
             var needsOrderMeta = (pending.tasks || []).some(function (tid) { return taskNeedsOrder(tid); });
             var showMetaEditor = openPendingMetaKey === key;
             var metaLine = (pending.woId || pending.plannedQty > 0)
-              ? ('<span>WO: ' + (pending.woId || '-') + ' · Total: ' + (pending.plannedQty || '-') + '</span><br>')
+              ? ('<span>' + formatSchedulerBatchMeta(pending.woId, pending.plannedQty) + '</span><br>')
               : '';
             var needsMachineForMaint = (pending.tasks || []).some(function (tid) { return tid === 'maintenance'; });
             return '<div class="scheduler-partial">' +
@@ -6024,12 +6038,12 @@
               (machineText ? ('Machines: ' + machineText) : (needsMachineForMaint ? 'Drop machine (required for Maintenance)' : 'Drop machine (optional)')) + '<br>' +
               metaLine +
               '<div class="scheduler-partial-controls">' +
-              (needsOrderMeta ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">WO + TOTAL</button>' : '') +
+              (needsOrderMeta ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">' + schedulerBatchMetaButtonLabel() + '</button>' : '') +
               '<button type="button" class="scheduler-clear-pending-btn" data-clear-pending="' + key + '">Clear</button>' +
               '</div>' +
               (showMetaEditor ? ('<div class="scheduler-slot-meta-pop">' +
-                '<input class="scheduler-slot-meta-input" type="text" placeholder="WO for this slot" data-slot-wo-input="' + key + '" value="' + woValue + '">' +
-                '<input class="scheduler-slot-meta-input qty" type="number" min="0" step="1" placeholder="TOTAL" data-slot-qty-input="' + key + '" value="' + qtyValue + '">' +
+                '<input class="scheduler-slot-meta-input" type="text" placeholder="' + SCHEDULER_BATCH_ID_LABEL + '" data-slot-wo-input="' + key + '" value="' + woValue + '">' +
+                '<input class="scheduler-slot-meta-input qty" type="number" min="0" step="1" placeholder="' + SCHEDULER_TOTAL_PIECES_LABEL + '" data-slot-qty-input="' + key + '" value="' + qtyValue + '">' +
                 '<button type="button" class="scheduler-slot-meta-btn" data-slot-save="' + key + '">Save</button>' +
                 '<button type="button" class="scheduler-clear-pending-btn" data-slot-cancel="' + key + '">Close</button>' +
                 '</div>') : '') +
@@ -6162,7 +6176,7 @@
             else byOrder.none += h;
             if (a.machineId && byMachine[a.machineId] !== undefined) byMachine[a.machineId] += h;
             else byMachine.none += h;
-            var woKey = normalizeWoId(a.woId || '') || '(no WO)';
+            var woKey = normalizeWoId(a.woId || '') || '(no batch)';
             woSet[woKey] = true;
             totalQty += Number(a.plannedQty) || 0;
             if (!byWo[woKey]) byWo[woKey] = { hours: 0, qty: 0, tasks: {}, orders: {} };
@@ -6250,7 +6264,7 @@
           }).join('');
           el.innerHTML =
             '<div class="scheduler-plan-block"><h5>What · week ' + weekLabel + '</h5>' +
-              (whatLines.length ? '<ul>' + whatLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No work orders planned yet.</p>') +
+              (whatLines.length ? '<ul>' + whatLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No batches planned yet.</p>') +
             '</div>' +
             '<div class="scheduler-plan-block"><h5>Who</h5>' +
               (whoLines.length ? '<ul>' + whoLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No worker hours assigned.</p>') +
@@ -6261,7 +6275,7 @@
             '</div>' +
             '<div class="scheduler-plan-block" style="grid-column:1/-1"><h5>Slot detail</h5>' +
               (detailRows
-                ? '<table class="scheduler-plan-detail-table"><thead><tr><th>Day</th><th>Start</th><th>Duration</th><th>Worker</th><th>Task</th><th>Order</th><th>Machine</th><th>WO</th><th>Qty</th></tr></thead><tbody>' + detailRows + '</tbody></table>'
+                ? '<table class="scheduler-plan-detail-table"><thead><tr><th>Day</th><th>Start</th><th>Duration</th><th>Worker</th><th>Task</th><th>Order</th><th>Machine</th><th>' + SCHEDULER_BATCH_ID_LABEL + '</th><th>' + SCHEDULER_TOTAL_PIECES_LABEL + '</th></tr></thead><tbody>' + detailRows + '</tbody></table>'
                 : '<p style="margin:0;color:var(--muted)">Drag chips into the grid to build the plan.</p>') +
             '</div>';
         }
@@ -6278,12 +6292,12 @@
           rows.push(['Total planned hours', stats.totalHours.toFixed(2)].map(escapeCsvCell).join(','));
           rows.push(['Labor cost (EUR)', stats.totalLaborCost.toFixed(2)].map(escapeCsvCell).join(','));
           rows.push(['Assignments', stats.assignmentsCount].map(escapeCsvCell).join(','));
-          rows.push(['Unique WO', stats.uniqueWOs].map(escapeCsvCell).join(','));
-          rows.push(['Total qty planned', stats.totalQty].map(escapeCsvCell).join(','));
+          rows.push(['Unique batch IDs', stats.uniqueWOs].map(escapeCsvCell).join(','));
+          rows.push(['Total pieces planned', stats.totalQty].map(escapeCsvCell).join(','));
           rows.push(['Team utilization %', stats.util.toFixed(1)].map(escapeCsvCell).join(','));
           rows.push('');
           rows.push(['Planned slots'].map(escapeCsvCell).join(','));
-          rows.push(['Day', 'Start', 'Duration (h)', 'Worker', 'Task', 'Order', 'Machine', 'WO ID', 'Qty'].map(escapeCsvCell).join(','));
+          rows.push(['Day', 'Start', 'Duration (h)', 'Worker', 'Task', 'Order', 'Machine', SCHEDULER_BATCH_ID_LABEL, SCHEDULER_TOTAL_PIECES_LABEL].map(escapeCsvCell).join(','));
           sortedAssignmentRows().forEach(function (a) {
             rows.push([
               a.day,
@@ -6314,8 +6328,8 @@
             return id === 'none' ? 'No machine' : (machinesById[id] ? machinesById[id].name : id);
           });
           rows.push('');
-          rows.push(['WO rollup'].map(escapeCsvCell).join(','));
-          rows.push(['WO', 'Planned qty', 'Hours'].map(escapeCsvCell).join(','));
+          rows.push(['Batch rollup'].map(escapeCsvCell).join(','));
+          rows.push([SCHEDULER_BATCH_ID_LABEL, SCHEDULER_TOTAL_PIECES_LABEL, 'Hours'].map(escapeCsvCell).join(','));
           Object.keys(stats.byWo).sort().forEach(function (wo) {
             var r = stats.byWo[wo];
             rows.push([wo, r.qty, r.hours.toFixed(2)].map(escapeCsvCell).join(','));
@@ -6350,8 +6364,8 @@
             '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Total planned hours</div><div class="scheduler-kpi-value">' + totalHours.toFixed(1) + 'h</div></div>' +
             '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Labor cost (@ €' + WORKER_HOURLY_COST_EUR + '/h)</div><div class="scheduler-kpi-value">€' + totalLaborCost.toFixed(0) + '</div></div>' +
             '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Assignments</div><div class="scheduler-kpi-value">' + assignmentsCount + '</div></div>' +
-            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Unique WO</div><div class="scheduler-kpi-value">' + uniqueWOs + '</div></div>' +
-            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Total to produce</div><div class="scheduler-kpi-value">' + totalQty + '</div></div>' +
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Unique batch IDs</div><div class="scheduler-kpi-value">' + uniqueWOs + '</div></div>' +
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Total pieces</div><div class="scheduler-kpi-value">' + totalQty + '</div></div>' +
             '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Team utilization</div><div class="scheduler-kpi-value">' + util.toFixed(1) + '%</div></div>';
           if (!window.echarts) {
             if (fallbackEl) {
@@ -6509,7 +6523,7 @@
             return (r.producedWeek > 0 || r.shippedWeek > 0 || r.queue > 0 || r.laborHoursWeek > 0 || r.producedTotal > 0 || r.shippedTotal > 0);
           }).sort();
           if (woList.length === 0) {
-            wrap.innerHTML = '<p class="scheduler-wo-profit-title">WO profit (recognized only when shipped)</p><div class="scheduler-infographic-fallback">No WO data yet. Add WO + TOTAL in scheduler slots.</div>';
+            wrap.innerHTML = '<p class="scheduler-wo-profit-title">Batch profit (recognized only when shipped)</p><div class="scheduler-infographic-fallback">No batch data yet. Add ' + schedulerBatchMetaButtonLabel() + ' in scheduler slots.</div>';
             return;
           }
           var activeList = [];
@@ -6646,7 +6660,7 @@
           var activeTotals = totalsFor(weekList, false);
           var archiveTotals = totalsFor(archiveList, true);
           wrap.innerHTML =
-            '<p class="scheduler-wo-profit-title">WO profit (recognized only when shipped; waiting qty carries to next week)</p>' +
+            '<p class="scheduler-wo-profit-title">Batch profit (recognized only when shipped; waiting pieces carry to next week)</p>' +
             '<div class="scheduler-pricing-grid">' +
               '<div class="scheduler-pricing-card">' +
                 '<p class="scheduler-pricing-label">OOKLA - SL</p>' +
@@ -6669,7 +6683,7 @@
               '</div>' +
             '</div>' +
             '<div class="scheduler-report-block">' +
-              '<div class="scheduler-report-head"><p class="scheduler-report-title">Active Week Report</p><span class="scheduler-report-sub">All WO touched this week</span></div>' +
+              '<div class="scheduler-report-head"><p class="scheduler-report-title">Active Week Report</p><span class="scheduler-report-sub">All batches touched this week</span></div>' +
               '<div class="scheduler-report-kpis">' +
                 '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Revenue</div><div class="scheduler-report-kpi-value">€' + activeTotals.revenue.toFixed(0) + '</div></div>' +
                 '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Material</div><div class="scheduler-report-kpi-value">€' + activeTotals.material.toFixed(0) + '</div></div>' +
@@ -6677,8 +6691,8 @@
                 '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Net</div><div class="scheduler-report-kpi-value">' + (activeTotals.net >= 0 ? '+' : '') + '€' + activeTotals.net.toFixed(0) + '</div></div>' +
               '</div>' +
               '<div class="scheduler-table-wrap"><table class="scheduler-wo-profit-table">' +
-              '<thead><tr><th>WO</th><th>Produced</th><th>Shipped</th><th>Status</th><th>Piece</th><th>Revenue/u (€)</th><th>Material/u (€)</th><th>Margin/u</th><th>Labor</th><th>Labor cost</th><th>Net</th></tr></thead>' +
-              '<tbody>' + (activeRows || '<tr><td colspan="11"><span class="scheduler-infographic-fallback">No WO activity in this week.</span></td></tr>') + '</tbody></table></div>' +
+              '<thead><tr><th>' + SCHEDULER_BATCH_ID_LABEL + '</th><th>Produced</th><th>Shipped</th><th>Status</th><th>Piece</th><th>Revenue/u (€)</th><th>Material/u (€)</th><th>Margin/u</th><th>Labor</th><th>Labor cost</th><th>Net</th></tr></thead>' +
+              '<tbody>' + (activeRows || '<tr><td colspan="11"><span class="scheduler-infographic-fallback">No batch activity in this week.</span></td></tr>') + '</tbody></table></div>' +
             '</div>' +
             '<div class="scheduler-report-block">' +
               '<div class="scheduler-report-head"><p class="scheduler-report-title">Archived Totals Report</p><span class="scheduler-report-sub">Fully shipped orders</span></div>' +
@@ -6689,8 +6703,8 @@
                 '<div class="scheduler-report-kpi"><div class="scheduler-report-kpi-label">Net</div><div class="scheduler-report-kpi-value">' + (archiveTotals.net >= 0 ? '+' : '') + '€' + archiveTotals.net.toFixed(0) + '</div></div>' +
               '</div>' +
               '<div class="scheduler-table-wrap"><table class="scheduler-wo-profit-table">' +
-              '<thead><tr><th>WO</th><th>Produced (total)</th><th>Shipped (total)</th><th>Status</th><th>Piece</th><th>Revenue/u (€)</th><th>Material/u (€)</th><th>Margin/u</th><th>Labor (total)</th><th>Labor cost</th><th>Net</th></tr></thead>' +
-              '<tbody>' + (archiveRows || '<tr><td colspan="11"><span class="scheduler-infographic-fallback">No archived WO yet.</span></td></tr>') + '</tbody></table></div>' +
+              '<thead><tr><th>' + SCHEDULER_BATCH_ID_LABEL + '</th><th>Produced (total)</th><th>Shipped (total)</th><th>Status</th><th>Piece</th><th>Revenue/u (€)</th><th>Material/u (€)</th><th>Margin/u</th><th>Labor (total)</th><th>Labor cost</th><th>Net</th></tr></thead>' +
+              '<tbody>' + (archiveRows || '<tr><td colspan="11"><span class="scheduler-infographic-fallback">No archived batches yet.</span></td></tr>') + '</tbody></table></div>' +
             '</div>';
         }
         function renderScheduler() {
@@ -6811,7 +6825,7 @@
           });
         }
         function exportWeekCsv() {
-          var lines = [['Day', 'Time', 'Duration(h)', 'Worker', 'Task', 'Order', 'Machine', 'WO ID', 'Qty'].map(escapeCsvCell).join(',')];
+          var lines = [['Day', 'Time', 'Duration(h)', 'Worker', 'Task', 'Order', 'Machine', SCHEDULER_BATCH_ID_LABEL, SCHEDULER_TOTAL_PIECES_LABEL].map(escapeCsvCell).join(',')];
           sortedAssignmentRows().forEach(function (a) {
             var w = workersById[a.workerId] ? workersById[a.workerId].name : a.workerId;
             var t = tasksById[a.taskId] ? tasksById[a.taskId].name : a.taskId;
@@ -6990,7 +7004,7 @@
               logAction('Created ' + result.made + ' assignment(s) at ' + day + ' ' + time);
             }
             if (result.missingOrders > 0) showSchedulerMessage('Order required for ordered tasks');
-            if (result.missingMeta > 0) showSchedulerMessage('Add WO + TOTAL for this slot');
+            if (result.missingMeta > 0) showSchedulerMessage('Add ' + schedulerBatchMetaButtonLabel() + ' for this slot');
             if (result.missingMachines > 0) showSchedulerMessage('Maintenance needs a machine');
             if (result.maintenanceConflicts > 0) showSchedulerMessage('Maintenance blocked: worker already booked in this slot');
             if (result.conflicts > 0) showSchedulerMessage('Conflicts skipped: ' + result.conflicts);
@@ -7095,7 +7109,7 @@
               var time = slot.getAttribute('data-time') || '';
               if (!day || !time) return;
               if (taskNeedsOrder(copiedAssignment.taskId) && !hasRequiredOrderMeta(copiedAssignment)) {
-                showSchedulerMessage('Copied assignment missing WO/TOTAL TO PRODUCE');
+                showSchedulerMessage('Copied assignment missing ' + schedulerBatchMetaButtonLabel());
                 return;
               }
               pushUndo();
@@ -7198,7 +7212,7 @@
             var keys = Object.keys(bulkSelected);
             if (keys.length === 0) return;
             if (taskNeedsOrder(t.value)) {
-              showSchedulerMessage('Bulk ordered tasks disabled: WO/TOTAL are per slot');
+              showSchedulerMessage('Bulk ordered tasks disabled: ' + schedulerBatchMetaButtonLabel() + ' are per slot');
               return;
             }
             pushUndo();
