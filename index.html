@@ -6530,9 +6530,11 @@
             (isStart ? '<span class="duration-tag">' + formatHoursFromSlots(a.duration) + '</span>' : '') +
             '<p class="worker-name">' + w.name + '</p>' +
             '<p class="task-name">' + t.name + '</p>' +
-            (compact ? '' : ((o ? ('<p class="order-name">' + o.name + '</p>') : '') +
-              (m ? '<p class="machine-name">' + m.name + '</p>') +
-              (((a.woId || '') || (Number(a.plannedQty) > 0)) ? ('<p class="wo-meta">' + formatSchedulerBatchMeta(a.woId, a.plannedQty) + '</p>') : ''))) +
+            (compact ? '' : (
+              (o ? ('<p class="order-name">' + o.name + '</p>') : '') +
+              (m ? ('<p class="machine-name">' + m.name + '</p>') : '') +
+              (((a.woId || '') || (Number(a.plannedQty) > 0)) ? ('<p class="wo-meta">' + formatSchedulerBatchMeta(a.woId, a.plannedQty) + '</p>') : '')
+            )) +
             (isStart ? '<span class="resize-handle-x" title="Resize across days" data-resize-x="' + a.id + '"></span>' : '') +
             (isStart ? '<span class="resize-handle" title="Resize duration" data-resize="' + a.id + '"></span>' : '') +
             '</div>';
