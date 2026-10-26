@@ -1864,6 +1864,7 @@
     .drag-chip.task-cleaning .dot { background: #14b8a6; }
     .drag-chip.task-maintenance .dot { background: #64748b; }
     .drag-chip.task-meeting .dot { background: #38bdf8; }
+    .drag-chip.task-test .dot { background: #c084fc; }
     .drag-chip.machine-mimaki1 .dot { background: #a78bfa; }
     .drag-chip.machine-mimaki2 .dot { background: #22d3ee; }
     .drag-chip.machine-sand-blaster .dot { background: #f87171; }
@@ -1885,6 +1886,7 @@
     .drag-chip.task-cleaning { border-color: rgba(20,184,166,0.55); }
     .drag-chip.task-maintenance { border-color: rgba(148,163,184,0.55); }
     .drag-chip.task-meeting { border-color: rgba(56,189,248,0.55); }
+    .drag-chip.task-test { border-color: rgba(192,132,252,0.55); }
     .scheduler-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
     .scheduler-topbar {
       display: flex;
@@ -2307,6 +2309,8 @@
     .scheduler-assignment.task-cleaning .task-name { background: #0f766e; }
     .scheduler-assignment.task-maintenance .task-name { background: #475569; }
     .scheduler-assignment.task-meeting .task-name { background: #0284c7; }
+    .scheduler-assignment.task-test { --task-accent: #c084fc; --task-bg: rgba(124, 58, 237, 0.4); }
+    .scheduler-assignment.task-test .task-name { background: #7c3aed; }
     .scheduler-assignment.machine-mimaki1 { box-shadow: inset 0 -2px 0 0 rgba(167,139,250,0.92), 0 4px 10px rgba(0,0,0,0.22); }
     .scheduler-assignment.machine-mimaki2 { box-shadow: inset 0 -2px 0 0 rgba(34,211,238,0.92), 0 4px 10px rgba(0,0,0,0.22); }
     .scheduler-assignment.machine-sand-blaster { box-shadow: inset 0 -2px 0 0 rgba(248,113,113,0.92), 0 4px 10px rgba(0,0,0,0.22); }
@@ -5277,7 +5281,8 @@
           { id: 'painting', name: 'Painting', cls: 'task-painting' },
           { id: 'cleaning', name: 'Cleaning', cls: 'task-cleaning' },
           { id: 'maintenance', name: 'Maintenance', cls: 'task-maintenance', durationSlots: 2 },
-          { id: 'meeting', name: 'Meeting', cls: 'task-meeting', durationSlots: 1 }
+          { id: 'meeting', name: 'Meeting', cls: 'task-meeting', durationSlots: 1 },
+          { id: 'test', name: 'Test', cls: 'task-test', durationSlots: 2 }
         ];
         var ORDERS = [
           { id: 'ookla', name: 'OOKLA', cls: 'order-ookla' },
@@ -6039,7 +6044,7 @@
           });
         }
         function taskNeedsOrder(taskId) {
-          return taskId !== 'maintenance' && taskId !== 'meeting';
+          return taskId !== 'maintenance' && taskId !== 'meeting' && taskId !== 'test';
         }
         function createAssignment(day, time, workerId, taskId, orderId, duration, machineId, woId, plannedQty) {
           var startIdx = timeIndex(time);
@@ -6269,7 +6274,7 @@
               '<button type="button" class="remove-btn" title="Clear slot" data-clear-pending="' + key + '" aria-label="Clear slot">&times;</button>' +
               (workersText ? ('Workers: ' + workersText) : 'Drop worker') + '<br>' +
               (taskText ? ('Tasks: ' + taskText) : 'Drop task') + '<br>' +
-              (orderText ? ('Orders: ' + orderText) : 'Drop order (optional for Meeting / Maintenance)') + '<br>' +
+              (orderText ? ('Orders: ' + orderText) : 'Drop order (optional for Meeting / Maintenance / Test)') + '<br>' +
               (machineText ? ('Machines: ' + machineText) : (needsMachineForMaint ? 'Drop machine (required for Maintenance)' : 'Drop machine (optional)')) + '<br>' +
               metaLine +
               durationSelectHtml(key, pending) +
