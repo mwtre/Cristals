@@ -2172,29 +2172,42 @@
       font-weight: 700;
       color: #e2e8f0;
     }
-    .scheduler-assignment .remove-btn {
+    .scheduler-assignment .remove-btn,
+    .scheduler-partial .remove-btn,
+    .scheduler-pending-inline .remove-btn {
       position: absolute;
       top: 2px;
       right: 2px;
-      width: 18px;
-      height: 18px;
+      width: 14px;
+      height: 14px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.35);
-      background: rgba(185, 28, 28, 0.92);
-      color: #fff;
+      border: none;
+      background: rgba(15, 23, 42, 0.5);
+      color: #94a3b8;
       cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 700;
-      line-height: 16px;
+      font-size: 0.62rem;
+      font-weight: 600;
+      line-height: 14px;
       text-align: center;
       padding: 0;
-      opacity: 1;
+      opacity: 0;
       z-index: 5;
-      transition: background 0.15s ease, transform 0.12s ease;
+      transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
     }
-    .scheduler-assignment .remove-btn:hover {
-      background: #ef4444;
-      transform: scale(1.06);
+    .scheduler-slot:hover .scheduler-assignment .remove-btn,
+    .scheduler-assignment:hover .remove-btn,
+    .scheduler-slot:hover .scheduler-partial .remove-btn,
+    .scheduler-slot:hover .scheduler-pending-inline .remove-btn,
+    .scheduler-partial:hover .remove-btn,
+    .scheduler-pending-inline:hover .remove-btn {
+      opacity: 0.55;
+    }
+    .scheduler-assignment .remove-btn:hover,
+    .scheduler-partial .remove-btn:hover,
+    .scheduler-pending-inline .remove-btn:hover {
+      opacity: 1;
+      background: rgba(127, 29, 29, 0.82);
+      color: #fecaca;
     }
     .scheduler-assignment .copy-btn {
       position: absolute;
@@ -2326,19 +2339,13 @@
       text-align: center;
       font-size: 0.66rem;
       line-height: 1.24;
-      padding: 0.26rem 1.6rem 0.26rem 0.26rem;
+      padding: 0.26rem 1.1rem 0.26rem 0.26rem;
       background: linear-gradient(180deg, rgba(15,23,42,0.7), rgba(2,6,23,0.65));
       position: relative;
     }
     .scheduler-pending-inline {
       position: relative;
-      padding-right: 1.4rem;
-    }
-    .scheduler-partial .remove-btn,
-    .scheduler-pending-inline .remove-btn {
-      position: absolute;
-      top: 3px;
-      right: 3px;
+      padding-right: 1rem;
     }
     .scheduler-partial-controls {
       margin-top: 0.2rem;
