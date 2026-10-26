@@ -1710,6 +1710,10 @@
       flex: 1 1 45%;
       min-height: 220px;
     }
+    #step-production-stats .scheduler-main.is-plan-collapsed .scheduler-grid-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
     #step-production-stats .scheduler-extras {
       margin-top: 0.5rem;
       border: 1px solid rgba(255,255,255,0.08);
@@ -1933,10 +1937,63 @@
       margin-top: 0.5rem;
       border: 1px solid rgba(201,169,98,0.22);
       border-radius: 12px;
-      padding: 0.55rem 0.65rem;
       background: linear-gradient(180deg, rgba(22,22,22,0.95), rgba(12,12,12,0.95));
       flex-shrink: 0;
-      max-height: min(42vh, 420px);
+      overflow: hidden;
+    }
+    .scheduler-plan-panel-summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem 0.65rem;
+      padding: 0.5rem 0.65rem;
+      border-bottom: 1px solid transparent;
+    }
+    .scheduler-plan-panel-summary::-webkit-details-marker { display: none; }
+    .scheduler-plan-panel-summary::before {
+      content: '▸';
+      color: var(--accent);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    .scheduler-plan-panel[open] .scheduler-plan-panel-summary {
+      border-bottom-color: rgba(255,255,255,0.06);
+    }
+    .scheduler-plan-panel[open] .scheduler-plan-panel-summary::before { content: '▾'; }
+    .scheduler-plan-summary-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .scheduler-plan-teaser {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .scheduler-plan-teaser-pill {
+      font-size: 0.68rem;
+      padding: 0.12rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(15,23,42,0.55);
+      color: #e2e8f0;
+      white-space: nowrap;
+    }
+    .scheduler-plan-teaser-pill strong { color: var(--accent); font-weight: 700; }
+    .scheduler-plan-summary-hint {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+    .scheduler-plan-panel-body {
+      padding: 0.55rem 0.65rem;
+      max-height: min(40vh, 400px);
       overflow: auto;
     }
     .scheduler-plan-panel-head {
@@ -1959,12 +2016,13 @@
     }
     .scheduler-plan-narrative {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.55rem;
+      margin-bottom: 0.55rem;
     }
     .scheduler-plan-block {
       border: 1px solid rgba(255,255,255,0.08);
+      border-left: 3px solid rgba(201,169,98,0.45);
       border-radius: 8px;
       padding: 0.4rem 0.45rem;
       background: rgba(0,0,0,0.22);
@@ -1983,6 +2041,47 @@
       padding-left: 1rem;
     }
     .scheduler-plan-block li { margin-bottom: 0.2rem; }
+    .scheduler-plan-block.block-what { border-left-color: #f59e0b; }
+    .scheduler-plan-block.block-who { border-left-color: #60a5fa; }
+    .scheduler-plan-block.block-how { border-left-color: #34d399; }
+    .scheduler-plan-block.block-detail { border-left-color: #a78bfa; }
+    .plan-who-row {
+      display: grid;
+      grid-template-columns: 4.5rem 1fr 2.5rem;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.28rem;
+      list-style: none;
+      padding: 0;
+    }
+    .plan-who-name { font-size: 0.72rem; font-weight: 600; }
+    .plan-who-bar {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.8);
+      overflow: hidden;
+    }
+    .plan-who-bar span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    }
+    .plan-who-hours {
+      font-size: 0.68rem;
+      text-align: right;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .plan-batch-card {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 0.35rem 0.45rem;
+      margin-bottom: 0.35rem;
+      background: rgba(15,23,42,0.35);
+    }
+    .plan-batch-card strong { color: #fbbf24; }
+    .plan-batch-meta { font-size: 0.68rem; color: var(--muted); margin-top: 0.15rem; line-height: 1.35; }
     .scheduler-plan-detail-table {
       width: 100%;
       border-collapse: collapse;
@@ -2583,8 +2682,11 @@
       border: 1px solid rgba(148,163,184,0.2);
       border-radius: 8px;
       padding: 0.35rem 0.4rem;
-      background: rgba(15,23,42,0.45);
+      background: linear-gradient(145deg, rgba(30,41,59,0.55), rgba(15,23,42,0.75));
     }
+    .scheduler-kpi.kpi-hours { border-color: rgba(96,165,250,0.35); }
+    .scheduler-kpi.kpi-cost { border-color: rgba(245,158,11,0.35); }
+    .scheduler-kpi.kpi-util { border-color: rgba(52,211,153,0.35); }
     .scheduler-kpi-label {
       font-size: 0.62rem;
       color: #94a3b8;
@@ -3849,6 +3951,7 @@
             </div>
             <div class="scheduler-topbar-actions">
               <button type="button" class="scheduler-mini-btn scheduler-sidebar-toggle" id="scheduler-sidebar-toggle" aria-expanded="true">Hide sidebar</button>
+              <button type="button" class="scheduler-mini-btn" id="scheduler-plan-toggle" aria-expanded="false">Show plan summary</button>
               <button type="button" class="scheduler-mini-btn" id="scheduler-prev-week">← Week</button>
               <button type="button" class="scheduler-mini-btn" id="scheduler-today-week">This week</button>
               <button type="button" class="scheduler-mini-btn" id="scheduler-next-week">Week →</button>
@@ -3893,18 +3996,25 @@
             <div class="scheduler-grid-wrap">
               <table class="scheduler-table" id="scheduler-table"></table>
             </div>
-            <section class="scheduler-plan-panel" id="scheduler-plan-panel" aria-label="Weekly plan infographic">
-              <div class="scheduler-plan-panel-head">
-                <h4>Plan infographic — what · who · how</h4>
-                <div class="scheduler-plan-export-row">
-                  <button type="button" class="scheduler-mini-btn" id="scheduler-export-excel">Export Excel</button>
-                  <button type="button" class="scheduler-mini-btn" id="scheduler-export-csv">Export CSV</button>
-                  <button type="button" class="scheduler-mini-btn" id="scheduler-print-visible">Print</button>
+            <details class="scheduler-plan-panel" id="scheduler-plan-panel" aria-label="Weekly plan infographic">
+              <summary class="scheduler-plan-panel-summary">
+                <span class="scheduler-plan-summary-title">Week plan summary</span>
+                <span class="scheduler-plan-teaser" id="scheduler-plan-teaser"></span>
+                <span class="scheduler-plan-summary-hint">Expand for infographic</span>
+              </summary>
+              <div class="scheduler-plan-panel-body">
+                <div class="scheduler-plan-panel-head">
+                  <h4>What · who · how</h4>
+                  <div class="scheduler-plan-export-row">
+                    <button type="button" class="scheduler-mini-btn" id="scheduler-export-excel">Export Excel</button>
+                    <button type="button" class="scheduler-mini-btn" id="scheduler-export-csv">Export CSV</button>
+                    <button type="button" class="scheduler-mini-btn" id="scheduler-print-visible">Print</button>
+                  </div>
                 </div>
+                <div class="scheduler-kpis" id="scheduler-kpis"></div>
+                <div class="scheduler-plan-narrative" id="scheduler-plan-narrative"></div>
               </div>
-              <div class="scheduler-plan-narrative" id="scheduler-plan-narrative"></div>
-              <div class="scheduler-kpis" id="scheduler-kpis"></div>
-            </section>
+            </details>
             <details class="scheduler-extras" id="scheduler-extras">
               <summary>Charts, capacity &amp; audit</summary>
             <div class="scheduler-capacity" id="scheduler-capacity"></div>
@@ -5356,8 +5466,8 @@
         }
         function reportFinalizePendingResult(result, day, time) {
           if (result.made > 0) logAction('Created ' + result.made + ' assignment(s) at ' + day + ' ' + time);
-          if (result.missingOrders > 0) showSchedulerMessage('Order required for ordered tasks');
-          if (result.missingMeta > 0) showSchedulerMessage('Add ' + schedulerBatchMetaButtonLabel() + ' for this slot');
+          if (result.missingOrders > 0) showSchedulerMessage('Add an order or ' + SCHEDULER_BATCH_ID_LABEL + ' / ' + SCHEDULER_TOTAL_PIECES_LABEL);
+          if (result.missingMeta > 0) showSchedulerMessage('Add ' + schedulerBatchMetaButtonLabel() + ' or drop an order');
           if (result.missingMachines > 0) showSchedulerMessage('Maintenance needs a machine');
           if (result.maintenanceConflicts > 0) showSchedulerMessage('Maintenance blocked: worker already booked in this slot');
           if (result.conflicts > 0) showSchedulerMessage('Conflicts skipped: ' + result.conflicts);
@@ -5589,6 +5699,32 @@
             btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
           }
         }
+        function syncPlanPanelLayout() {
+          var main = document.querySelector('#step-production-stats .scheduler-main');
+          var panel = schedulerEl('scheduler-plan-panel');
+          var toggleBtn = schedulerEl('scheduler-plan-toggle');
+          var open = !!(panel && panel.open);
+          if (main) main.classList.toggle('is-plan-collapsed', !open);
+          if (toggleBtn) {
+            toggleBtn.textContent = open ? 'Hide plan summary' : 'Show plan summary';
+            toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          }
+          var hint = document.querySelector('.scheduler-plan-summary-hint');
+          if (hint) hint.textContent = open ? 'Click to collapse' : 'Expand for infographic';
+        }
+        function setPlanPanelOpen(open) {
+          var panel = schedulerEl('scheduler-plan-panel');
+          if (!panel) return;
+          panel.open = !!open;
+          syncPlanPanelLayout();
+        }
+        function resizeSchedulerChartsSoon() {
+          requestAnimationFrame(function () {
+            Object.keys(schedulerCharts).forEach(function (k) {
+              if (schedulerCharts[k]) schedulerCharts[k].resize();
+            });
+          });
+        }
         function slotKey(day, time) { return day + '|' + time; }
         function pendingHasContent(pending) {
           if (!pending) return false;
@@ -5676,8 +5812,17 @@
         function pad2(n) { return String(n).padStart(2, '0'); }
         function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
         function timeIndex(time) { return TIMES.indexOf(time); }
+        function hasBatchMeta(woId, plannedQty) {
+          return !!normalizeWoId(woId) || Number(plannedQty) > 0;
+        }
         function hasRequiredOrderMeta(meta) {
-          return !!(meta && meta.woId && Number(meta.plannedQty) > 0);
+          if (!meta) return false;
+          if (meta.orderId && ordersById[meta.orderId]) return true;
+          return hasBatchMeta(meta.woId, meta.plannedQty);
+        }
+        function pendingHasCommercialRef(pending, woId, plannedQty) {
+          var hasOrder = !!(pending && pending.orders && pending.orders.length > 0);
+          return hasOrder || hasBatchMeta(woId, plannedQty);
         }
         function normalizeWoId(value) {
           if (value === null || value === undefined) return '';
@@ -5898,12 +6043,9 @@
             var taskId = normalizeTaskId(a.taskId);
             taskId = tasksById[taskId] ? taskId : null;
             var orderId = ordersById[a.orderId] ? a.orderId : '';
-            if (taskId && taskNeedsOrder(taskId) && !orderId) {
-              orderId = ordersById[DEFAULT_ORDER_ID] ? DEFAULT_ORDER_ID : null;
-            }
             var machineId = machinesById[a.machineId] ? a.machineId : '';
             if (!day || !startTime || !workerId || !taskId) return null;
-            if (taskNeedsOrder(taskId) && !orderId) return null;
+            if (taskNeedsOrder(taskId) && !orderId && !hasBatchMeta(a.woId, a.plannedQty)) return null;
             var startIdx = timeIndex(startTime);
             var duration = clampDuration(startIdx, Math.round((Number(a.duration) || 1) * factor));
             return {
@@ -6082,9 +6224,10 @@
           var normalizedWoId = normalizeWoId(woId || '');
           var normalizedOrderId = '';
           if (taskNeedsOrder(taskId)) {
-            if (!ordersById[orderId]) return false;
-            if (!normalizedWoId || Number(plannedQty) <= 0) return false;
-            normalizedOrderId = orderId;
+            var hasOrder = ordersById[orderId];
+            var hasBatch = hasBatchMeta(normalizedWoId, plannedQty);
+            if (!hasOrder && !hasBatch) return false;
+            normalizedOrderId = hasOrder ? orderId : '';
           } else {
             normalizedOrderId = ordersById[orderId] ? orderId : '';
           }
@@ -6212,16 +6355,13 @@
                   return;
                 }
               }
-              var orderList = taskNeedsOrder(tid)
-                ? ((pending.orders && pending.orders.length > 0) ? pending.orders : [])
-                : [''];
-              if (taskNeedsOrder(tid) && orderList.length === 0) {
-                missingOrders++;
-                return;
-              }
-              if (taskNeedsOrder(tid) && (!woId || plannedQty <= 0)) {
-                missingMeta++;
-                return;
+              var orderList = [''];
+              if (taskNeedsOrder(tid)) {
+                if (!pendingHasCommercialRef(pending, woId, plannedQty)) {
+                  missingOrders++;
+                  return;
+                }
+                orderList = (pending.orders && pending.orders.length > 0) ? pending.orders : [''];
               }
               orderList.forEach(function (oid) {
                 machineList.forEach(function (mid) {
@@ -6240,7 +6380,9 @@
           var inSlot = getAssignmentsForSlot(day, slotIdx);
           if (inSlot.length > 0) {
             var hasPending = (pending.workers && pending.workers.length) || (pending.tasks && pending.tasks.length) || (pending.orders && pending.orders.length) || (pending.machines && pending.machines.length);
-            var needsOrderMetaInline = (pending.tasks || []).some(function (tid) { return taskNeedsOrder(tid); });
+            var needsOrderMetaInline = (pending.tasks || []).some(function (tid) {
+              return taskNeedsOrder(tid) && !pendingHasCommercialRef(pending, pending.woId, pending.plannedQty);
+            });
             var showMetaInline = openPendingMetaKey === key;
             var pendingWoValue = pending.woId ? String(normalizeWoId(pending.woId)).replace(/"/g, '&quot;') : '';
             var pendingQtyValue = Number(pending.plannedQty) > 0 ? String(Math.round(Number(pending.plannedQty))) : '';
@@ -6294,7 +6436,9 @@
             var machineText = (pending.machines || []).map(function (m) { return machinesById[m] ? machinesById[m].name : ''; }).filter(Boolean).join(', ');
             var woValue = pending.woId ? String(normalizeWoId(pending.woId)).replace(/"/g, '&quot;') : '';
             var qtyValue = Number(pending.plannedQty) > 0 ? String(Math.round(Number(pending.plannedQty))) : '';
-            var needsOrderMeta = (pending.tasks || []).some(function (tid) { return taskNeedsOrder(tid); });
+            var needsOrderMeta = (pending.tasks || []).some(function (tid) {
+              return taskNeedsOrder(tid) && !pendingHasCommercialRef(pending, pending.woId, pending.plannedQty);
+            });
             var showMetaEditor = openPendingMetaKey === key;
             var metaLine = (pending.woId || pending.plannedQty > 0)
               ? ('<span>' + formatSchedulerBatchMeta(pending.woId, pending.plannedQty) + '</span><br>')
@@ -6304,7 +6448,7 @@
               '<button type="button" class="remove-btn" title="Clear slot" data-clear-pending="' + key + '" aria-label="Clear slot">&times;</button>' +
               (workersText ? ('Workers: ' + workersText) : 'Drop worker') + '<br>' +
               (taskText ? ('Tasks: ' + taskText) : 'Drop task') + '<br>' +
-              (orderText ? ('Orders: ' + orderText) : 'Drop order (optional for Meeting / Maintenance / Test)') + '<br>' +
+              (orderText ? ('Orders: ' + orderText) : 'Drop order or add Batch ID / pieces (optional for Meeting, Maintenance, Test)') + '<br>' +
               (machineText ? ('Machines: ' + machineText) : (needsMachineForMaint ? 'Drop machine (required for Maintenance)' : 'Drop machine (optional)')) + '<br>' +
               metaLine +
               durationSelectHtml(key, pending) +
@@ -6504,20 +6648,24 @@
             var orderBits = Object.keys(row.orders).sort().map(function (o) {
               return o + ' (' + row.orders[o].toFixed(1) + 'h)';
             }).join(', ');
-            return '<li><strong>' + wo + '</strong> — ' + row.qty + ' pcs planned · ' + row.hours.toFixed(1) + 'h' +
-              (taskBits ? '<br><span style="color:var(--muted)">Tasks: ' + taskBits + '</span>' : '') +
-              (orderBits ? '<br><span style="color:var(--muted)">Orders: ' + orderBits + '</span>' : '') +
-              '</li>';
+            return '<div class="plan-batch-card"><strong>' + wo + '</strong> · ' + row.qty + ' pcs · ' + row.hours.toFixed(1) + 'h' +
+              (taskBits || orderBits ? ('<div class="plan-batch-meta">' +
+                (taskBits ? ('Tasks: ' + taskBits) : '') +
+                (taskBits && orderBits ? '<br>' : '') +
+                (orderBits ? ('Orders: ' + orderBits) : '') +
+                '</div>') : '') +
+              '</div>';
           });
+          var maxWorkerHours = 0;
+          WORKERS.forEach(function (w) { maxWorkerHours = Math.max(maxWorkerHours, stats.byWorker[w.id] || 0); });
+          if (maxWorkerHours <= 0) maxWorkerHours = 1;
           var whoLines = WORKERS.map(function (w) {
             var h = stats.byWorker[w.id] || 0;
             if (h <= 0) return '';
-            var taskParts = TASKS.map(function (t) {
-              var hh = stats.workerTaskHours[w.id + '|' + t.id] || 0;
-              return hh > 0 ? (t.name + ' ' + hh.toFixed(1) + 'h') : '';
-            }).filter(Boolean).join(', ');
-            return '<li><strong>' + w.name + '</strong> — ' + h.toFixed(1) + 'h' +
-              (taskParts ? ' · ' + taskParts : '') + '</li>';
+            var pct = Math.max(4, Math.round((h / maxWorkerHours) * 100));
+            return '<li class="plan-who-row"><span class="plan-who-name">' + w.name + '</span>' +
+              '<span class="plan-who-bar" aria-hidden="true"><span style="width:' + pct + '%"></span></span>' +
+              '<span class="plan-who-hours">' + h.toFixed(1) + 'h</span></li>';
           }).filter(Boolean);
           var howLines = TASKS.map(function (t) {
             var h = stats.byTask[t.id] || 0;
@@ -6535,17 +6683,17 @@
             return '<tr><td>' + a.day + '</td><td>' + a.startTime + '</td><td>' + (a.duration * slotHours()).toFixed(1) + 'h</td><td>' + w + '</td><td>' + t + '</td><td>' + o + '</td><td>' + m + '</td><td>' + (a.woId || '') + '</td><td>' + (a.plannedQty || '') + '</td></tr>';
           }).join('');
           el.innerHTML =
-            '<div class="scheduler-plan-block"><h5>What · week ' + weekLabel + '</h5>' +
-              (whatLines.length ? '<ul>' + whatLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No batches planned yet.</p>') +
+            '<div class="scheduler-plan-block block-what"><h5>What · ' + weekLabel + '</h5>' +
+              (whatLines.length ? whatLines.join('') : '<p style="margin:0;color:var(--muted)">No batches planned yet.</p>') +
             '</div>' +
-            '<div class="scheduler-plan-block"><h5>Who</h5>' +
-              (whoLines.length ? '<ul>' + whoLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No worker hours assigned.</p>') +
+            '<div class="scheduler-plan-block block-who"><h5>Who · hours by person</h5>' +
+              (whoLines.length ? '<ul style="margin:0;padding:0">' + whoLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No worker hours assigned.</p>') +
             '</div>' +
-            '<div class="scheduler-plan-block"><h5>How (tasks &amp; machines)</h5>' +
+            '<div class="scheduler-plan-block block-how"><h5>How · tasks &amp; machines</h5>' +
               (howLines.length ? '<ul>' + howLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No tasks scheduled.</p>') +
               (machineLines.length ? '<p style="margin:0.35rem 0 0;color:var(--muted)">Machines</p><ul>' + machineLines.join('') + '</ul>' : '') +
             '</div>' +
-            '<div class="scheduler-plan-block" style="grid-column:1/-1"><h5>Slot detail</h5>' +
+            '<div class="scheduler-plan-block block-detail" style="grid-column:1/-1"><h5>Slot detail</h5>' +
               (detailRows
                 ? '<table class="scheduler-plan-detail-table"><thead><tr><th>Day</th><th>Start</th><th>Duration</th><th>Worker</th><th>Task</th><th>Order</th><th>Machine</th><th>' + SCHEDULER_BATCH_ID_LABEL + '</th><th>' + SCHEDULER_TOTAL_PIECES_LABEL + '</th></tr></thead><tbody>' + detailRows + '</tbody></table>'
                 : '<p style="margin:0;color:var(--muted)">Drag chips into the grid to build the plan.</p>') +
@@ -6633,12 +6781,20 @@
           var totalLaborCost = stats.totalLaborCost;
           var util = stats.util;
           kpisEl.innerHTML =
-            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Total planned hours</div><div class="scheduler-kpi-value">' + totalHours.toFixed(1) + 'h</div></div>' +
-            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Labor cost (@ €' + WORKER_HOURLY_COST_EUR + '/h)</div><div class="scheduler-kpi-value">€' + totalLaborCost.toFixed(0) + '</div></div>' +
+            '<div class="scheduler-kpi kpi-hours"><div class="scheduler-kpi-label">Planned hours</div><div class="scheduler-kpi-value">' + totalHours.toFixed(1) + 'h</div></div>' +
+            '<div class="scheduler-kpi kpi-cost"><div class="scheduler-kpi-label">Labor (@ €' + WORKER_HOURLY_COST_EUR + '/h)</div><div class="scheduler-kpi-value">€' + totalLaborCost.toFixed(0) + '</div></div>' +
+            '<div class="scheduler-kpi kpi-util"><div class="scheduler-kpi-label">Utilization</div><div class="scheduler-kpi-value">' + util.toFixed(1) + '%</div></div>' +
             '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Assignments</div><div class="scheduler-kpi-value">' + assignmentsCount + '</div></div>' +
-            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Unique batch IDs</div><div class="scheduler-kpi-value">' + uniqueWOs + '</div></div>' +
-            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Total pieces</div><div class="scheduler-kpi-value">' + totalQty + '</div></div>' +
-            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Team utilization</div><div class="scheduler-kpi-value">' + util.toFixed(1) + '%</div></div>';
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Batch IDs</div><div class="scheduler-kpi-value">' + uniqueWOs + '</div></div>' +
+            '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Pieces</div><div class="scheduler-kpi-value">' + totalQty + '</div></div>';
+          var teaserEl = schedulerEl('scheduler-plan-teaser');
+          if (teaserEl) {
+            teaserEl.innerHTML =
+              '<span class="scheduler-plan-teaser-pill"><strong>' + totalHours.toFixed(1) + 'h</strong> planned</span>' +
+              '<span class="scheduler-plan-teaser-pill">' + assignmentsCount + ' assignments</span>' +
+              '<span class="scheduler-plan-teaser-pill">' + util.toFixed(0) + '% util</span>' +
+              (totalQty > 0 ? ('<span class="scheduler-plan-teaser-pill">' + totalQty + ' pcs</span>') : '');
+          }
           if (!window.echarts) {
             if (fallbackEl) {
               fallbackEl.style.display = 'block';
@@ -7203,6 +7359,19 @@
               saveSchedulerUi(ui);
             });
           }
+          var planToggleBtn = schedulerEl('scheduler-plan-toggle');
+          if (planToggleBtn) {
+            planToggleBtn.addEventListener('click', function () {
+              var panel = schedulerEl('scheduler-plan-panel');
+              if (!panel) return;
+              panel.open = !panel.open;
+              var ui = readSchedulerUi();
+              ui.planPanelOpen = panel.open;
+              saveSchedulerUi(ui);
+              syncPlanPanelLayout();
+              if (panel.open) resizeSchedulerChartsSoon();
+            });
+          }
           initResize();
           function bindDragStart(root) {
             if (!root) return;
@@ -7467,7 +7636,7 @@
               var time = slot.getAttribute('data-time') || '';
               if (!day || !time) return;
               if (taskNeedsOrder(copiedAssignment.taskId) && !hasRequiredOrderMeta(copiedAssignment)) {
-                showSchedulerMessage('Copied assignment missing ' + schedulerBatchMetaButtonLabel());
+                showSchedulerMessage('Copied assignment needs an order or batch info');
                 return;
               }
               pushUndo();
@@ -7694,6 +7863,20 @@
           if (!schedulerEl('scheduler-table')) return;
           var ui = readSchedulerUi();
           setSidebarCollapsed(!!ui.sidebarCollapsed);
+          var planPanel = schedulerEl('scheduler-plan-panel');
+          if (planPanel) {
+            planPanel.open = ui.planPanelOpen === true;
+            syncPlanPanelLayout();
+            planPanel.addEventListener('toggle', function () {
+              var nextUi = readSchedulerUi();
+              nextUi.planPanelOpen = planPanel.open;
+              saveSchedulerUi(nextUi);
+              syncPlanPanelLayout();
+              if (planPanel.open) resizeSchedulerChartsSoon();
+            });
+          } else {
+            syncPlanPanelLayout();
+          }
           renderPaletteAndControls();
           loadRemote(function (data) {
             schedulerStore = normalizeStore(data);
