@@ -2106,20 +2106,27 @@
     }
     .scheduler-assignment .remove-btn {
       position: absolute;
-      top: 1px;
-      right: 1px;
-      width: 14px;
-      height: 14px;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
       border-radius: 999px;
-      border: none;
-      background: rgba(17,24,39,0.28);
-      color: #111827;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(185, 28, 28, 0.92);
+      color: #fff;
       cursor: pointer;
-      font-size: 0.62rem;
-      line-height: 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 16px;
       text-align: center;
-      opacity: 0;
-      transition: opacity 0.15s ease;
+      padding: 0;
+      opacity: 1;
+      z-index: 5;
+      transition: background 0.15s ease, transform 0.12s ease;
+    }
+    .scheduler-assignment .remove-btn:hover {
+      background: #ef4444;
+      transform: scale(1.06);
     }
     .scheduler-assignment .copy-btn {
       position: absolute;
@@ -2138,7 +2145,6 @@
       opacity: 0;
       transition: opacity 0.15s ease;
     }
-    .scheduler-slot:hover .scheduler-assignment .remove-btn { opacity: 1; }
     .scheduler-slot:hover .scheduler-assignment .copy-btn { opacity: 1; }
     .scheduler-assignment .resize-handle {
       position: absolute;
@@ -2250,8 +2256,19 @@
       text-align: center;
       font-size: 0.66rem;
       line-height: 1.24;
-      padding: 0.26rem;
+      padding: 0.26rem 1.6rem 0.26rem 0.26rem;
       background: linear-gradient(180deg, rgba(15,23,42,0.7), rgba(2,6,23,0.65));
+      position: relative;
+    }
+    .scheduler-pending-inline {
+      position: relative;
+      padding-right: 1.4rem;
+    }
+    .scheduler-partial .remove-btn,
+    .scheduler-pending-inline .remove-btn {
+      position: absolute;
+      top: 3px;
+      right: 3px;
     }
     .scheduler-partial-controls {
       margin-top: 0.2rem;
@@ -6071,7 +6088,7 @@
                 (isStart ? ' draggable="true" title="Drag to move"' : '') +
                 '>' +
                 (isStart ? '<button type="button" class="copy-btn" title="Copy assignment" data-copy="' + a.id + '">⧉</button>' : '') +
-                (isStart ? '<button type="button" class="remove-btn" title="Remove assignment" data-remove="' + a.id + '">&times;</button>' : '') +
+                '<button type="button" class="remove-btn" title="Remove from schedule" data-remove="' + a.id + '" aria-label="Remove">&times;</button>' +
                 (isStart ? '<span class="duration-tag">' + formatHoursFromSlots(a.duration) + '</span>' : '') +
                 '<p class="worker-name">' + w.name + '</p>' +
                 '<p class="task-name">' + t.name + '</p>' +
@@ -6084,6 +6101,7 @@
             }).join('');
             if (hasPending) {
               cards += '<div class="scheduler-pending-inline">' +
+                '<button type="button" class="remove-btn" title="Clear pending" data-clear-pending="' + key + '" aria-label="Clear pending">&times;</button>' +
                 '<span>Pending new assignment in this slot</span>' +
                 '<div class="scheduler-partial-controls">' +
                 (needsOrderMetaInline ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">' + schedulerBatchMetaButtonLabel() + '</button>' : '') +
@@ -6113,6 +6131,7 @@
               : '';
             var needsMachineForMaint = (pending.tasks || []).some(function (tid) { return tid === 'maintenance'; });
             return '<div class="scheduler-partial">' +
+              '<button type="button" class="remove-btn" title="Clear slot" data-clear-pending="' + key + '" aria-label="Clear slot">&times;</button>' +
               (workersText ? ('Workers: ' + workersText) : 'Drop worker') + '<br>' +
               (taskText ? ('Tasks: ' + taskText) : 'Drop task') + '<br>' +
               (orderText ? ('Orders: ' + orderText) : 'Drop order (optional for Meeting / Maintenance)') + '<br>' +
@@ -7116,7 +7135,9 @@
           });
           table.addEventListener('click', function (e) {
             var slot = e.target && e.target.closest ? e.target.closest('.scheduler-slot') : null;
-            var clearPendingBtn = e.target && e.target.closest ? e.target.closest('.scheduler-clear-pending-btn') : null;
+            var clearPendingBtn = e.target && e.target.closest
+              ? e.target.closest('.scheduler-clear-pending-btn, .remove-btn[data-clear-pending]')
+              : null;
             var editMetaBtn = e.target && e.target.closest ? e.target.closest('.scheduler-slot-meta-btn[data-slot-edit]') : null;
             var saveMetaBtn = e.target && e.target.closest ? e.target.closest('.scheduler-slot-meta-btn[data-slot-save]') : null;
             var applySlotBtn = e.target && e.target.closest ? e.target.closest('.scheduler-slot-apply') : null;
@@ -7199,13 +7220,20 @@
               }
               return;
             }
-            var btn = e.target && e.target.closest ? e.target.closest('.remove-btn') : null;
+            var btn = e.target && e.target.closest ? e.target.closest('.remove-btn[data-remove]') : null;
             if (btn) {
               var assignmentId = btn.getAttribute('data-remove') || '';
               if (!assignmentId) return;
+              var target = currentWeekData.assignments.find(function (a) { return a.id === assignmentId; });
               pushUndo();
-              currentWeekData.assignments = currentWeekData.assignments.filter(function (a) { return a.id !== assignmentId; });
-              logAction('Removed assignment');
+              if (target && target.seriesId) {
+                var seriesId = target.seriesId;
+                currentWeekData.assignments = currentWeekData.assignments.filter(function (a) { return a.seriesId !== seriesId; });
+                logAction('Removed series from schedule');
+              } else {
+                currentWeekData.assignments = currentWeekData.assignments.filter(function (a) { return a.id !== assignmentId; });
+                logAction('Removed assignment');
+              }
               saveStore();
               renderScheduler();
               return;
