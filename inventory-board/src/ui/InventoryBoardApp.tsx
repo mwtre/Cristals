@@ -597,11 +597,21 @@ export function InventoryBoardApp() {
       try {
         setIsSyncing(true);
         await saveRemote(payload);
-        await syncWorkOrdersToSupabase(nextState.woById);
-        await syncInventoryBoardStats(nextState, payload.movements.length);
         setStatusFlash('Synced');
-      } catch {
-        setStatusFlash('Sync failed');
+        try {
+          await syncWorkOrdersToSupabase(nextState.woById);
+        } catch (err) {
+          console.warn('work_orders sync failed (main inventory saved):', err);
+        }
+        try {
+          await syncInventoryBoardStats(nextState, payload.movements.length);
+        } catch (err) {
+          console.warn('inventory_board_stats sync failed (main inventory saved):', err);
+        }
+      } catch (err) {
+        console.error('Inventory sync failed:', err);
+        const msg = err instanceof Error ? err.message : 'Sync failed';
+        setStatusFlash(msg.length > 72 ? 'Sync failed — see console' : msg);
       } finally {
         setIsSyncing(false);
       }

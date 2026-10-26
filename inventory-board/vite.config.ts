@@ -13,7 +13,7 @@ export default defineConfig({
     {
       name: 'inject-cristal-supabase-globals',
       transformIndexHtml(html) {
-        const snippet = `\n    <script>window.CRISTAL_SUPABASE_URL='${CRISTAL_SUPABASE.url}';window.CRISTAL_SUPABASE_ANON_KEY='${CRISTAL_SUPABASE.anonKey}';</script>`;
+        const snippet = `\n    <script>window.CRISTAL_SUPABASE_URL='${CRISTAL_SUPABASE.url}';window.CRISTAL_SUPABASE_ANON_KEY='${CRISTAL_SUPABASE.anonKey}';</script>\n    <script src="../../cristal-supabase-rest.js"></script>`;
         return html.replace('<head>', `<head>${snippet}`);
       },
     },

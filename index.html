@@ -672,6 +672,58 @@
       background: var(--accent);
       color: #0d0d0d;
     }
+    #top-steps-nav .top-step-primary {
+      font-weight: 600;
+      border-color: rgba(201,169,98,0.45);
+      padding: 0.48rem 1rem;
+    }
+    .top-nav-more {
+      position: relative;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    .top-nav-more-toggle {
+      padding: 0.42rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.03);
+      color: rgba(226,232,240,0.78);
+      font: inherit;
+      font-size: 0.86rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .top-nav-more-toggle:hover,
+    .top-nav-more-toggle[aria-expanded="true"] {
+      border-color: rgba(201,169,98,0.55);
+      background: rgba(201,169,98,0.08);
+      color: #e2e8f0;
+    }
+    .top-nav-more-panel {
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      right: 0;
+      min-width: 220px;
+      max-height: min(70vh, 420px);
+      overflow-y: auto;
+      padding: 0.35rem;
+      border-radius: 12px;
+      border: 1px solid rgba(201,169,98,0.25);
+      background: rgba(13, 13, 13, 0.98);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .top-nav-more-panel[hidden] { display: none !important; }
+    .top-nav-more-panel .top-step {
+      width: 100%;
+      justify-content: flex-start;
+      border-radius: 8px;
+    }
 
     .cta {
       display: block;
@@ -1645,6 +1697,48 @@
     #step-production-stats .scheduler-bulk-row {
       display: none !important;
     }
+    #step-production-stats .production-stats-title {
+      font-size: 1.15rem;
+      margin: 0 0 0.35rem 0;
+    }
+    #step-production-stats .production-stats-inner {
+      height: calc(100vh - 3.25rem - 0.5rem);
+      max-height: calc(100vh - 3.25rem - 0.5rem);
+      overflow: hidden;
+    }
+    #step-production-stats .scheduler-extras {
+      margin-top: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 0.35rem 0.5rem;
+      background: rgba(0,0,0,0.2);
+      flex-shrink: 0;
+    }
+    #step-production-stats .scheduler-extras > summary {
+      cursor: pointer;
+      font-size: 0.78rem;
+      color: var(--muted);
+      user-select: none;
+      list-style: none;
+    }
+    #step-production-stats .scheduler-extras > summary::-webkit-details-marker { display: none; }
+    #step-production-stats .scheduler-extras > summary::before {
+      content: '▸ ';
+      color: var(--accent);
+    }
+    #step-production-stats .scheduler-extras[open] > summary::before { content: '▾ '; }
+    #step-production-stats .scheduler-extras[open] > summary { margin-bottom: 0.5rem; color: var(--text); }
+    #step-production-stats .scheduler-main {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    #step-production-stats .scheduler-legend-row {
+      flex-shrink: 0;
+    }
+    #step-production-stats .scheduler-topbar-actions {
+      flex-shrink: 0;
+    }
     .production-scheduler-wrap {
       background: radial-gradient(1200px 260px at 25% -120px, rgba(201,169,98,0.18), rgba(26,26,26,0.96) 55%),
         linear-gradient(180deg, rgba(30,30,30,0.96), rgba(18,18,18,0.96));
@@ -1712,7 +1806,7 @@
     .drag-chip .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
     .drag-chip.worker-enzo .dot { background: #60a5fa; }
     .drag-chip.worker-andre .dot { background: #f59e0b; }
-    .drag-chip.worker-enrique .dot { background: #34d399; }
+    .drag-chip.worker-maurizio .dot { background: #34d399; }
     .drag-chip.worker-scoth .dot { background: #f472b6; }
     .drag-chip.order-ookla .dot { background: #60a5fa; }
     .drag-chip.order-wetrack .dot { background: #34d399; }
@@ -1732,7 +1826,7 @@
     .drag-chip.machine-sand-blaster .dot { background: #f87171; }
     .drag-chip.worker-enzo { border-color: rgba(96,165,250,0.55); background: linear-gradient(180deg, rgba(30,58,138,0.35), rgba(15,23,42,0.95)); }
     .drag-chip.worker-andre { border-color: rgba(245,158,11,0.55); background: linear-gradient(180deg, rgba(120,53,15,0.38), rgba(15,23,42,0.95)); }
-    .drag-chip.worker-enrique { border-color: rgba(16,185,129,0.55); background: linear-gradient(180deg, rgba(6,78,59,0.4), rgba(15,23,42,0.95)); }
+    .drag-chip.worker-maurizio { border-color: rgba(16,185,129,0.55); background: linear-gradient(180deg, rgba(6,78,59,0.4), rgba(15,23,42,0.95)); }
     .drag-chip.worker-scoth { border-color: rgba(236,72,153,0.55); background: linear-gradient(180deg, rgba(131,24,67,0.38), rgba(15,23,42,0.95)); }
     .drag-chip.order-ookla { border-color: rgba(59,130,246,0.55); }
     .drag-chip.order-wetrack { border-color: rgba(16,185,129,0.55); }
@@ -1769,9 +1863,9 @@
       border-radius: 12px;
       background: linear-gradient(180deg, #101010, #0a0a0a);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-      flex: 0 0 auto;
-      height: calc(100vh - 280px);
-      min-height: 520px;
+      flex: 1 1 auto;
+      min-height: 280px;
+      height: auto;
     }
     .scheduler-table {
       width: 100%;
@@ -2009,7 +2103,7 @@
     }
     .scheduler-assignment.worker-enzo { --worker-accent: #60a5fa; }
     .scheduler-assignment.worker-andre { --worker-accent: #f59e0b; }
-    .scheduler-assignment.worker-enrique { --worker-accent: #34d399; }
+    .scheduler-assignment.worker-maurizio { --worker-accent: #34d399; }
     .scheduler-assignment.worker-scoth { --worker-accent: #f472b6; }
     .scheduler-assignment.order-ookla { --order-accent: #2563eb; }
     .scheduler-assignment.order-wetrack { --order-accent: #059669; }
@@ -2659,21 +2753,27 @@
 </head>
 <body>
   Optional: enable online saving so all PCs share the same production data. See PRODUCTION-STATS-ONLINE-SETUP.md
-   <script>window.CRISTAL_SUPABASE_URL='https://gimzlqbodxnriaqieetm.supabase.co';window.CRISTAL_SUPABASE_ANON_KEY='sb_publishable_fmHwMrvM6ccnMCJgFYpEAA_Pu-ydW5u';</script> 
+   <script>window.CRISTAL_SUPABASE_URL='https://gimzlqbodxnriaqieetm.supabase.co';window.CRISTAL_SUPABASE_ANON_KEY='sb_publishable_fmHwMrvM6ccnMCJgFYpEAA_Pu-ydW5u';</script>
+   <script src="cristal-supabase-rest.js"></script>
   <nav id="top-steps-nav" aria-label="Configuration steps">
-    <button type="button" class="top-step active" data-step="0"><span class="step-index">1</span> Intro</button>
-    <button type="button" class="top-step" data-step="1"><span class="step-index">2</span> Production Schedule</button>
-    <button type="button" class="top-step" data-step="2"><span class="step-index">3</span> Factory map</button>
-    <button type="button" class="top-step" data-step="3"><span class="step-index">4</span> Inventory movements</button>
-    <button type="button" class="top-step" data-step="4"><span class="step-index">5</span> Choose crystal</button>
-    <button type="button" class="top-step" data-step="5"><span class="step-index">6</span> Customize</button>
-    <button type="button" class="top-step" data-step="6"><span class="step-index">7</span> Plan production</button>
-    <button type="button" class="top-step" data-step="7"><span class="step-index">8</span> Checkout</button>
-    <button type="button" class="top-step" data-step="8"><span class="step-index">9</span> Innovation</button>
-    <button type="button" class="top-step" data-step="9"><span class="step-index">10</span> Recruiting</button>
-    <button type="button" class="top-step" data-step="10"><span class="step-index">11</span> BC Integration</button>
+    <button type="button" class="top-step top-step-primary active" data-step="1">Production Schedule</button>
+    <div class="top-nav-more" id="top-nav-more">
+      <button type="button" class="top-nav-more-toggle" id="top-nav-more-toggle" aria-expanded="false" aria-controls="top-nav-more-panel">More sections</button>
+      <div class="top-nav-more-panel" id="top-nav-more-panel" hidden>
+        <button type="button" class="top-step" data-step="0"><span class="step-index">1</span> Intro</button>
+        <button type="button" class="top-step" data-step="2"><span class="step-index">2</span> Factory map</button>
+        <button type="button" class="top-step" data-step="3"><span class="step-index">3</span> Inventory movements</button>
+        <button type="button" class="top-step" data-step="4"><span class="step-index">4</span> Choose crystal</button>
+        <button type="button" class="top-step" data-step="5"><span class="step-index">5</span> Customize</button>
+        <button type="button" class="top-step" data-step="6"><span class="step-index">6</span> Plan production</button>
+        <button type="button" class="top-step" data-step="7"><span class="step-index">7</span> Checkout</button>
+        <button type="button" class="top-step" data-step="8"><span class="step-index">8</span> Innovation</button>
+        <button type="button" class="top-step" data-step="9"><span class="step-index">9</span> Recruiting</button>
+        <button type="button" class="top-step" data-step="10"><span class="step-index">10</span> BC Integration</button>
+      </div>
+    </div>
   </nav>
-  <div id="step-intro" class="step-screen active">
+  <div id="step-intro" class="step-screen">
     <div class="intro-video-wrap">
       <video id="intro-video" src="cristals/intro.mp4?v=4" muted playsinline preload="auto"></video>
     </div>
@@ -3509,7 +3609,7 @@
     </div>
   </div>
 
-  <div id="step-production-stats" class="step-screen">
+  <div id="step-production-stats" class="step-screen active">
     <div class="production-stats-inner">
       <h2 class="production-stats-title">Production Schedule</h2>
       <section class="production-scheduler-wrap" aria-label="Weekly production scheduler">
@@ -3572,10 +3672,12 @@
               <button type="button" class="scheduler-mini-btn" id="scheduler-undo">Undo</button>
               <button type="button" class="scheduler-mini-btn" id="scheduler-redo">Redo</button>
             </div>
-            <div class="scheduler-capacity" id="scheduler-capacity"></div>
             <div class="scheduler-grid-wrap">
               <table class="scheduler-table" id="scheduler-table"></table>
             </div>
+            <details class="scheduler-extras" id="scheduler-extras">
+              <summary>Capacity, charts &amp; audit</summary>
+            <div class="scheduler-capacity" id="scheduler-capacity"></div>
             <div class="scheduler-infographic" id="scheduler-infographic" aria-label="Weekly scheduler infographic">
               <div class="scheduler-infographic-head">
                 <h4>Weekly infographic</h4>
@@ -3609,6 +3711,7 @@
             <div class="scheduler-wo-profit" id="scheduler-wo-profit"></div>
             </div>
             <div class="scheduler-audit" id="scheduler-audit"></div>
+            </details>
           </div>
         </div>
       </section>
@@ -3680,11 +3783,11 @@
           </div>
           <p class="worker-total" id="worker-total-andre">Total: 0 min</p>
         </div>
-        <div class="worker-card" data-worker-id="enrique">
-          <div class="worker-avatar" aria-hidden="true">E</div>
-          <h3 class="worker-name">Enrique</h3>
-          <div class="worker-start-row worker-log-form" id="worker-start-enrique">
-            <select id="log-task-enrique" class="log-task-select" aria-label="Task for Enrique">
+        <div class="worker-card" data-worker-id="maurizio">
+          <div class="worker-avatar" aria-hidden="true">M</div>
+          <h3 class="worker-name">Maurizio</h3>
+          <div class="worker-start-row worker-log-form" id="worker-start-maurizio">
+            <select id="log-task-maurizio" class="log-task-select" aria-label="Task for Maurizio">
               <option value="">Select task…</option>
               <option value="receiving">Receiving</option>
               <option value="qc">QC</option>
@@ -3694,20 +3797,20 @@
               <option value="kitting">Kitting</option>
               <option value="expedition">Expedition</option>
             </select>
-            <select id="log-workorder-enrique" class="log-workorder-select" aria-label="Work order for Enrique">
+            <select id="log-workorder-maurizio" class="log-workorder-select" aria-label="Work order for Maurizio">
               <option value="">Work order…</option>
               <option value="OOKLA">OOKLA</option>
               <option value="SHOPIFY">SHOPIFY</option>
               <option value="WE TRACK">WE TRACK</option>
             </select>
-            <button type="button" class="cta worker-start-btn" data-worker-id="enrique">Start</button>
+            <button type="button" class="cta worker-start-btn" data-worker-id="maurizio">Start</button>
           </div>
-          <div class="worker-running-row worker-log-form" id="worker-running-enrique" style="display: none;">
-            <span class="worker-running-task" id="worker-running-task-enrique"></span>
-            <span class="worker-elapsed" id="worker-elapsed-enrique">0:00</span>
-            <button type="button" class="cta secondary worker-stop-btn" data-worker-id="enrique">Stop</button>
+          <div class="worker-running-row worker-log-form" id="worker-running-maurizio" style="display: none;">
+            <span class="worker-running-task" id="worker-running-task-maurizio"></span>
+            <span class="worker-elapsed" id="worker-elapsed-maurizio">0:00</span>
+            <button type="button" class="cta secondary worker-stop-btn" data-worker-id="maurizio">Stop</button>
           </div>
-          <p class="worker-total" id="worker-total-enrique">Total: 0 min</p>
+          <p class="worker-total" id="worker-total-maurizio">Total: 0 min</p>
         </div>
         <div class="worker-card" data-worker-id="scot">
           <div class="worker-avatar" aria-hidden="true">S</div>
@@ -3846,7 +3949,7 @@
             <li>Create 1–2 standard job profiles (Production Worker, Line Operator) and keep them live on Indeed and local boards.</li>
             <li>Use clear shift windows and real pictures from the factory so expectations match reality.</li>
             <li>Screen quickly: short phone or WhatsApp call, then invite for a paid trial shift.</li>
-            <li>Feed accepted workers directly into our production stats system (Enzo / Andre / Enrique / Scoth cards).</li>
+            <li>Feed accepted workers directly into our production stats system (Enzo / Andre / Maurizio / Scoth cards).</li>
           </ul>
           <p class="recruiting-metric">Goal: 3–5 hires / month purely from online channels once tuned.</p>
         </article>
@@ -3959,7 +4062,7 @@
       var SVG_CORS_PROXY = 'https://api.allorigins.win/raw?url=';
       var GEMINI_API_KEY = 'AIzaSyC0YVi1OcVhdBQbjhQKg3oFV-VLD1YjNi8';
       var GEMINI_MODEL = 'gemini-2.5-flash';
-      var currentStep = 0;
+      var currentStep = 1;
       var currentSlide = 0;
       var totalSlides = 3;
       var crystalMeta = [
@@ -3994,9 +4097,14 @@
           lead: '7–10 business days'
         }
       ];
+      function closeNavMorePanel() {
+        var panel = document.getElementById('top-nav-more-panel');
+        var toggle = document.getElementById('top-nav-more-toggle');
+        if (panel) panel.hidden = true;
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      }
       function updateTopNav(step) {
-        var navSteps = document.querySelectorAll('.top-step');
-        navSteps.forEach(function (btn) {
+        document.querySelectorAll('#top-steps-nav [data-step]').forEach(function (btn) {
           var s = parseInt(btn.getAttribute('data-step'), 10);
           btn.classList.toggle('active', s === step);
         });
@@ -4144,17 +4252,32 @@
       var topNav = document.getElementById('top-steps-nav');
       if (topNav) {
         topNav.addEventListener('click', function (e) {
-          var btn = e.target && (e.target.closest ? e.target.closest('.top-step') : e.target);
-          if (btn && btn.classList && btn.classList.contains('top-step')) {
+          var moreToggle = e.target && e.target.closest ? e.target.closest('#top-nav-more-toggle') : null;
+          if (moreToggle) {
+            e.preventDefault();
+            e.stopPropagation();
+            var panel = document.getElementById('top-nav-more-panel');
+            var open = panel && panel.hidden;
+            if (panel) panel.hidden = !open;
+            moreToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            return;
+          }
+          var btn = e.target && (e.target.closest ? e.target.closest('[data-step]') : e.target);
+          if (btn && btn.getAttribute('data-step') != null) {
             var s = parseInt(btn.getAttribute('data-step'), 10);
             if (!isNaN(s)) {
               e.preventDefault();
               e.stopPropagation();
+              closeNavMorePanel();
               showStep(s);
             }
           }
         });
       }
+      document.addEventListener('click', function (e) {
+        var moreRoot = document.getElementById('top-nav-more');
+        if (moreRoot && !moreRoot.contains(e.target)) closeNavMorePanel();
+      });
       (function () {
         var PRODUCTION_STORAGE_KEY = 'cristal_production_logs';
         var TIMERS_STORAGE_KEY = 'cristal_production_timers';
@@ -4170,19 +4293,7 @@
         var useRemote = SUPABASE_URL && SUPABASE_KEY;
         function supabaseFetch(path, options) {
           if (!useRemote) return Promise.reject(new Error('No remote'));
-          var url = SUPABASE_URL + '/rest/v1' + path;
-          var headers = {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': (options && options.prefer) || ''
-          };
-          if (options && options.body !== undefined) headers['Prefer'] = 'resolution=merge-duplicates';
-          return fetch(url, {
-            method: (options && options.method) || 'GET',
-            headers: headers,
-            body: (options && options.body !== undefined) ? JSON.stringify(options.body) : undefined
-          });
+          return window.cristalSupabaseFetch(path, options);
         }
         function loadProductionFromRemote(callback) {
           if (!useRemote) { if (callback) callback(); return; }
@@ -4214,18 +4325,18 @@
         }
         function saveProductionLogsToRemote(logs) {
           if (!useRemote) return;
-          supabaseFetch('/production_data', { method: 'POST', body: [{ key: 'logs', value: logs || [] }] })
+          window.cristalSaveProductionDataRow('logs', logs || [])
             .then(function () { showProductionSyncStatus('synced'); })
             .catch(function (err) { console.error('Production sync failed (logs):', err); showProductionSyncStatus('error'); });
         }
         function saveTimersToRemote(timers) {
           if (!useRemote) return;
-          supabaseFetch('/production_data', { method: 'POST', body: [{ key: 'timers', value: timers || {} }] })
+          window.cristalSaveProductionDataRow('timers', timers || {})
             .catch(function (err) { console.error('Production sync failed (timers):', err); });
         }
         function saveCalendarToRemote(calendar) {
           if (!useRemote) return;
-          supabaseFetch('/production_data', { method: 'POST', body: [{ key: 'calendar', value: calendar || {} }] })
+          window.cristalSaveProductionDataRow('calendar', calendar || {})
             .then(function () { showProductionSyncStatus('synced'); })
             .catch(function (err) { console.error('Production sync failed (calendar):', err); showProductionSyncStatus('error'); });
         }
@@ -4245,9 +4356,23 @@
         var WORKERS = [
           { id: 'enzo', name: 'Enzo' },
           { id: 'andre', name: 'Andre' },
-          { id: 'enrique', name: 'Enrique' },
+          { id: 'maurizio', name: 'Maurizio' },
           { id: 'scot', name: 'Scoth' }
         ];
+        function normalizeWorkerId(id) {
+          if (id === 'enrique') return 'maurizio';
+          return id;
+        }
+        function normalizeProductionLogs(logs) {
+          if (!Array.isArray(logs)) return [];
+          return logs.map(function (e) {
+            if (!e || typeof e !== 'object') return e;
+            var wid = normalizeWorkerId(e.workerId);
+            if (wid === e.workerId) return e;
+            var worker = WORKERS.find(function (w) { return w.id === wid; });
+            return { workerId: wid, workerName: worker ? worker.name : e.workerName, taskId: e.taskId, taskName: e.taskName, workOrder: e.workOrder, minutes: e.minutes, date: e.date };
+          });
+        }
         var WORK_ORDERS = ['OOKLA', 'SHOPIFY', 'WE TRACK'];
         var COST_PER_HOUR = 18;
         function getLast12MonthKeys() {
@@ -4262,7 +4387,7 @@
         function getProductionLogs() {
           try {
             var raw = localStorage.getItem(PRODUCTION_STORAGE_KEY);
-            return raw ? JSON.parse(raw) : [];
+            return normalizeProductionLogs(raw ? JSON.parse(raw) : []);
           } catch (e) { return []; }
         }
         function saveProductionLogs(logs) {
@@ -4274,7 +4399,13 @@
         function getTimers() {
           try {
             var raw = localStorage.getItem(TIMERS_STORAGE_KEY);
-            return raw ? JSON.parse(raw) : {};
+            var timers = raw ? JSON.parse(raw) : {};
+            var migrated = {};
+            Object.keys(timers).forEach(function (k) {
+              var nk = normalizeWorkerId(k);
+              if (!migrated[nk]) migrated[nk] = timers[k];
+            });
+            return migrated;
           } catch (e) { return {}; }
         }
         function saveTimers(timers) {
@@ -4539,6 +4670,7 @@
           }
         }
         function addProductionLog(workerId, taskId, minutes, workOrder, dateIso) {
+          workerId = normalizeWorkerId(workerId);
           var worker = WORKERS.find(function (w) { return w.id === workerId; });
           var taskName = TASK_LABELS[taskId] || taskId;
           if (!worker || !taskName || minutes < 1) return false;
@@ -4557,6 +4689,7 @@
           return true;
         }
         function startTimer(workerId, taskId, workOrder) {
+          workerId = normalizeWorkerId(workerId);
           var taskName = TASK_LABELS[taskId];
           if (!taskId || !taskName) return false;
           var timers = getTimers();
@@ -4566,6 +4699,7 @@
           return true;
         }
         function stopTimer(workerId) {
+          workerId = normalizeWorkerId(workerId);
           var timers = getTimers();
           var t = timers[workerId];
           if (!t) return false;
@@ -4630,7 +4764,8 @@
           var byMonth = {};
           WORKERS.forEach(function (w) { byWorker[w.id] = 0; });
           logs.forEach(function (entry) {
-            byWorker[entry.workerId] = (byWorker[entry.workerId] || 0) + entry.minutes;
+            var wid = normalizeWorkerId(entry.workerId);
+            byWorker[wid] = (byWorker[wid] || 0) + entry.minutes;
             var d = new Date(entry.date);
             var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
             if (!byMonth[key]) byMonth[key] = [];
@@ -4738,8 +4873,8 @@
             Object.keys(TASK_LABELS).forEach(function (tid) { byWorkerTask[w.id][tid] = 0; });
           });
           logs.forEach(function (e) {
-            if (byWorkerTask[e.workerId] && byWorkerTask[e.workerId][e.taskId] !== undefined) {
-              byWorkerTask[e.workerId][e.taskId] += e.minutes;
+            if (byWorkerTask[normalizeWorkerId(e.workerId)] && byWorkerTask[normalizeWorkerId(e.workerId)][e.taskId] !== undefined) {
+              byWorkerTask[normalizeWorkerId(e.workerId)][e.taskId] += e.minutes;
             }
           });
           var taskIds = Object.keys(TASK_LABELS);
@@ -4781,8 +4916,8 @@
             Object.keys(TASK_LABELS).forEach(function (tid) { byWorkerTask[w.id][tid] = 0; });
           });
           periodLogs.forEach(function (e) {
-            if (byWorkerTask[e.workerId] && byWorkerTask[e.workerId][e.taskId] !== undefined) {
-              byWorkerTask[e.workerId][e.taskId] += e.minutes;
+            if (byWorkerTask[normalizeWorkerId(e.workerId)] && byWorkerTask[normalizeWorkerId(e.workerId)][e.taskId] !== undefined) {
+              byWorkerTask[normalizeWorkerId(e.workerId)][e.taskId] += e.minutes;
             }
           });
           var taskIds = Object.keys(TASK_LABELS);
@@ -4904,9 +5039,13 @@
         var WORKERS = [
           { id: 'enzo', name: 'Enzo', cls: 'worker-enzo' },
           { id: 'andre', name: 'Andre', cls: 'worker-andre' },
-          { id: 'enrique', name: 'Enrique', cls: 'worker-enrique' },
+          { id: 'maurizio', name: 'Maurizio', cls: 'worker-maurizio' },
           { id: 'scoth', name: 'Scoth', cls: 'worker-scoth' }
         ];
+        function normalizeWorkerId(id) {
+          if (id === 'enrique') return 'maurizio';
+          return id;
+        }
         var TASKS = [
           { id: 'receiving', name: 'Receiving', cls: 'task-receiving' },
           { id: 'qc', name: 'QC', cls: 'task-qc' },
@@ -4983,19 +5122,8 @@
         var SUPABASE_KEY = (typeof window !== 'undefined' && window.CRISTAL_SUPABASE_ANON_KEY) || '';
         var useRemote = !!(SUPABASE_URL && SUPABASE_KEY);
         function invFetch(path, options) {
-          var url = SUPABASE_URL + '/rest/v1' + path;
-          var headers = {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': (options && options.prefer) || ''
-          };
-          if (options && options.body !== undefined) headers['Prefer'] = 'resolution=merge-duplicates';
-          return fetch(url, {
-            method: (options && options.method) || 'GET',
-            headers: headers,
-            body: (options && options.body !== undefined) ? JSON.stringify(options.body) : undefined
-          });
+          if (!useRemote) return Promise.reject(new Error('No remote'));
+          return window.cristalSupabaseFetch(path, options);
         }
 
         window.refreshInventoryMovements = function () {};
@@ -5314,19 +5442,8 @@
           };
         }
         function supabaseFetch(path, options) {
-          var url = SUPABASE_URL + '/rest/v1' + path;
-          var headers = {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': (options && options.prefer) || ''
-          };
-          if (options && options.body !== undefined) headers['Prefer'] = 'resolution=merge-duplicates';
-          return fetch(url, {
-            method: (options && options.method) || 'GET',
-            headers: headers,
-            body: (options && options.body !== undefined) ? JSON.stringify(options.body) : undefined
-          });
+          if (!useRemote) return Promise.reject(new Error('No remote'));
+          return window.cristalSupabaseFetch(path, options);
         }
         function loadLocal() {
           try {
@@ -5342,7 +5459,9 @@
           var out = {};
           Object.keys(obj).forEach(function (k) {
             var p = obj[k] || {};
-            var workers = Array.isArray(p.workers) ? p.workers.filter(function (w) { return !!workersById[w]; }) : [];
+            var workers = Array.isArray(p.workers)
+              ? p.workers.map(normalizeWorkerId).filter(function (w, i, arr) { return !!workersById[w] && arr.indexOf(w) === i; })
+              : [];
             var tasks = Array.isArray(p.tasks)
               ? p.tasks.map(normalizeTaskId).filter(function (t) { return !!tasksById[t]; })
               : [];
@@ -5367,7 +5486,8 @@
             if (!a || typeof a !== 'object') return null;
             var day = DAYS.indexOf(a.day) >= 0 ? a.day : null;
             var startTime = timeIndex(a.startTime) >= 0 ? a.startTime : null;
-            var workerId = workersById[a.workerId] ? a.workerId : null;
+            var workerIdRaw = normalizeWorkerId(a.workerId);
+            var workerId = workersById[workerIdRaw] ? workerIdRaw : null;
             var taskId = normalizeTaskId(a.taskId);
             taskId = tasksById[taskId] ? taskId : null;
             var orderId = ordersById[a.orderId] ? a.orderId : '';
@@ -5426,13 +5546,13 @@
             var parts = k.split('|');
             if (parts.length !== 2) return;
             if (DAYS.indexOf(parts[0]) < 0 || timeIndex(parts[1]) < 0) return;
-            if (workersById[v.workerId] && tasksById[v.taskId]) {
+            if (workersById[normalizeWorkerId(v.workerId)] && tasksById[v.taskId]) {
               legacy.push({
                 id: 'legacy-' + legacy.length + '-' + Date.now(),
                 day: parts[0],
                 startTime: parts[1],
                 duration: 2,
-                workerId: v.workerId,
+                workerId: normalizeWorkerId(v.workerId),
                 taskId: v.taskId,
                 orderId: ordersById[v.orderId] ? v.orderId : DEFAULT_ORDER_ID,
                 machineId: machinesById[v.machineId] ? v.machineId : ''
@@ -5448,7 +5568,7 @@
           if (!useRemote) return;
           if (syncTimer) clearTimeout(syncTimer);
           syncTimer = setTimeout(function () {
-            supabaseFetch('/production_data', { method: 'POST', body: [{ key: REMOTE_KEY, value: next || {} }] })
+            window.cristalSaveProductionDataRow(REMOTE_KEY, next || {})
               .then(function () { showSchedulerSyncStatus('synced'); })
               .catch(function (err) { console.error('Scheduler sync failed:', err); showSchedulerSyncStatus('error'); });
           }, 250);
@@ -6860,17 +6980,11 @@
           introEl.addEventListener('transitionend', function onLeave() {
             introEl.removeEventListener('transitionend', onLeave);
             introEl.classList.remove('leaving', 'active');
-            var nextEl = document.getElementById('step-production-stats');
-            nextEl.classList.add('active', 'entering');
-            requestAnimationFrame(function () {
-              requestAnimationFrame(function () { nextEl.classList.remove('entering'); });
-            });
-            currentStep = 1;
-            updateTopNav(1);
+            showStep(1);
           }, { once: true });
         };
       });
-      startIntroSequence();
+      showStep(1);
       document.getElementById('carousel-prev').addEventListener('click', function () {
         currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
         updateCarousel();

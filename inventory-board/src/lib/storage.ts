@@ -50,9 +50,12 @@ async function supabaseFetch(
   if (!env) throw new Error('No Supabase env');
   const headers: Record<string, string> = {
     apikey: env.anonKey,
-    Authorization: `Bearer ${env.anonKey}`,
     'Content-Type': 'application/json',
   };
+  // Publishable keys (sb_publishable_*) are not JWTs — Authorization breaks PostgREST.
+  if (env.anonKey.startsWith('eyJ')) {
+    headers.Authorization = `Bearer ${env.anonKey}`;
+  }
   const merge = options?.preferMergeDuplicates !== false && options?.body !== undefined;
   if (merge) headers.Prefer = 'resolution=merge-duplicates';
   const res = await fetch(`${env.url}/rest/v1${path}`, {
@@ -118,6 +121,46 @@ export async function saveRemote(payload: RemotePayload): Promise<void> {
 
 type WoRow = NonNullable<LocationState['woById']>[string];
 
+async function upsertTableRow(
+  table: string,
+  idColumn: string,
+  idValue: string,
+  row: Record<string, unknown>,
+): Promise<void> {
+  const keyEq = `/${table}?${idColumn}=eq.${encodeURIComponent(idValue)}`;
+  const probe = await supabaseFetch(`${keyEq}&select=${idColumn}`);
+  if (!probe.ok) {
+    const detail = await probe.text().catch(() => '');
+    throw new Error(`${table} read failed (${probe.status}): ${detail || probe.statusText}`);
+  }
+  const existing = (await probe.json()) as unknown[];
+  const hasRow = Array.isArray(existing) && existing.length > 0;
+  let res: Response;
+  if (hasRow) {
+    res = await supabaseFetch(keyEq, {
+      method: 'PATCH',
+      body: row,
+      preferMergeDuplicates: false,
+    });
+  } else {
+    res = await supabaseFetch(`/${table}`, {
+      method: 'POST',
+      body: [row],
+    });
+    if (res.status === 409) {
+      res = await supabaseFetch(keyEq, {
+        method: 'PATCH',
+        body: row,
+        preferMergeDuplicates: false,
+      });
+    }
+  }
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`${table} save failed (${res.status}): ${detail || res.statusText}`);
+  }
+}
+
 /** Mirror `state.woById` into Supabase `work_orders` for Table Editor / reporting. */
 export async function syncWorkOrdersToSupabase(woById: LocationState['woById'] | undefined): Promise<void> {
   if (!hasSupabaseEnv()) return;
@@ -133,15 +176,8 @@ export async function syncWorkOrdersToSupabase(woById: LocationState['woById'] |
     updated_at: new Date().toISOString(),
   }));
 
-  if (rows.length > 0) {
-    const up = await supabaseFetch('/work_orders?on_conflict=id', {
-      method: 'POST',
-      body: rows,
-    });
-    if (!up.ok) {
-      const detail = await up.text().catch(() => '');
-      throw new Error(`work_orders upsert failed (${up.status}): ${detail || up.statusText}`);
-    }
+  for (const row of rows) {
+    await upsertTableRow('work_orders', 'id', row.id, row);
   }
 
   const listRes = await supabaseFetch('/work_orders?select=id');
@@ -203,39 +239,7 @@ export async function syncInventoryBoardStats(state: LocationState, movementsSto
   if (!hasSupabaseEnv()) return;
 
   const row = computeInventoryBoardStatsRow(state, movementsStored);
-  const keyEq = `/inventory_board_stats?id=eq.${encodeURIComponent(INVENTORY_STATS_ID)}`;
-  const probe = await supabaseFetch(`${keyEq}&select=id`);
-  if (!probe.ok) {
-    const detail = await probe.text().catch(() => '');
-    throw new Error(`inventory_board_stats read failed (${probe.status}): ${detail || probe.statusText}`);
-  }
-  const existing = (await probe.json()) as unknown[];
-  const hasRow = Array.isArray(existing) && existing.length > 0;
-
-  let res: Response;
-  if (hasRow) {
-    res = await supabaseFetch(keyEq, {
-      method: 'PATCH',
-      body: row,
-      preferMergeDuplicates: false,
-    });
-  } else {
-    res = await supabaseFetch('/inventory_board_stats', {
-      method: 'POST',
-      body: [row],
-    });
-    if (res.status === 409) {
-      res = await supabaseFetch(keyEq, {
-        method: 'PATCH',
-        body: row,
-        preferMergeDuplicates: false,
-      });
-    }
-  }
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new Error(`inventory_board_stats save failed (${res.status}): ${detail || res.statusText}`);
-  }
+  await upsertTableRow('inventory_board_stats', 'id', INVENTORY_STATS_ID, row);
 }
 
 export function newEmptyState(): { state: LocationState; movements: Movement[] } {
