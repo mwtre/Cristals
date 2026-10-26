@@ -2420,6 +2420,15 @@
       color: var(--text);
       font-size: 0.8rem;
     }
+    .scheduler-duration-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin: 0.25rem 0 0.15rem 0;
+    }
+    .scheduler-duration-label select { min-width: 88px; }
     .scheduler-capacity {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -5181,8 +5190,8 @@
           { id: 'hatching', name: 'Hatching', cls: 'task-hatching' },
           { id: 'painting', name: 'Painting', cls: 'task-painting' },
           { id: 'cleaning', name: 'Cleaning', cls: 'task-cleaning' },
-          { id: 'maintenance', name: 'Maintenance', cls: 'task-maintenance' },
-          { id: 'meeting', name: 'Meeting', cls: 'task-meeting' }
+          { id: 'maintenance', name: 'Maintenance', cls: 'task-maintenance', durationSlots: 2 },
+          { id: 'meeting', name: 'Meeting', cls: 'task-meeting', durationSlots: 1 }
         ];
         var ORDERS = [
           { id: 'ookla', name: 'OOKLA', cls: 'order-ookla' },
@@ -5199,6 +5208,75 @@
         var DEFAULT_ORDER_ID = 'ookla';
         var SLOT_MINUTES = 30;
         var DEFAULT_DURATION_SLOTS = 2;
+        var DURATION_SLOT_OPTIONS = [
+          { slots: 1, label: '30 min' },
+          { slots: 2, label: '1 h' },
+          { slots: 3, label: '1.5 h' },
+          { slots: 4, label: '2 h' },
+          { slots: 6, label: '3 h' },
+          { slots: 8, label: '4 h' }
+        ];
+        function defaultDurationSlotsForTask(taskId) {
+          var t = tasksById[taskId];
+          if (t && Number(t.durationSlots) >= 1) {
+            return Math.max(1, Math.min(8, Math.round(Number(t.durationSlots))));
+          }
+          return DEFAULT_DURATION_SLOTS;
+        }
+        function suggestedDurationForPending(pending) {
+          if (!pending || !pending.tasks || pending.tasks.length === 0) return DEFAULT_DURATION_SLOTS;
+          var maxSlots = 1;
+          pending.tasks.forEach(function (tid) {
+            maxSlots = Math.max(maxSlots, defaultDurationSlotsForTask(tid));
+          });
+          return maxSlots;
+        }
+        function resolvePendingDuration(pending, taskId, fallback) {
+          var explicit = Number(pending && pending.durationSlots);
+          if (explicit >= 1) return Math.max(1, Math.min(8, Math.round(explicit)));
+          if (taskId) return defaultDurationSlotsForTask(taskId);
+          return fallback || DEFAULT_DURATION_SLOTS;
+        }
+        function durationSelectHtml(key, pending) {
+          var sel = resolvePendingDuration(pending, pending.tasks && pending.tasks[0], DEFAULT_DURATION_SLOTS);
+          return '<label class="scheduler-duration-label">Duration' +
+            '<select class="scheduler-mini-select scheduler-slot-duration" data-slot-duration="' + key + '">' +
+            DURATION_SLOT_OPTIONS.map(function (opt) {
+              return '<option value="' + opt.slots + '"' + (opt.slots === sel ? ' selected' : '') + '>' + opt.label + '</option>';
+            }).join('') +
+            '</select></label>';
+        }
+        function pendingKeyToDayTime(key) {
+          var parts = String(key || '').split('|');
+          if (parts.length !== 2) return null;
+          return { day: parts[0], time: parts[1] };
+        }
+        function reportFinalizePendingResult(result, day, time) {
+          if (result.made > 0) logAction('Created ' + result.made + ' assignment(s) at ' + day + ' ' + time);
+          if (result.missingOrders > 0) showSchedulerMessage('Order required for ordered tasks');
+          if (result.missingMeta > 0) showSchedulerMessage('Add ' + schedulerBatchMetaButtonLabel() + ' for this slot');
+          if (result.missingMachines > 0) showSchedulerMessage('Maintenance needs a machine');
+          if (result.maintenanceConflicts > 0) showSchedulerMessage('Maintenance blocked: worker already booked in this slot');
+          if (result.conflicts > 0) showSchedulerMessage('Conflicts skipped: ' + result.conflicts);
+        }
+        function tryFinalizePendingSlot(key, options) {
+          options = options || {};
+          var loc = pendingKeyToDayTime(key);
+          if (!loc) return { made: 0 };
+          var pending = currentWeekData.pending[key];
+          if (!pending) return { made: 0 };
+          var result = finalizePending(loc.day, loc.time, pending, resolvePendingDuration(pending, pending.tasks && pending.tasks[0]));
+          if (result.made > 0) {
+            delete currentWeekData.pending[key];
+            if (openPendingMetaKey === key) openPendingMetaKey = '';
+            reportFinalizePendingResult(result, loc.day, loc.time);
+            if (options.save !== false) saveStore();
+            if (options.render !== false) renderScheduler();
+          } else if (!options.silent) {
+            reportFinalizePendingResult(result, loc.day, loc.time);
+          }
+          return result;
+        }
         function makeTimes() {
           var out = [];
           for (var h = 9; h < 18; h++) {
@@ -5613,8 +5691,10 @@
             if (tasks.length === 0 && singleTask && tasksById[singleTask]) tasks.push(singleTask);
             if (orders.length === 0 && p.orderId && ordersById[p.orderId]) orders.push(p.orderId);
             if (machines.length === 0 && p.machineId && machinesById[p.machineId]) machines.push(p.machineId);
-            if (workers.length || tasks.length || orders.length || machines.length || woId || plannedQty > 0) {
-              out[k] = { workers: workers, tasks: tasks, orders: orders, machines: machines, woId: woId, plannedQty: plannedQty };
+            var durationSlots = Number(p.durationSlots);
+            durationSlots = durationSlots >= 1 ? Math.max(1, Math.min(8, Math.round(durationSlots))) : 0;
+            if (workers.length || tasks.length || orders.length || machines.length || woId || plannedQty > 0 || durationSlots > 0) {
+              out[k] = { workers: workers, tasks: tasks, orders: orders, machines: machines, woId: woId, plannedQty: plannedQty, durationSlots: durationSlots };
             }
           });
           return out;
@@ -5789,7 +5869,7 @@
         }
         function uniqPush(arr, value) { if (arr.indexOf(value) < 0) arr.push(value); }
         function ensurePending(key) {
-          if (!currentWeekData.pending[key]) currentWeekData.pending[key] = { workers: [], tasks: [], orders: [], machines: [], woId: '', plannedQty: 0 };
+          if (!currentWeekData.pending[key]) currentWeekData.pending[key] = { workers: [], tasks: [], orders: [], machines: [], woId: '', plannedQty: 0, durationSlots: 0 };
           return currentWeekData.pending[key];
         }
         function overlaps(start1, dur1, start2, dur2) {
@@ -5935,9 +6015,10 @@
                 missingMachines++;
                 return;
               }
+              var taskDur = resolvePendingDuration(pending, tid, defaultDur);
               if (tid === 'maintenance') {
                 var startIdx = timeIndex(time);
-                var dur = clampDuration(startIdx, Math.round(defaultDur || DEFAULT_DURATION_SLOTS));
+                var dur = clampDuration(startIdx, Math.round(taskDur));
                 if (hasWorkerConflict(wid, day, startIdx, dur, null)) {
                   conflicts++;
                   maintenanceConflicts++;
@@ -5957,7 +6038,7 @@
               }
               orderList.forEach(function (oid) {
                 machineList.forEach(function (mid) {
-                  var ok = createAssignment(day, time, wid, tid, oid, defaultDur, mid, woId, plannedQty);
+                  var ok = createAssignment(day, time, wid, tid, oid, taskDur, mid, woId, plannedQty);
                   if (ok) made++;
                   else conflicts++;
                 });
@@ -5968,7 +6049,7 @@
         }
         function slotInner(day, time, slotIdx) {
           var key = slotKey(day, time);
-          var pending = currentWeekData.pending[key] || { workers: [], tasks: [], orders: [], machines: [], woId: '', plannedQty: 0 };
+          var pending = currentWeekData.pending[key] || { workers: [], tasks: [], orders: [], machines: [], woId: '', plannedQty: 0, durationSlots: 0 };
           var inSlot = getAssignmentsForSlot(day, slotIdx);
           if (inSlot.length > 0) {
             var hasPending = (pending.workers && pending.workers.length) || (pending.tasks && pending.tasks.length) || (pending.orders && pending.orders.length) || (pending.machines && pending.machines.length);
@@ -6037,8 +6118,10 @@
               (orderText ? ('Orders: ' + orderText) : 'Drop order (optional for Meeting / Maintenance)') + '<br>' +
               (machineText ? ('Machines: ' + machineText) : (needsMachineForMaint ? 'Drop machine (required for Maintenance)' : 'Drop machine (optional)')) + '<br>' +
               metaLine +
+              durationSelectHtml(key, pending) +
               '<div class="scheduler-partial-controls">' +
               (needsOrderMeta ? '<button type="button" class="scheduler-slot-meta-btn" data-slot-edit="' + key + '">' + schedulerBatchMetaButtonLabel() + '</button>' : '') +
+              '<button type="button" class="scheduler-mini-btn scheduler-slot-apply" data-slot-apply="' + key + '">Schedule</button>' +
               '<button type="button" class="scheduler-clear-pending-btn" data-clear-pending="' + key + '">Clear</button>' +
               '</div>' +
               (showMetaEditor ? ('<div class="scheduler-slot-meta-pop">' +
@@ -6745,7 +6828,10 @@
           var cloneFrom = schedulerEl('scheduler-clone-from');
           var cloneTo = schedulerEl('scheduler-clone-to');
           if (workersEl) workersEl.innerHTML = WORKERS.map(function (w) { return '<div class="drag-chip ' + w.cls + '" draggable="true" data-kind="worker" data-id="' + w.id + '"><span class="dot"></span><span>' + w.name + '</span></div>'; }).join('');
-          if (tasksEl) tasksEl.innerHTML = TASKS.map(function (t) { return '<div class="drag-chip ' + (t.cls || '') + '" draggable="true" data-kind="task" data-id="' + t.id + '"><span class="dot"></span><span>' + t.name + '</span></div>'; }).join('');
+          if (tasksEl) tasksEl.innerHTML = TASKS.map(function (t) {
+            var durHint = t.durationSlots ? (' <span style="opacity:0.65;font-size:0.72em">(' + formatHoursFromSlots(t.durationSlots) + ')</span>') : '';
+            return '<div class="drag-chip ' + (t.cls || '') + '" draggable="true" data-kind="task" data-id="' + t.id + '" title="' + t.name + (t.durationSlots ? (' — default ' + formatHoursFromSlots(t.durationSlots)) : '') + '"><span class="dot"></span><span>' + t.name + durHint + '</span></div>';
+          }).join('');
           if (ordersEl) ordersEl.innerHTML = ORDERS.map(function (o) { return '<div class="drag-chip ' + o.cls + '" draggable="true" data-kind="order" data-id="' + o.id + '"><span class="dot"></span><span>' + o.name + '</span></div>'; }).join('');
           if (machinesEl) machinesEl.innerHTML = MACHINES.map(function (m) { return '<div class="drag-chip ' + m.cls + '" draggable="true" data-kind="machine" data-id="' + m.id + '"><span class="dot"></span><span>' + m.name + '</span></div>'; }).join('');
           function fillSelect(el, list, withAll, currentValue) {
@@ -6995,21 +7081,24 @@
             var pending = ensurePending(key);
             pushUndo();
             if (payload.kind === 'worker' && workersById[payload.id]) uniqPush(pending.workers, payload.id);
-            if (payload.kind === 'task' && tasksById[payload.id]) uniqPush(pending.tasks, payload.id);
+            if (payload.kind === 'task' && tasksById[payload.id]) {
+              uniqPush(pending.tasks, payload.id);
+              pending.durationSlots = suggestedDurationForPending(pending);
+            }
             if (payload.kind === 'order' && ordersById[payload.id]) uniqPush(pending.orders, payload.id);
             if (payload.kind === 'machine' && machinesById[payload.id]) uniqPush(pending.machines, payload.id);
-            var result = finalizePending(day, time, pending, DEFAULT_DURATION_SLOTS);
-            if (result.made > 0) {
-              delete currentWeekData.pending[key];
-              logAction('Created ' + result.made + ' assignment(s) at ' + day + ' ' + time);
-            }
-            if (result.missingOrders > 0) showSchedulerMessage('Order required for ordered tasks');
-            if (result.missingMeta > 0) showSchedulerMessage('Add ' + schedulerBatchMetaButtonLabel() + ' for this slot');
-            if (result.missingMachines > 0) showSchedulerMessage('Maintenance needs a machine');
-            if (result.maintenanceConflicts > 0) showSchedulerMessage('Maintenance blocked: worker already booked in this slot');
-            if (result.conflicts > 0) showSchedulerMessage('Conflicts skipped: ' + result.conflicts);
+            tryFinalizePendingSlot(key, { silent: true });
             saveStore();
             renderScheduler();
+          });
+          table.addEventListener('change', function (e) {
+            var durSel = e.target && e.target.matches ? e.target : null;
+            if (!durSel || !durSel.matches('select[data-slot-duration]')) return;
+            var dKey = durSel.getAttribute('data-slot-duration') || '';
+            if (!dKey) return;
+            var pendingDur = ensurePending(dKey);
+            pendingDur.durationSlots = Math.max(1, Math.min(8, Math.round(Number(durSel.value) || DEFAULT_DURATION_SLOTS)));
+            saveStore();
           });
           table.addEventListener('input', function (e) {
             var input = e.target && e.target.matches ? e.target : null;
@@ -7030,6 +7119,7 @@
             var clearPendingBtn = e.target && e.target.closest ? e.target.closest('.scheduler-clear-pending-btn') : null;
             var editMetaBtn = e.target && e.target.closest ? e.target.closest('.scheduler-slot-meta-btn[data-slot-edit]') : null;
             var saveMetaBtn = e.target && e.target.closest ? e.target.closest('.scheduler-slot-meta-btn[data-slot-save]') : null;
+            var applySlotBtn = e.target && e.target.closest ? e.target.closest('.scheduler-slot-apply') : null;
             var cancelMetaBtn = e.target && e.target.closest ? e.target.closest('.scheduler-clear-pending-btn[data-slot-cancel]') : null;
             if (editMetaBtn) {
               openPendingMetaKey = editMetaBtn.getAttribute('data-slot-edit') || '';
@@ -7041,18 +7131,34 @@
               renderScheduler();
               return;
             }
+            if (applySlotBtn) {
+              var applyKey = applySlotBtn.getAttribute('data-slot-apply') || '';
+              if (!applyKey) return;
+              pushUndo();
+              var pendingApply = ensurePending(applyKey);
+              var durSelect = table.querySelector('select[data-slot-duration="' + applyKey + '"]');
+              if (durSelect) {
+                pendingApply.durationSlots = Math.max(1, Math.min(8, Math.round(Number(durSelect.value) || DEFAULT_DURATION_SLOTS)));
+              }
+              tryFinalizePendingSlot(applyKey);
+              return;
+            }
             if (saveMetaBtn) {
               var saveKey = saveMetaBtn.getAttribute('data-slot-save') || '';
               if (!saveKey) return;
               var pendingSave = ensurePending(saveKey);
               var woInput = table.querySelector('input[data-slot-wo-input="' + saveKey + '"]');
               var qtyInput = table.querySelector('input[data-slot-qty-input="' + saveKey + '"]');
+              var durSelectSave = table.querySelector('select[data-slot-duration="' + saveKey + '"]');
               pendingSave.woId = normalizeWoId(woInput && woInput.value ? woInput.value : '');
               var qtyNum = qtyInput ? Number(qtyInput.value) : 0;
               pendingSave.plannedQty = isFinite(qtyNum) && qtyNum > 0 ? Math.round(qtyNum) : 0;
-              saveStore();
+              if (durSelectSave) {
+                pendingSave.durationSlots = Math.max(1, Math.min(8, Math.round(Number(durSelectSave.value) || DEFAULT_DURATION_SLOTS)));
+              }
               openPendingMetaKey = '';
-              renderScheduler();
+              pushUndo();
+              tryFinalizePendingSlot(saveKey);
               return;
             }
             if (clearPendingBtn) {
