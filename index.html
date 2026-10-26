@@ -1866,6 +1866,7 @@
     .drag-chip.task-hatching .dot { background: #84cc16; }
     .drag-chip.task-painting .dot { background: #ec4899; }
     .drag-chip.task-cleaning .dot { background: #14b8a6; }
+    .drag-chip.task-batch-labelling .dot { background: #fb923c; }
     .drag-chip.task-maintenance .dot { background: #64748b; }
     .drag-chip.task-meeting .dot { background: #38bdf8; }
     .drag-chip.task-test .dot { background: #c084fc; }
@@ -1888,6 +1889,7 @@
     .drag-chip.task-hatching { border-color: rgba(132,204,22,0.55); }
     .drag-chip.task-painting { border-color: rgba(236,72,153,0.55); }
     .drag-chip.task-cleaning { border-color: rgba(20,184,166,0.55); }
+    .drag-chip.task-batch-labelling { border-color: rgba(251,146,60,0.55); }
     .drag-chip.task-maintenance { border-color: rgba(148,163,184,0.55); }
     .drag-chip.task-meeting { border-color: rgba(56,189,248,0.55); }
     .drag-chip.task-test { border-color: rgba(192,132,252,0.55); }
@@ -2492,6 +2494,8 @@
     .scheduler-assignment.task-hatching .task-name { background: #65a30d; }
     .scheduler-assignment.task-painting .task-name { background: #db2777; }
     .scheduler-assignment.task-cleaning .task-name { background: #0f766e; }
+    .scheduler-assignment.task-batch-labelling { --task-accent: #fb923c; --task-bg: rgba(194, 65, 12, 0.4); }
+    .scheduler-assignment.task-batch-labelling .task-name { background: #ea580c; }
     .scheduler-assignment.task-maintenance .task-name { background: #475569; }
     .scheduler-assignment.task-meeting .task-name { background: #0284c7; }
     .scheduler-assignment.task-test { --task-accent: #c084fc; --task-bg: rgba(124, 58, 237, 0.4); }
@@ -5491,6 +5495,7 @@
           { id: 'hatching', name: 'Hatching', cls: 'task-hatching' },
           { id: 'painting', name: 'Painting', cls: 'task-painting' },
           { id: 'cleaning', name: 'Cleaning', cls: 'task-cleaning' },
+          { id: 'batch-labelling', name: 'Batch ID labelling', cls: 'task-batch-labelling', durationSlots: 1 },
           { id: 'maintenance', name: 'Maintenance', cls: 'task-maintenance', durationSlots: 2 },
           { id: 'meeting', name: 'Meeting', cls: 'task-meeting', durationSlots: 1 },
           { id: 'test', name: 'Test', cls: 'task-test', durationSlots: 2 }
