@@ -1825,6 +1825,7 @@
     .drag-chip.task-painting .dot { background: #ec4899; }
     .drag-chip.task-cleaning .dot { background: #14b8a6; }
     .drag-chip.task-maintenance .dot { background: #64748b; }
+    .drag-chip.task-meeting .dot { background: #38bdf8; }
     .drag-chip.machine-mimaki1 .dot { background: #a78bfa; }
     .drag-chip.machine-mimaki2 .dot { background: #22d3ee; }
     .drag-chip.machine-sand-blaster .dot { background: #f87171; }
@@ -1845,6 +1846,7 @@
     .drag-chip.task-painting { border-color: rgba(236,72,153,0.55); }
     .drag-chip.task-cleaning { border-color: rgba(20,184,166,0.55); }
     .drag-chip.task-maintenance { border-color: rgba(148,163,184,0.55); }
+    .drag-chip.task-meeting { border-color: rgba(56,189,248,0.55); }
     .scheduler-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
     .scheduler-topbar {
       display: flex;
@@ -2222,6 +2224,7 @@
     .scheduler-assignment.task-painting { --task-accent: #ec4899; --task-bg: rgba(219, 39, 119, 0.44); }
     .scheduler-assignment.task-cleaning { --task-accent: #14b8a6; --task-bg: rgba(15, 118, 110, 0.44); }
     .scheduler-assignment.task-maintenance { --task-accent: #64748b; --task-bg: rgba(71, 85, 105, 0.44); }
+    .scheduler-assignment.task-meeting { --task-accent: #38bdf8; --task-bg: rgba(14, 116, 144, 0.44); }
     .scheduler-assignment.task-receiving .task-name { background: #16a34a; }
     .scheduler-assignment.task-qc .task-name { background: #0891b2; }
     .scheduler-assignment.task-printing .task-name { background: #7c3aed; }
@@ -2231,6 +2234,7 @@
     .scheduler-assignment.task-painting .task-name { background: #db2777; }
     .scheduler-assignment.task-cleaning .task-name { background: #0f766e; }
     .scheduler-assignment.task-maintenance .task-name { background: #475569; }
+    .scheduler-assignment.task-meeting .task-name { background: #0284c7; }
     .scheduler-assignment.machine-mimaki1 { box-shadow: inset 0 -2px 0 0 rgba(167,139,250,0.92), 0 4px 10px rgba(0,0,0,0.22); }
     .scheduler-assignment.machine-mimaki2 { box-shadow: inset 0 -2px 0 0 rgba(34,211,238,0.92), 0 4px 10px rgba(0,0,0,0.22); }
     .scheduler-assignment.machine-sand-blaster { box-shadow: inset 0 -2px 0 0 rgba(248,113,113,0.92), 0 4px 10px rgba(0,0,0,0.22); }
@@ -5177,7 +5181,8 @@
           { id: 'hatching', name: 'Hatching', cls: 'task-hatching' },
           { id: 'painting', name: 'Painting', cls: 'task-painting' },
           { id: 'cleaning', name: 'Cleaning', cls: 'task-cleaning' },
-          { id: 'maintenance', name: 'Maintenance', cls: 'task-maintenance' }
+          { id: 'maintenance', name: 'Maintenance', cls: 'task-maintenance' },
+          { id: 'meeting', name: 'Meeting', cls: 'task-meeting' }
         ];
         var ORDERS = [
           { id: 'ookla', name: 'OOKLA', cls: 'order-ookla' },
@@ -5788,7 +5793,7 @@
           });
         }
         function taskNeedsOrder(taskId) {
-          return taskId !== 'maintenance';
+          return taskId !== 'maintenance' && taskId !== 'meeting';
         }
         function createAssignment(day, time, workerId, taskId, orderId, duration, machineId, woId, plannedQty) {
           var startIdx = timeIndex(time);
@@ -6015,7 +6020,7 @@
             return '<div class="scheduler-partial">' +
               (workersText ? ('Workers: ' + workersText) : 'Drop worker') + '<br>' +
               (taskText ? ('Tasks: ' + taskText) : 'Drop task') + '<br>' +
-              (orderText ? ('Orders: ' + orderText) : 'Drop order (not needed for Maintenance)') + '<br>' +
+              (orderText ? ('Orders: ' + orderText) : 'Drop order (optional for Meeting / Maintenance)') + '<br>' +
               (machineText ? ('Machines: ' + machineText) : (needsMachineForMaint ? 'Drop machine (required for Maintenance)' : 'Drop machine (optional)')) + '<br>' +
               metaLine +
               '<div class="scheduler-partial-controls">' +
