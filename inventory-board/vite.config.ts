@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react';
 
 /** Same project as root `index.html` — keeps standalone `cristals/inventory-board/` online sync working. */
 const CRISTAL_SUPABASE = {
-  url: 'https://gimzlqbodxnriaqieetm.supabase.co',
-  anonKey: 'sb_publishable_fmHwMrvM6ccnMCJgFYpEAA_Pu-ydW5u',
+  url: 'https://miacnxumhzqzadwnatoz.supabase.co',
+  anonKey: 'sb_publishable_FhOOTr10CPPKwBmgfZHtKg_3Lq1QdWg',
 };
 
 export default defineConfig({

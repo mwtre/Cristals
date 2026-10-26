@@ -2853,7 +2853,7 @@
 </head>
 <body>
   Optional: enable online saving so all PCs share the same production data. See PRODUCTION-STATS-ONLINE-SETUP.md
-   <script>window.CRISTAL_SUPABASE_URL='https://gimzlqbodxnriaqieetm.supabase.co';window.CRISTAL_SUPABASE_ANON_KEY='sb_publishable_fmHwMrvM6ccnMCJgFYpEAA_Pu-ydW5u';</script>
+   <script>window.CRISTAL_SUPABASE_URL='https://miacnxumhzqzadwnatoz.supabase.co';window.CRISTAL_SUPABASE_ANON_KEY='sb_publishable_FhOOTr10CPPKwBmgfZHtKg_3Lq1QdWg';</script>
    <script src="cristal-supabase-rest.js"></script>
   <nav id="top-steps-nav" aria-label="Configuration steps">
     <button type="button" class="top-step top-step-primary active" data-step="1">Production Schedule</button>
@@ -4417,18 +4417,24 @@
               return r.json();
             })
             .then(function (rows) {
-              var logs = [];
-              var timers = {};
-              var calendar = {};
+              var remoteLogs = null;
+              var remoteTimers = null;
+              var remoteCalendar = null;
               rows.forEach(function (row) {
-                if (row.key === 'logs' && Array.isArray(row.value)) logs = row.value;
-                if (row.key === 'timers' && row.value && typeof row.value === 'object') timers = row.value;
-                if (row.key === 'calendar' && row.value && typeof row.value === 'object') calendar = row.value;
+                if (row.key === 'logs' && Array.isArray(row.value)) remoteLogs = row.value;
+                if (row.key === 'timers' && row.value && typeof row.value === 'object') remoteTimers = row.value;
+                if (row.key === 'calendar' && row.value && typeof row.value === 'object') remoteCalendar = row.value;
               });
               try {
-                localStorage.setItem(PRODUCTION_STORAGE_KEY, JSON.stringify(logs));
-                localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(timers));
-                localStorage.setItem(PRODUCTION_CALENDAR_STORAGE_KEY, JSON.stringify(calendar));
+                if (remoteLogs && remoteLogs.length > 0) {
+                  localStorage.setItem(PRODUCTION_STORAGE_KEY, JSON.stringify(normalizeProductionLogs(remoteLogs)));
+                }
+                if (remoteTimers && Object.keys(remoteTimers).length > 0) {
+                  localStorage.setItem(TIMERS_STORAGE_KEY, JSON.stringify(remoteTimers));
+                }
+                if (remoteCalendar && Object.keys(remoteCalendar).length > 0) {
+                  localStorage.setItem(PRODUCTION_CALENDAR_STORAGE_KEY, JSON.stringify(remoteCalendar));
+                }
               } catch (e) {}
               if (callback) callback();
             })
@@ -5700,15 +5706,37 @@
           saveLocal(schedulerStore);
           saveRemoteDebounced(schedulerStore);
         }
+        function schedulerStoreHasPlan(store) {
+          var norm = normalizeStore(store || {});
+          return Object.keys(norm.weeks || {}).some(function (wk) {
+            var wd = norm.weeks[wk];
+            return !!(wd && Array.isArray(wd.assignments) && wd.assignments.length > 0);
+          });
+        }
         function loadRemote(done) {
-          if (!useRemote) { if (done) done(loadLocal()); return; }
+          var localRaw = loadLocal();
+          if (!useRemote) { if (done) done(localRaw); return; }
           supabaseFetch('/production_data?key=eq.' + REMOTE_KEY)
             .then(function (r) { if (!r.ok) throw new Error('Load failed: ' + r.status); return r.json(); })
             .then(function (rows) {
               var fromRemote = rows && rows[0] && rows[0].value && typeof rows[0].value === 'object' ? rows[0].value : null;
-              if (done) done(fromRemote || loadLocal());
+              if (!fromRemote) {
+                if (done) done(localRaw);
+                return;
+              }
+              var remoteNorm = normalizeStore(fromRemote);
+              var localNorm = normalizeStore(localRaw);
+              var remoteHas = schedulerStoreHasPlan(remoteNorm);
+              var localHas = schedulerStoreHasPlan(localNorm);
+              if (localHas && !remoteHas) {
+                schedulerStore = localNorm;
+                saveRemoteDebounced(localNorm);
+                if (done) done(localNorm);
+                return;
+              }
+              if (done) done(remoteNorm);
             })
-            .catch(function () { if (done) done(loadLocal()); });
+            .catch(function () { if (done) done(localRaw); });
         }
         function ensureCurrentWeek() {
           currentWeekKey = weekKeyByOffset(weekOffset);
