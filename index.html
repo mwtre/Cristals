@@ -1706,6 +1706,10 @@
       max-height: calc(100vh - 3.25rem - 0.5rem);
       overflow: hidden;
     }
+    #step-production-stats .scheduler-grid-wrap {
+      flex: 1 1 45%;
+      min-height: 220px;
+    }
     #step-production-stats .scheduler-extras {
       margin-top: 0.5rem;
       border: 1px solid rgba(255,255,255,0.08);
@@ -1857,6 +1861,102 @@
     }
     .scheduler-sync-status { font-size: 0.74rem; color: var(--muted); }
     .scheduler-sync-status.error { color: #f87171; }
+    .scheduler-topbar-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+    }
+    .scheduler-supabase-status {
+      font-size: 0.72rem;
+      padding: 0.12rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+    }
+    .scheduler-supabase-status.is-active {
+      color: #34d399;
+      border-color: rgba(52,211,153,0.35);
+      background: rgba(6,78,59,0.25);
+    }
+    .scheduler-supabase-status.is-error {
+      color: #f87171;
+      border-color: rgba(248,113,113,0.35);
+      background: rgba(127,29,29,0.25);
+    }
+    .scheduler-supabase-status.is-off,
+    .scheduler-supabase-status.is-checking { color: var(--muted); }
+    .scheduler-plan-panel {
+      margin-top: 0.5rem;
+      border: 1px solid rgba(201,169,98,0.22);
+      border-radius: 12px;
+      padding: 0.55rem 0.65rem;
+      background: linear-gradient(180deg, rgba(22,22,22,0.95), rgba(12,12,12,0.95));
+      flex-shrink: 0;
+      max-height: min(42vh, 420px);
+      overflow: auto;
+    }
+    .scheduler-plan-panel-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.45rem;
+    }
+    .scheduler-plan-panel-head h4 {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--accent);
+    }
+    .scheduler-plan-export-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .scheduler-plan-narrative {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .scheduler-plan-block {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 0.4rem 0.45rem;
+      background: rgba(0,0,0,0.22);
+      font-size: 0.72rem;
+      line-height: 1.45;
+    }
+    .scheduler-plan-block h5 {
+      margin: 0 0 0.35rem 0;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+    .scheduler-plan-block ul {
+      margin: 0;
+      padding-left: 1rem;
+    }
+    .scheduler-plan-block li { margin-bottom: 0.2rem; }
+    .scheduler-plan-detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.68rem;
+      margin-top: 0.35rem;
+    }
+    .scheduler-plan-detail-table th,
+    .scheduler-plan-detail-table td {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 0.2rem 0.35rem;
+      text-align: left;
+    }
+    .scheduler-plan-detail-table th {
+      color: var(--muted);
+      font-weight: 600;
+    }
     .scheduler-grid-wrap {
       overflow: auto;
       border: 1px solid rgba(201,169,98,0.22);
@@ -3626,8 +3726,11 @@
           </aside>
           <div class="scheduler-main">
             <div class="scheduler-topbar">
-              <span class="scheduler-title">Monday to Friday · 10:00-18:30 · 30min slots</span>
-              <span id="scheduler-sync-status" class="scheduler-sync-status" aria-live="polite"></span>
+              <span class="scheduler-title">Monday to Friday · 09:00-18:00 · 30min slots</span>
+              <div class="scheduler-topbar-meta">
+                <span id="scheduler-supabase-status" class="scheduler-supabase-status is-off" aria-live="polite">Supabase: …</span>
+                <span id="scheduler-sync-status" class="scheduler-sync-status" aria-live="polite"></span>
+              </div>
             </div>
             <div class="scheduler-topbar-actions">
               <button type="button" class="scheduler-mini-btn scheduler-sidebar-toggle" id="scheduler-sidebar-toggle" aria-expanded="true">Hide sidebar</button>
@@ -3675,14 +3778,25 @@
             <div class="scheduler-grid-wrap">
               <table class="scheduler-table" id="scheduler-table"></table>
             </div>
+            <section class="scheduler-plan-panel" id="scheduler-plan-panel" aria-label="Weekly plan infographic">
+              <div class="scheduler-plan-panel-head">
+                <h4>Plan infographic — what · who · how</h4>
+                <div class="scheduler-plan-export-row">
+                  <button type="button" class="scheduler-mini-btn" id="scheduler-export-excel">Export Excel</button>
+                  <button type="button" class="scheduler-mini-btn" id="scheduler-export-csv">Export CSV</button>
+                  <button type="button" class="scheduler-mini-btn" id="scheduler-print-visible">Print</button>
+                </div>
+              </div>
+              <div class="scheduler-plan-narrative" id="scheduler-plan-narrative"></div>
+              <div class="scheduler-kpis" id="scheduler-kpis"></div>
+            </section>
             <details class="scheduler-extras" id="scheduler-extras">
-              <summary>Capacity, charts &amp; audit</summary>
+              <summary>Charts, capacity &amp; audit</summary>
             <div class="scheduler-capacity" id="scheduler-capacity"></div>
             <div class="scheduler-infographic" id="scheduler-infographic" aria-label="Weekly scheduler infographic">
               <div class="scheduler-infographic-head">
-                <h4>Weekly infographic</h4>
+                <h4>Weekly charts</h4>
               </div>
-              <div class="scheduler-kpis" id="scheduler-kpis"></div>
               <div class="scheduler-charts-grid">
                 <div class="scheduler-chart-card">
                   <p class="scheduler-chart-title">Hours by worker</p>
@@ -5074,11 +5188,10 @@
         var DEFAULT_DURATION_SLOTS = 2;
         function makeTimes() {
           var out = [];
-          for (var h = 10; h <= 18; h++) {
+          for (var h = 9; h < 18; h++) {
             out.push(String(h).padStart(2, '0') + ':00');
-            if (h < 18) out.push(String(h).padStart(2, '0') + ':30');
+            out.push(String(h).padStart(2, '0') + ':30');
           }
-          out.push('18:30');
           return out;
         }
         var TIMES = makeTimes();
@@ -5569,8 +5682,15 @@
           if (syncTimer) clearTimeout(syncTimer);
           syncTimer = setTimeout(function () {
             window.cristalSaveProductionDataRow(REMOTE_KEY, next || {})
-              .then(function () { showSchedulerSyncStatus('synced'); })
-              .catch(function (err) { console.error('Scheduler sync failed:', err); showSchedulerSyncStatus('error'); });
+              .then(function () {
+                showSchedulerSyncStatus('synced');
+                checkSupabaseConnection();
+              })
+              .catch(function (err) {
+                console.error('Scheduler sync failed:', err);
+                showSchedulerSyncStatus('error');
+                checkSupabaseConnection();
+              });
           }, 250);
         }
         function saveStore() {
@@ -5945,10 +6065,41 @@
             }
           }, true);
         }
-        function renderSchedulerInfographic() {
-          var kpisEl = schedulerEl('scheduler-kpis');
-          var fallbackEl = schedulerEl('scheduler-infographic-fallback');
-          if (!kpisEl) return;
+        function escapeCsvCell(v) {
+          var s = String(v == null ? '' : v);
+          return s.indexOf(',') >= 0 || s.indexOf('"') >= 0 || s.indexOf('\n') >= 0 || s.indexOf('\r') >= 0
+            ? '"' + s.replace(/"/g, '""') + '"'
+            : s;
+        }
+        var supabaseStatusState = 'off';
+        function renderSupabaseStatusBadge(state, message) {
+          supabaseStatusState = state;
+          var el = schedulerEl('scheduler-supabase-status');
+          if (!el) return;
+          el.textContent = message;
+          el.className = 'scheduler-supabase-status is-' + state;
+        }
+        function checkSupabaseConnection() {
+          if (!useRemote || typeof window.cristalSupabaseFetch !== 'function') {
+            renderSupabaseStatusBadge('off', 'Supabase: not configured');
+            return Promise.resolve(false);
+          }
+          renderSupabaseStatusBadge('checking', 'Supabase: checking…');
+          return window.cristalSupabaseFetch('/production_data?select=key&limit=1')
+            .then(function (r) {
+              if (r.ok) {
+                renderSupabaseStatusBadge('active', 'Supabase: active');
+                return true;
+              }
+              renderSupabaseStatusBadge('error', 'Supabase: error ' + r.status);
+              return false;
+            })
+            .catch(function () {
+              renderSupabaseStatusBadge('error', 'Supabase: offline');
+              return false;
+            });
+        }
+        function computeWeekPlanStats() {
           var byWorker = {};
           var byTask = {};
           var byOrder = {};
@@ -5964,6 +6115,8 @@
           var totalHours = 0;
           var totalQty = 0;
           var woSet = {};
+          var byWo = {};
+          var workerTaskHours = {};
           currentWeekData.assignments.forEach(function (a) {
             var h = a.duration * slotHours();
             totalHours += h;
@@ -5974,14 +6127,190 @@
             else byOrder.none += h;
             if (a.machineId && byMachine[a.machineId] !== undefined) byMachine[a.machineId] += h;
             else byMachine.none += h;
-            if (a.woId) woSet[a.woId] = true;
+            var woKey = normalizeWoId(a.woId || '') || '(no WO)';
+            woSet[woKey] = true;
             totalQty += Number(a.plannedQty) || 0;
+            if (!byWo[woKey]) byWo[woKey] = { hours: 0, qty: 0, tasks: {}, orders: {} };
+            byWo[woKey].hours += h;
+            byWo[woKey].qty += Number(a.plannedQty) || 0;
+            var tName = tasksById[a.taskId] ? tasksById[a.taskId].name : a.taskId;
+            byWo[woKey].tasks[tName] = (byWo[woKey].tasks[tName] || 0) + h;
+            var oName = a.orderId && ordersById[a.orderId] ? ordersById[a.orderId].name : (a.orderId || '—');
+            byWo[woKey].orders[oName] = (byWo[woKey].orders[oName] || 0) + h;
+            var wtKey = a.workerId + '|' + a.taskId;
+            workerTaskHours[wtKey] = (workerTaskHours[wtKey] || 0) + h;
           });
           var uniqueWOs = Object.keys(woSet).length;
           var assignmentsCount = currentWeekData.assignments.length;
-          var totalLaborCost = totalHours * WORKER_HOURLY_COST_EUR;
+          var totalLaborCost = 0;
+          WORKERS.forEach(function (w) { totalLaborCost += costByWorker[w.id] || 0; });
           var maxHours = TIMES.length * slotHours() * DAYS.length * WORKERS.length;
           var util = maxHours > 0 ? (totalHours / maxHours) * 100 : 0;
+          return {
+            byWorker: byWorker,
+            byTask: byTask,
+            byOrder: byOrder,
+            byMachine: byMachine,
+            costByWorker: costByWorker,
+            byWo: byWo,
+            workerTaskHours: workerTaskHours,
+            totalHours: totalHours,
+            totalQty: totalQty,
+            uniqueWOs: uniqueWOs,
+            assignmentsCount: assignmentsCount,
+            totalLaborCost: totalLaborCost,
+            util: util
+          };
+        }
+        function sortedAssignmentRows() {
+          return currentWeekData.assignments.slice().sort(function (a, b) {
+            var da = DAYS.indexOf(a.day);
+            var db = DAYS.indexOf(b.day);
+            if (da !== db) return da - db;
+            return timeIndex(a.startTime) - timeIndex(b.startTime);
+          });
+        }
+        function renderSchedulePlanNarrative(stats) {
+          var el = schedulerEl('scheduler-plan-narrative');
+          if (!el) return;
+          var meta = getWeekDaysMeta(weekOffset);
+          var weekLabel = meta.length ? (meta[0].label + ' – ' + meta[meta.length - 1].label) : currentWeekKey;
+          var whatLines = Object.keys(stats.byWo).sort().map(function (wo) {
+            var row = stats.byWo[wo];
+            var taskBits = Object.keys(row.tasks).sort().map(function (t) {
+              return t + ' (' + row.tasks[t].toFixed(1) + 'h)';
+            }).join(', ');
+            var orderBits = Object.keys(row.orders).sort().map(function (o) {
+              return o + ' (' + row.orders[o].toFixed(1) + 'h)';
+            }).join(', ');
+            return '<li><strong>' + wo + '</strong> — ' + row.qty + ' pcs planned · ' + row.hours.toFixed(1) + 'h' +
+              (taskBits ? '<br><span style="color:var(--muted)">Tasks: ' + taskBits + '</span>' : '') +
+              (orderBits ? '<br><span style="color:var(--muted)">Orders: ' + orderBits + '</span>' : '') +
+              '</li>';
+          });
+          var whoLines = WORKERS.map(function (w) {
+            var h = stats.byWorker[w.id] || 0;
+            if (h <= 0) return '';
+            var taskParts = TASKS.map(function (t) {
+              var hh = stats.workerTaskHours[w.id + '|' + t.id] || 0;
+              return hh > 0 ? (t.name + ' ' + hh.toFixed(1) + 'h') : '';
+            }).filter(Boolean).join(', ');
+            return '<li><strong>' + w.name + '</strong> — ' + h.toFixed(1) + 'h' +
+              (taskParts ? ' · ' + taskParts : '') + '</li>';
+          }).filter(Boolean);
+          var howLines = TASKS.map(function (t) {
+            var h = stats.byTask[t.id] || 0;
+            return h > 0 ? '<li><strong>' + t.name + '</strong> — ' + h.toFixed(1) + 'h planned</li>' : '';
+          }).filter(Boolean);
+          var machineLines = MACHINES.map(function (m) {
+            var h = stats.byMachine[m.id] || 0;
+            return h > 0 ? '<li>' + m.name + ' — ' + h.toFixed(1) + 'h</li>' : '';
+          }).filter(Boolean);
+          var detailRows = sortedAssignmentRows().map(function (a) {
+            var w = workersById[a.workerId] ? workersById[a.workerId].name : a.workerId;
+            var t = tasksById[a.taskId] ? tasksById[a.taskId].name : a.taskId;
+            var o = a.orderId && ordersById[a.orderId] ? ordersById[a.orderId].name : '';
+            var m = a.machineId && machinesById[a.machineId] ? machinesById[a.machineId].name : '';
+            return '<tr><td>' + a.day + '</td><td>' + a.startTime + '</td><td>' + (a.duration * slotHours()).toFixed(1) + 'h</td><td>' + w + '</td><td>' + t + '</td><td>' + o + '</td><td>' + m + '</td><td>' + (a.woId || '') + '</td><td>' + (a.plannedQty || '') + '</td></tr>';
+          }).join('');
+          el.innerHTML =
+            '<div class="scheduler-plan-block"><h5>What · week ' + weekLabel + '</h5>' +
+              (whatLines.length ? '<ul>' + whatLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No work orders planned yet.</p>') +
+            '</div>' +
+            '<div class="scheduler-plan-block"><h5>Who</h5>' +
+              (whoLines.length ? '<ul>' + whoLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No worker hours assigned.</p>') +
+            '</div>' +
+            '<div class="scheduler-plan-block"><h5>How (tasks &amp; machines)</h5>' +
+              (howLines.length ? '<ul>' + howLines.join('') + '</ul>' : '<p style="margin:0;color:var(--muted)">No tasks scheduled.</p>') +
+              (machineLines.length ? '<p style="margin:0.35rem 0 0;color:var(--muted)">Machines</p><ul>' + machineLines.join('') + '</ul>' : '') +
+            '</div>' +
+            '<div class="scheduler-plan-block" style="grid-column:1/-1"><h5>Slot detail</h5>' +
+              (detailRows
+                ? '<table class="scheduler-plan-detail-table"><thead><tr><th>Day</th><th>Start</th><th>Duration</th><th>Worker</th><th>Task</th><th>Order</th><th>Machine</th><th>WO</th><th>Qty</th></tr></thead><tbody>' + detailRows + '</tbody></table>'
+                : '<p style="margin:0;color:var(--muted)">Drag chips into the grid to build the plan.</p>') +
+            '</div>';
+        }
+        function exportSchedulePlanExcel() {
+          var stats = computeWeekPlanStats();
+          var meta = getWeekDaysMeta(weekOffset);
+          var weekLabel = meta.length ? (meta[0].label + ' - ' + meta[meta.length - 1].label) : currentWeekKey;
+          var rows = [];
+          rows.push(['Production schedule plan', weekLabel].map(escapeCsvCell).join(','));
+          rows.push(['Week key', currentWeekKey].map(escapeCsvCell).join(','));
+          rows.push(['Supabase', supabaseStatusState === 'active' ? 'active' : supabaseStatusState].map(escapeCsvCell).join(','));
+          rows.push('');
+          rows.push(['Summary KPIs'].map(escapeCsvCell).join(','));
+          rows.push(['Total planned hours', stats.totalHours.toFixed(2)].map(escapeCsvCell).join(','));
+          rows.push(['Labor cost (EUR)', stats.totalLaborCost.toFixed(2)].map(escapeCsvCell).join(','));
+          rows.push(['Assignments', stats.assignmentsCount].map(escapeCsvCell).join(','));
+          rows.push(['Unique WO', stats.uniqueWOs].map(escapeCsvCell).join(','));
+          rows.push(['Total qty planned', stats.totalQty].map(escapeCsvCell).join(','));
+          rows.push(['Team utilization %', stats.util.toFixed(1)].map(escapeCsvCell).join(','));
+          rows.push('');
+          rows.push(['Planned slots'].map(escapeCsvCell).join(','));
+          rows.push(['Day', 'Start', 'Duration (h)', 'Worker', 'Task', 'Order', 'Machine', 'WO ID', 'Qty'].map(escapeCsvCell).join(','));
+          sortedAssignmentRows().forEach(function (a) {
+            rows.push([
+              a.day,
+              a.startTime,
+              (a.duration * slotHours()).toFixed(2),
+              workersById[a.workerId] ? workersById[a.workerId].name : a.workerId,
+              tasksById[a.taskId] ? tasksById[a.taskId].name : a.taskId,
+              a.orderId && ordersById[a.orderId] ? ordersById[a.orderId].name : (a.orderId || ''),
+              a.machineId && machinesById[a.machineId] ? machinesById[a.machineId].name : '',
+              a.woId || '',
+              a.plannedQty || ''
+            ].map(escapeCsvCell).join(','));
+          });
+          function pushMapSection(title, mapObj, labelFn) {
+            rows.push('');
+            rows.push([title].map(escapeCsvCell).join(','));
+            rows.push(['Name', 'Hours'].map(escapeCsvCell).join(','));
+            chartPairsFromMap(mapObj, labelFn, false).forEach(function (p) {
+              rows.push([p.label, p.value.toFixed(2)].map(escapeCsvCell).join(','));
+            });
+          }
+          pushMapSection('Hours by worker', stats.byWorker, function (id) { return workersById[id] ? workersById[id].name : id; });
+          pushMapSection('Hours by task', stats.byTask, function (id) { return tasksById[id] ? tasksById[id].name : id; });
+          pushMapSection('Hours by order', stats.byOrder, function (id) {
+            return id === 'none' ? 'No order' : (ordersById[id] ? ordersById[id].name : id);
+          });
+          pushMapSection('Hours by machine', stats.byMachine, function (id) {
+            return id === 'none' ? 'No machine' : (machinesById[id] ? machinesById[id].name : id);
+          });
+          rows.push('');
+          rows.push(['WO rollup'].map(escapeCsvCell).join(','));
+          rows.push(['WO', 'Planned qty', 'Hours'].map(escapeCsvCell).join(','));
+          Object.keys(stats.byWo).sort().forEach(function (wo) {
+            var r = stats.byWo[wo];
+            rows.push([wo, r.qty, r.hours.toFixed(2)].map(escapeCsvCell).join(','));
+          });
+          var csv = rows.join('\r\n');
+          var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'production-schedule-plan-' + currentWeekKey + '.csv';
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+        function renderSchedulerInfographic() {
+          var kpisEl = schedulerEl('scheduler-kpis');
+          var fallbackEl = schedulerEl('scheduler-infographic-fallback');
+          if (!kpisEl) return;
+          var stats = computeWeekPlanStats();
+          renderSchedulePlanNarrative(stats);
+          var byWorker = stats.byWorker;
+          var byTask = stats.byTask;
+          var byOrder = stats.byOrder;
+          var byMachine = stats.byMachine;
+          var costByWorker = stats.costByWorker;
+          var totalHours = stats.totalHours;
+          var totalQty = stats.totalQty;
+          var uniqueWOs = stats.uniqueWOs;
+          var assignmentsCount = stats.assignmentsCount;
+          var totalLaborCost = stats.totalLaborCost;
+          var util = stats.util;
           kpisEl.innerHTML =
             '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Total planned hours</div><div class="scheduler-kpi-value">' + totalHours.toFixed(1) + 'h</div></div>' +
             '<div class="scheduler-kpi"><div class="scheduler-kpi-label">Labor cost (@ €' + WORKER_HOURLY_COST_EUR + '/h)</div><div class="scheduler-kpi-value">€' + totalLaborCost.toFixed(0) + '</div></div>' +
@@ -6447,13 +6776,13 @@
           });
         }
         function exportWeekCsv() {
-          var lines = ['Day,Time,Duration(h),Worker,Task,Order,Machine,WO ID,Qty'];
-          currentWeekData.assignments.forEach(function (a) {
+          var lines = [['Day', 'Time', 'Duration(h)', 'Worker', 'Task', 'Order', 'Machine', 'WO ID', 'Qty'].map(escapeCsvCell).join(',')];
+          sortedAssignmentRows().forEach(function (a) {
             var w = workersById[a.workerId] ? workersById[a.workerId].name : a.workerId;
             var t = tasksById[a.taskId] ? tasksById[a.taskId].name : a.taskId;
             var o = ordersById[a.orderId] ? ordersById[a.orderId].name : a.orderId;
             var m = machinesById[a.machineId] ? machinesById[a.machineId].name : '';
-            lines.push([a.day, a.startTime, (a.duration * slotHours()).toFixed(2), w, t, o, m, (a.woId || ''), (a.plannedQty || '')].join(','));
+            lines.push([a.day, a.startTime, (a.duration * slotHours()).toFixed(2), w, t, o, m, (a.woId || ''), (a.plannedQty || '')].map(escapeCsvCell).join(','));
           });
           var csv = lines.join('\r\n');
           var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
@@ -6878,9 +7207,15 @@
           });
 
           var exportBtn = schedulerEl('scheduler-export');
+          var exportCsvBtn = schedulerEl('scheduler-export-csv');
+          var exportExcelBtn = schedulerEl('scheduler-export-excel');
           var printBtn = schedulerEl('scheduler-print');
+          var printVisibleBtn = schedulerEl('scheduler-print-visible');
           if (exportBtn) exportBtn.addEventListener('click', exportWeekCsv);
+          if (exportCsvBtn) exportCsvBtn.addEventListener('click', exportWeekCsv);
+          if (exportExcelBtn) exportExcelBtn.addEventListener('click', exportSchedulePlanExcel);
           if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
+          if (printVisibleBtn) printVisibleBtn.addEventListener('click', function () { window.print(); });
           var woProfitWrap = schedulerEl('scheduler-wo-profit');
           if (woProfitWrap) {
             woProfitWrap.addEventListener('change', function (e) {
@@ -6959,7 +7294,9 @@
             saveLocal(schedulerStore);
             renderScheduler();
             renderAudit();
+            checkSupabaseConnection();
           });
+          checkSupabaseConnection();
           initInteractions();
         }
         if (typeof window !== 'undefined') window.refreshProductionScheduler = function () { ensureCurrentWeek(); renderScheduler(); };
