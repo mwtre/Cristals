@@ -2196,9 +2196,24 @@
     .scheduler-slot-stack {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 2px;
       min-height: 100%;
+      width: 100%;
     }
+    .scheduler-slot-stack.is-multi {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+      gap: 2px;
+      align-items: stretch;
+    }
+    .scheduler-slot:has(.scheduler-slot-stack[data-stack-count="2"]) { min-height: 52px; }
+    .scheduler-slot:has(.scheduler-slot-stack[data-stack-count="3"]) { min-height: 72px; }
+    .scheduler-slot:has(.scheduler-slot-stack[data-stack-count="4"]) { min-height: 92px; }
+    .scheduler-slot:has(.scheduler-slot-stack[data-stack-count="5"]) { min-height: 112px; }
+    .scheduler-slot-half:has(.scheduler-slot-stack[data-stack-count="2"]) { min-height: 52px; }
+    .scheduler-slot-half:has(.scheduler-slot-stack[data-stack-count="3"]) { min-height: 72px; }
+    .scheduler-slot-half:has(.scheduler-slot-stack[data-stack-count="4"]) { min-height: 92px; }
+    .scheduler-slot-half:has(.scheduler-slot-stack[data-stack-count="5"]) { min-height: 112px; }
     .scheduler-assignment {
       min-height: 15px;
       border-radius: 6px;
@@ -2212,6 +2227,64 @@
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0,0,0,0.22);
       border: 1px solid rgba(148,163,184,0.28);
+    }
+    .scheduler-assignment.compact {
+      min-height: 26px;
+      padding: 0.12rem 0.2rem 0.14rem;
+    }
+    .scheduler-assignment.compact .worker-name {
+      font-size: 0.58rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .scheduler-assignment.compact .task-name {
+      font-size: 0.52rem;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .scheduler-assignment.compact .order-name,
+    .scheduler-assignment.compact .machine-name,
+    .scheduler-assignment.compact .wo-meta {
+      display: none;
+    }
+    .scheduler-assignment.compact .duration-tag {
+      font-size: 0.48rem;
+      right: 14px;
+      top: 1px;
+    }
+    .scheduler-assignment.compact.is-continued {
+      min-height: 10px;
+      padding: 0;
+      opacity: 0.92;
+    }
+    .scheduler-assignment.compact.is-continued .worker-name,
+    .scheduler-assignment.compact.is-continued .task-name,
+    .scheduler-assignment.compact.is-continued .remove-btn,
+    .scheduler-assignment.compact.is-continued .copy-btn,
+    .scheduler-assignment.compact.is-continued .duration-tag,
+    .scheduler-assignment.compact.is-continued .resize-handle,
+    .scheduler-assignment.compact.is-continued .resize-handle-x {
+      display: none;
+    }
+    .scheduler-assignment.compact.is-continued::after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, rgba(148,163,184,0.35), rgba(148,163,184,0.12));
+    }
+    .scheduler-assignment.compact.is-continued.worker-enzo::after { background: linear-gradient(90deg, rgba(96,165,250,0.55), rgba(96,165,250,0.15)); }
+    .scheduler-assignment.compact.is-continued.worker-andre::after { background: linear-gradient(90deg, rgba(245,158,11,0.55), rgba(245,158,11,0.15)); }
+    .scheduler-assignment.compact.is-continued.worker-maurizio::after { background: linear-gradient(90deg, rgba(52,211,153,0.55), rgba(52,211,153,0.15)); }
+    .scheduler-assignment.compact.is-continued.worker-scott::after { background: linear-gradient(90deg, rgba(244,114,182,0.55), rgba(244,114,182,0.15)); }
+    .scheduler-slot-stack.is-multi .scheduler-pending-inline {
+      grid-column: 1 / -1;
     }
     .scheduler-assignment .worker-name {
       margin: 0;
@@ -6437,6 +6510,33 @@
           });
           return { made: made, conflicts: conflicts, missingOrders: missingOrders, missingMeta: missingMeta, missingMachines: missingMachines, maintenanceConflicts: maintenanceConflicts };
         }
+        function renderAssignmentCard(a, slotIdx, compact) {
+          var w = workersById[a.workerId];
+          var t = tasksById[a.taskId];
+          var o = ordersById[a.orderId];
+          var m = a.machineId ? machinesById[a.machineId] : null;
+          if (!w || !t) return '';
+          var startIdx = timeIndex(a.startTime);
+          var isStart = slotIdx === startIdx;
+          var taskClass = t.cls ? (' ' + t.cls) : '';
+          var orderClass = o ? (' ' + o.cls) : '';
+          var title = w.name + ' · ' + t.name + (o ? (' · ' + o.name) : '');
+          var compactClass = compact ? ' compact' : '';
+          return '<div class="scheduler-assignment ' + w.cls + taskClass + orderClass + (m ? (' ' + m.cls) : '') + compactClass + (isStart ? ' is-start' : ' is-continued') + '" data-assignment-id="' + a.id + '"' +
+            (isStart ? ' draggable="true"' : '') +
+            ' title="' + title.replace(/"/g, '&quot;') + '">' +
+            (isStart ? '<button type="button" class="copy-btn" title="Copy assignment" data-copy="' + a.id + '">⧉</button>' : '') +
+            '<button type="button" class="remove-btn" title="Remove from schedule" data-remove="' + a.id + '" aria-label="Remove">&times;</button>' +
+            (isStart ? '<span class="duration-tag">' + formatHoursFromSlots(a.duration) + '</span>' : '') +
+            '<p class="worker-name">' + w.name + '</p>' +
+            '<p class="task-name">' + t.name + '</p>' +
+            (compact ? '' : ((o ? ('<p class="order-name">' + o.name + '</p>') : '') +
+              (m ? '<p class="machine-name">' + m.name + '</p>') +
+              (((a.woId || '') || (Number(a.plannedQty) > 0)) ? ('<p class="wo-meta">' + formatSchedulerBatchMeta(a.woId, a.plannedQty) + '</p>') : ''))) +
+            (isStart ? '<span class="resize-handle-x" title="Resize across days" data-resize-x="' + a.id + '"></span>' : '') +
+            (isStart ? '<span class="resize-handle" title="Resize duration" data-resize="' + a.id + '"></span>' : '') +
+            '</div>';
+        }
         function slotInner(day, time, slotIdx) {
           var key = slotKey(day, time);
           var pending = currentWeekData.pending[key] || { workers: [], tasks: [], orders: [], machines: [], woId: '', plannedQty: 0, durationSlots: 0 };
@@ -6446,31 +6546,14 @@
             var showBatchFieldsInline = pendingHasProductionTask(pending);
             var pendingWoValue = pending.woId ? String(normalizeWoId(pending.woId)).replace(/"/g, '&quot;') : '';
             var pendingQtyValue = Number(pending.plannedQty) > 0 ? String(Math.round(Number(pending.plannedQty))) : '';
-            var cards = inSlot.map(function (a) {
-              var w = workersById[a.workerId];
-              var t = tasksById[a.taskId];
-              var o = ordersById[a.orderId];
-              var m = a.machineId ? machinesById[a.machineId] : null;
-              if (!w || !t) return '';
-              var startIdx = timeIndex(a.startTime);
-              var isStart = slotIdx === startIdx;
-              var taskClass = t.cls ? (' ' + t.cls) : '';
-              var orderClass = o ? (' ' + o.cls) : '';
-              return '<div class="scheduler-assignment ' + w.cls + taskClass + orderClass + (m ? (' ' + m.cls) : '') + (isStart ? ' is-start' : ' is-continued') + '" data-assignment-id="' + a.id + '"' +
-                (isStart ? ' draggable="true" title="Drag to move"' : '') +
-                '>' +
-                (isStart ? '<button type="button" class="copy-btn" title="Copy assignment" data-copy="' + a.id + '">⧉</button>' : '') +
-                '<button type="button" class="remove-btn" title="Remove from schedule" data-remove="' + a.id + '" aria-label="Remove">&times;</button>' +
-                (isStart ? '<span class="duration-tag">' + formatHoursFromSlots(a.duration) + '</span>' : '') +
-                '<p class="worker-name">' + w.name + '</p>' +
-                '<p class="task-name">' + t.name + '</p>' +
-                (o ? ('<p class="order-name">' + o.name + '</p>') : '') +
-                (m ? '<p class="machine-name">' + m.name + '</p>' : '') +
-                (((a.woId || '') || (Number(a.plannedQty) > 0)) ? ('<p class="wo-meta">' + formatSchedulerBatchMeta(a.woId, a.plannedQty) + '</p>') : '') +
-                (isStart ? '<span class="resize-handle-x" title="Resize across days" data-resize-x="' + a.id + '"></span>' : '') +
-                (isStart ? '<span class="resize-handle" title="Resize duration" data-resize="' + a.id + '"></span>' : '') +
-                '</div>';
-            }).join('');
+            var multi = inSlot.length > 1;
+            inSlot.sort(function (a, b) {
+              var wa = workersById[a.workerId] ? workersById[a.workerId].name : a.workerId;
+              var wb = workersById[b.workerId] ? workersById[b.workerId].name : b.workerId;
+              if (wa !== wb) return wa.localeCompare(wb);
+              return timeIndex(a.startTime) - timeIndex(b.startTime);
+            });
+            var cards = inSlot.map(function (a) { return renderAssignmentCard(a, slotIdx, multi); }).join('');
             if (hasPending) {
               cards += '<div class="scheduler-pending-inline">' +
                 '<button type="button" class="remove-btn" title="Clear pending" data-clear-pending="' + key + '" aria-label="Clear pending">&times;</button>' +
@@ -6483,7 +6566,8 @@
                 '</div>' +
                 '</div>';
             }
-            return '<div class="scheduler-slot-stack">' + cards + '</div>';
+            var stackCount = Math.min(inSlot.length, 5);
+            return '<div class="scheduler-slot-stack' + (multi ? ' is-multi' : '') + '" data-stack-count="' + stackCount + '">' + cards + '</div>';
           }
           if (pendingHasContent(pending)) {
             var workersText = (pending.workers || []).map(function (w) { return workersById[w] ? workersById[w].name : ''; }).filter(Boolean).join(', ');
