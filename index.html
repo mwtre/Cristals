@@ -5482,7 +5482,7 @@
         }
         function reportFinalizePendingResult(result, day, time) {
           if (result.made > 0) logAction('Created ' + result.made + ' assignment(s) at ' + day + ' ' + time);
-          if (result.missingOrders > 0) showSchedulerMessage('Add an order or ' + SCHEDULER_BATCH_ID_LABEL + ' / ' + SCHEDULER_TOTAL_PIECES_LABEL);
+          if (result.missingOrders > 0) showSchedulerMessage('Add an order, or both ' + SCHEDULER_BATCH_ID_LABEL + ' and ' + SCHEDULER_TOTAL_PIECES_LABEL);
           if (result.missingMeta > 0) showSchedulerMessage('Add ' + schedulerBatchMetaButtonLabel() + ' or drop an order');
           if (result.missingMachines > 0) showSchedulerMessage('Maintenance needs a machine');
           if (result.maintenanceConflicts > 0) showSchedulerMessage('Maintenance blocked: worker already booked in this slot');
@@ -5829,7 +5829,7 @@
         function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
         function timeIndex(time) { return TIMES.indexOf(time); }
         function hasBatchMeta(woId, plannedQty) {
-          return !!normalizeWoId(woId) || Number(plannedQty) > 0;
+          return !!normalizeWoId(woId) && Number(plannedQty) > 0;
         }
         function hasRequiredOrderMeta(meta) {
           if (!meta) return false;
@@ -5848,15 +5848,35 @@
           if (pendingHasProductionTask(pending)) return false;
           return true;
         }
-        function syncPendingMetaFromDom(table, pending, key) {
-          if (!pending || !key) return;
-          var root = table || document;
-          var woInput = root.querySelector('input[data-slot-wo-input="' + key + '"]');
-          var qtyInput = root.querySelector('input[data-slot-qty-input="' + key + '"]');
+        function syncPendingMetaFromContainer(container, pending) {
+          if (!container || !pending) return;
+          var woInput = container.querySelector('input[data-slot-wo-input]');
+          var qtyInput = container.querySelector('input[data-slot-qty-input]');
           if (woInput) pending.woId = normalizeWoId(woInput.value || '');
           if (qtyInput) {
             var n = Number(qtyInput.value);
             pending.plannedQty = isFinite(n) && n > 0 ? Math.round(n) : 0;
+          }
+        }
+        function syncPendingMetaFromDom(table, pending, key) {
+          if (!pending || !key) return;
+          var root = table || document;
+          var escaped = (typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(key) : key.replace(/"/g, '\\"');
+          var container = root.querySelector('.scheduler-partial input[data-slot-wo-input="' + escaped + '"]');
+          if (container) container = container.closest('.scheduler-partial, .scheduler-pending-inline');
+          if (!container) {
+            container = root.querySelector('.scheduler-pending-inline input[data-slot-wo-input="' + escaped + '"]');
+            if (container) container = container.closest('.scheduler-pending-inline');
+          }
+          if (container) syncPendingMetaFromContainer(container, pending);
+          else {
+            var woInput = root.querySelector('input[data-slot-wo-input="' + escaped + '"]');
+            var qtyInput = root.querySelector('input[data-slot-qty-input="' + escaped + '"]');
+            if (woInput) pending.woId = normalizeWoId(woInput.value || '');
+            if (qtyInput) {
+              var n = Number(qtyInput.value);
+              pending.plannedQty = isFinite(n) && n > 0 ? Math.round(n) : 0;
+            }
           }
         }
         function batchMetaFieldsHtml(key, woValue, qtyValue) {
@@ -6455,15 +6475,17 @@
               cards += '<div class="scheduler-pending-inline">' +
                 '<button type="button" class="remove-btn" title="Clear pending" data-clear-pending="' + key + '" aria-label="Clear pending">&times;</button>' +
                 '<span>Pending new assignment in this slot</span>' +
+                durationSelectHtml(key, pending) +
                 (showBatchFieldsInline ? batchMetaFieldsHtml(key, pendingWoValue, pendingQtyValue) : '') +
                 '<div class="scheduler-partial-controls">' +
+                '<button type="button" class="scheduler-mini-btn scheduler-slot-apply" data-slot-apply="' + key + '">Confirm</button>' +
                 '<button type="button" class="scheduler-clear-pending-btn" data-clear-pending="' + key + '">Clear pending</button>' +
                 '</div>' +
                 '</div>';
             }
             return '<div class="scheduler-slot-stack">' + cards + '</div>';
           }
-          if ((pending.workers && pending.workers.length) || (pending.tasks && pending.tasks.length) || (pending.orders && pending.orders.length) || (pending.machines && pending.machines.length)) {
+          if (pendingHasContent(pending)) {
             var workersText = (pending.workers || []).map(function (w) { return workersById[w] ? workersById[w].name : ''; }).filter(Boolean).join(', ');
             var taskText = (pending.tasks || []).map(function (t) { return tasksById[t] ? tasksById[t].name : ''; }).filter(Boolean).join(', ');
             var orderText = (pending.orders || []).map(function (o) { return ordersById[o] ? ordersById[o].name : ''; }).filter(Boolean).join(', ');
@@ -6485,7 +6507,7 @@
               durationSelectHtml(key, pending) +
               (showBatchFields ? batchMetaFieldsHtml(key, woValue, qtyValue) : '') +
               '<div class="scheduler-partial-controls">' +
-              '<button type="button" class="scheduler-mini-btn scheduler-slot-apply" data-slot-apply="' + key + '">Schedule</button>' +
+              '<button type="button" class="scheduler-mini-btn scheduler-slot-apply" data-slot-apply="' + key + '">Confirm</button>' +
               '<button type="button" class="scheduler-clear-pending-btn" data-clear-pending="' + key + '">Clear</button>' +
               '</div>' +
               '</div>';
@@ -7567,12 +7589,18 @@
               return;
             }
             if (applySlotBtn) {
+              e.preventDefault();
+              e.stopPropagation();
               var applyKey = applySlotBtn.getAttribute('data-slot-apply') || '';
               if (!applyKey) return;
+              var applyBox = applySlotBtn.closest('.scheduler-partial, .scheduler-pending-inline');
               pushUndo();
               var pendingApply = ensurePending(applyKey);
-              syncPendingMetaFromDom(table, pendingApply, applyKey);
-              var durSelect = table.querySelector('select[data-slot-duration="' + applyKey + '"]');
+              if (applyBox) syncPendingMetaFromContainer(applyBox, pendingApply);
+              else syncPendingMetaFromDom(table, pendingApply, applyKey);
+              var durSelect = applyBox
+                ? applyBox.querySelector('select[data-slot-duration]')
+                : table.querySelector('select[data-slot-duration="' + ((typeof CSS !== 'undefined' && CSS.escape) ? CSS.escape(applyKey) : applyKey) + '"]');
               if (durSelect) {
                 pendingApply.durationSlots = Math.max(1, Math.min(8, Math.round(Number(durSelect.value) || DEFAULT_DURATION_SLOTS)));
               }
