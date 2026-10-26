@@ -2522,7 +2522,12 @@
       color: var(--muted);
       margin: 0.25rem 0 0.15rem 0;
     }
-    .scheduler-duration-label select { min-width: 88px; }
+    .scheduler-duration-label select {
+      min-width: 88px;
+      position: relative;
+      z-index: 6;
+      pointer-events: auto;
+    }
     .scheduler-capacity {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -5603,6 +5608,21 @@
           if (slot && slot.classList.contains('scheduler-slot-hour')) return null;
           return slot;
         }
+        function blocksSidebarSlotClick(target) {
+          if (!target || !target.closest) return false;
+          if (target.closest('.remove-btn, .copy-btn, .resize-handle, .resize-handle-x')) return true;
+          return !!target.closest(
+            'select[data-slot-duration], input[data-slot-wo-input], input[data-slot-qty-input], ' +
+            '.scheduler-duration-label, .scheduler-slot-meta-pop, .scheduler-slot-meta-input, ' +
+            '.scheduler-slot-meta-btn, .scheduler-slot-apply, .scheduler-clear-pending-btn, ' +
+            '.scheduler-assignment'
+          );
+        }
+        function pendingForcesHalfSplit(pending) {
+          if (!pendingHasContent(pending)) return false;
+          var d = resolvePendingDuration(pending, pending.tasks && pending.tasks[0], DEFAULT_DURATION_SLOTS);
+          return d === 1;
+        }
         function clearSidebarChipSelection() {
           sidebarSelection = null;
           document.querySelectorAll('#scheduler-sidebar .drag-chip.is-selected').forEach(function (el) {
@@ -5620,7 +5640,10 @@
           var time30 = TIMES[i1];
           for (var mi = 0; mi < meta.length; mi++) {
             var day = meta[mi].name;
-            if (pendingHasContent(currentWeekData.pending[slotKey(day, time30)])) return true;
+            var pend0 = currentWeekData.pending[slotKey(day, TIMES[i0])];
+            var pend1 = currentWeekData.pending[slotKey(day, time30)];
+            if (pendingForcesHalfSplit(pend0) || pendingForcesHalfSplit(pend1)) return true;
+            if (pendingHasContent(pend1)) return true;
             if (getAssignmentsForSlot(day, i1).length > 0) return true;
             var at00 = getAssignmentsForSlot(day, i0);
             for (var ai = 0; ai < at00.length; ai++) {
@@ -7188,7 +7211,6 @@
               if (!chip) return;
               var payload = { kind: chip.getAttribute('data-kind') || '', id: chip.getAttribute('data-id') || '' };
               activeDrag = payload;
-              setSidebarChipSelection(payload.kind, payload.id, chip);
               if (e.dataTransfer) {
                 e.dataTransfer.effectAllowed = 'copy';
                 e.dataTransfer.setData('application/json', JSON.stringify(payload));
@@ -7314,6 +7336,7 @@
             var pendingDur = ensurePending(dKey);
             pendingDur.durationSlots = Math.max(1, Math.min(8, Math.round(Number(durSel.value) || DEFAULT_DURATION_SLOTS)));
             saveStore();
+            renderScheduler();
           });
           table.addEventListener('input', function (e) {
             var input = e.target && e.target.matches ? e.target : null;
@@ -7389,7 +7412,7 @@
               return;
             }
             if (e.target && e.target.closest && e.target.closest('.scheduler-slot-meta-input')) return;
-            if (sidebarSelection && slot) {
+            if (sidebarSelection && slot && !blocksSidebarSlotClick(e.target)) {
               var daySel = slot.getAttribute('data-day') || '';
               var timeSel = slot.getAttribute('data-time') || '';
               if (daySel && timeSel && applySidebarPayloadToSlot(daySel, timeSel, sidebarSelection)) return;
