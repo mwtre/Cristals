@@ -1743,6 +1743,11 @@
     #step-production-stats .scheduler-topbar-actions {
       flex-shrink: 0;
     }
+    #step-production-stats .production-scheduler-layout {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
     .production-scheduler-wrap {
       background: radial-gradient(1200px 260px at 25% -120px, rgba(201,169,98,0.18), rgba(26,26,26,0.96) 55%),
         linear-gradient(180deg, rgba(30,30,30,0.96), rgba(18,18,18,0.96));
@@ -1774,6 +1779,33 @@
       padding: 0.65rem;
       background: linear-gradient(180deg, rgba(28,28,28,0.88), rgba(14,14,14,0.88));
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      min-height: 0;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .scheduler-sidebar-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 0.15rem;
+      margin-right: -0.15rem;
+    }
+    .scheduler-sidebar-scroll::-webkit-scrollbar { width: 8px; }
+    .scheduler-sidebar-scroll::-webkit-scrollbar-thumb {
+      background: rgba(201,169,98,0.35);
+      border-radius: 999px;
+    }
+    .scheduler-sidebar-hint {
+      margin: 0 0 0.45rem 0;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.25;
+      flex-shrink: 0;
     }
     .production-scheduler-layout.is-sidebar-collapsed .scheduler-sidebar {
       display: none;
@@ -1807,6 +1839,12 @@
       box-shadow: 0 6px 16px rgba(0,0,0,0.28);
     }
     .drag-chip:active { cursor: grabbing; }
+    .drag-chip.is-selected {
+      border-color: rgba(201,169,98,0.95);
+      box-shadow: 0 0 0 2px rgba(201,169,98,0.45), 0 6px 16px rgba(0,0,0,0.28);
+      transform: translateY(-1px);
+    }
+    .drag-chip.is-selected .dot { box-shadow: 0 0 0 2px rgba(255,255,255,0.35); }
     .drag-chip .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
     .drag-chip.worker-enzo .dot { background: #60a5fa; }
     .drag-chip.worker-andre .dot { background: #f59e0b; }
@@ -2014,6 +2052,34 @@
       transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
       position: relative;
       padding: 0.06rem;
+    }
+    .scheduler-slot-hour {
+      min-height: 68px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+    }
+    .scheduler-slot-half {
+      flex: 1 1 50%;
+      min-height: 17px;
+      border-top: none;
+      background: linear-gradient(180deg, #141414, #0f0f0f);
+    }
+    .scheduler-slot-half + .scheduler-slot-half {
+      border-top: 1px dashed rgba(148,163,184,0.22);
+    }
+    tr.scheduler-half-hour .scheduler-slot {
+      min-height: 17px;
+    }
+    tr.scheduler-half-hour .scheduler-slot-half {
+      min-height: 17px;
+    }
+    .scheduler-time-col .scheduler-time-sub {
+      display: block;
+      font-size: 0.58rem;
+      color: #64748b;
+      margin-top: 0.05rem;
     }
     .scheduler-slot.drag-over {
       background: linear-gradient(180deg, rgba(201,169,98,0.16), rgba(201,169,98,0.08));
@@ -3745,18 +3811,21 @@
       <section class="production-scheduler-wrap" aria-label="Weekly production scheduler">
         <div class="production-scheduler-layout" id="scheduler-layout">
           <aside class="scheduler-sidebar" id="scheduler-sidebar">
-            <h4>Workers</h4>
-            <div id="scheduler-workers" class="scheduler-list"></div>
-            <h4>Tasks</h4>
-            <div id="scheduler-tasks" class="scheduler-list"></div>
-            <h4>Orders</h4>
-            <div id="scheduler-orders" class="scheduler-list"></div>
-            <h4>Machines</h4>
-            <div id="scheduler-machines" class="scheduler-list"></div>
+            <p class="scheduler-sidebar-hint">Drag chips onto the grid, or <strong>click a chip</strong> then click a time slot.</p>
+            <div class="scheduler-sidebar-scroll" id="scheduler-sidebar-scroll">
+              <h4>Workers</h4>
+              <div id="scheduler-workers" class="scheduler-list"></div>
+              <h4>Tasks</h4>
+              <div id="scheduler-tasks" class="scheduler-list"></div>
+              <h4>Orders</h4>
+              <div id="scheduler-orders" class="scheduler-list"></div>
+              <h4>Machines</h4>
+              <div id="scheduler-machines" class="scheduler-list"></div>
+            </div>
           </aside>
           <div class="scheduler-main">
             <div class="scheduler-topbar">
-              <span class="scheduler-title">Monday to Friday · 09:00-18:00 · 30min slots</span>
+              <span class="scheduler-title">Monday to Friday · 09:00–18:00 · 1 h rows · 30 min when needed</span>
               <div class="scheduler-topbar-meta">
                 <span id="scheduler-supabase-status" class="scheduler-supabase-status is-off" aria-live="polite">Supabase: …</span>
                 <span id="scheduler-sync-status" class="scheduler-sync-status" aria-live="polite"></span>
@@ -5313,6 +5382,7 @@
         MACHINES.forEach(function (m) { machinesById[m.id] = m; });
 
         var activeDrag = null;
+        var sidebarSelection = null;
         var syncTimer = null;
         var highlightedSlot = null;
         var resizeState = null;
@@ -5503,6 +5573,71 @@
           }
         }
         function slotKey(day, time) { return day + '|' + time; }
+        function pendingHasContent(pending) {
+          if (!pending) return false;
+          return !!((pending.workers && pending.workers.length) ||
+            (pending.tasks && pending.tasks.length) ||
+            (pending.orders && pending.orders.length) ||
+            (pending.machines && pending.machines.length) ||
+            pending.woId ||
+            Number(pending.plannedQty) > 0 ||
+            Number(pending.durationSlots) > 0);
+        }
+        function closestSchedulerSlot(target) {
+          if (!target || !target.closest) return null;
+          var half = target.closest('.scheduler-slot-half');
+          if (half) return half;
+          var slot = target.closest('.scheduler-slot');
+          if (slot && slot.classList.contains('scheduler-slot-hour')) return null;
+          return slot;
+        }
+        function clearSidebarChipSelection() {
+          sidebarSelection = null;
+          document.querySelectorAll('#scheduler-sidebar .drag-chip.is-selected').forEach(function (el) {
+            el.classList.remove('is-selected');
+          });
+        }
+        function setSidebarChipSelection(kind, id, chipEl) {
+          clearSidebarChipSelection();
+          if (!kind || !id) return;
+          sidebarSelection = { kind: kind, id: id };
+          if (chipEl) chipEl.classList.add('is-selected');
+        }
+        function hourNeedsHalfSplit(meta, i0, i1) {
+          if (i1 < 0 || i1 >= TIMES.length) return false;
+          var time30 = TIMES[i1];
+          for (var mi = 0; mi < meta.length; mi++) {
+            var day = meta[mi].name;
+            if (pendingHasContent(currentWeekData.pending[slotKey(day, time30)])) return true;
+            if (getAssignmentsForSlot(day, i1).length > 0) return true;
+            var at00 = getAssignmentsForSlot(day, i0);
+            for (var ai = 0; ai < at00.length; ai++) {
+              if (Number(at00[ai].duration) === 1) return true;
+            }
+          }
+          return false;
+        }
+        function schedulerSlotCellHtml(dayName, time, idx, selectedClass) {
+          return '<div class="scheduler-slot scheduler-slot-half' + selectedClass + '" data-day="' + dayName + '" data-time="' + time + '" data-index="' + idx + '">' +
+            slotInner(dayName, time, idx) + '</div>';
+        }
+        function applySidebarPayloadToSlot(day, time, payload) {
+          if (!payload || !payload.kind || !payload.id) return false;
+          var key = slotKey(day, time);
+          var pending = ensurePending(key);
+          pushUndo();
+          if (payload.kind === 'worker' && workersById[payload.id]) uniqPush(pending.workers, payload.id);
+          if (payload.kind === 'task' && tasksById[payload.id]) {
+            uniqPush(pending.tasks, payload.id);
+            pending.durationSlots = suggestedDurationForPending(pending);
+          }
+          if (payload.kind === 'order' && ordersById[payload.id]) uniqPush(pending.orders, payload.id);
+          if (payload.kind === 'machine' && machinesById[payload.id]) uniqPush(pending.machines, payload.id);
+          tryFinalizePendingSlot(key, { silent: true });
+          saveStore();
+          renderScheduler();
+          return true;
+        }
         function pad2(n) { return String(n).padStart(2, '0'); }
         function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
         function timeIndex(time) { return TIMES.indexOf(time); }
@@ -6816,15 +6951,47 @@
           var thead = '<thead><tr><th class="scheduler-time-col">Time</th>' +
             meta.map(function (d) { return '<th>' + d.name + '<br><span style="font-size:0.62rem;color:#888;">' + d.label + '</span></th>'; }).join('') +
             '</tr></thead>';
-          var tbody = '<tbody>' + TIMES.map(function (time, idx) {
-            return '<tr><td class="scheduler-time-col">' + time + '</td>' +
-              meta.map(function (d) {
-                var key = slotKey(d.name, time);
-                var selectedClass = bulkMode && bulkSelected[key] ? ' bulk-selected' : '';
-                return '<td><div class="scheduler-slot' + selectedClass + '" data-day="' + d.name + '" data-time="' + time + '" data-index="' + idx + '">' + slotInner(d.name, time, idx) + '</div></td>';
-              }).join('') +
-              '</tr>';
-          }).join('') + '</tbody>';
+          var tbody = '<tbody>';
+          for (var hi = 0; hi < TIMES.length; hi += 2) {
+            var i0 = hi;
+            var i1 = hi + 1;
+            var time0 = TIMES[i0];
+            var time1 = TIMES[i1];
+            var split = hourNeedsHalfSplit(meta, i0, i1);
+            if (!split) {
+              tbody += '<tr class="scheduler-hour-row">' +
+                '<td class="scheduler-time-col">' + time0 + '</td>' +
+                meta.map(function (d) {
+                  var key0 = slotKey(d.name, time0);
+                  var key1 = time1 ? slotKey(d.name, time1) : '';
+                  var sel0 = bulkMode && bulkSelected[key0] ? ' bulk-selected' : '';
+                  var sel1 = key1 && bulkMode && bulkSelected[key1] ? ' bulk-selected' : '';
+                  var inner = schedulerSlotCellHtml(d.name, time0, i0, sel0);
+                  if (time1) inner += schedulerSlotCellHtml(d.name, time1, i1, sel1);
+                  return '<td><div class="scheduler-slot scheduler-slot-hour' + (sel0 || sel1 ? ' bulk-selected' : '') + '">' + inner + '</div></td>';
+                }).join('') +
+                '</tr>';
+            } else {
+              tbody += '<tr class="scheduler-hour-row scheduler-half-hour">' +
+                '<td class="scheduler-time-col" rowspan="2">' + time0 + '</td>' +
+                meta.map(function (d) {
+                  var key0 = slotKey(d.name, time0);
+                  var selectedClass = bulkMode && bulkSelected[key0] ? ' bulk-selected' : '';
+                  return '<td>' + schedulerSlotCellHtml(d.name, time0, i0, selectedClass) + '</td>';
+                }).join('') +
+                '</tr>';
+              if (time1) {
+                tbody += '<tr class="scheduler-hour-row scheduler-half-hour">' +
+                  meta.map(function (d) {
+                    var key1 = slotKey(d.name, time1);
+                    var selectedClass = bulkMode && bulkSelected[key1] ? ' bulk-selected' : '';
+                    return '<td>' + schedulerSlotCellHtml(d.name, time1, i1, selectedClass) + '</td>';
+                  }).join('') +
+                  '</tr>';
+              }
+            }
+          }
+          tbody += '</tbody>';
           table.innerHTML = thead + tbody;
           renderWeekHeader();
           renderCapacity();
@@ -6879,7 +7046,7 @@
           window.addEventListener('mousemove', function (e) {
             if (!resizeState) return;
             var target = document.elementFromPoint(e.clientX, e.clientY);
-            var slot = target && target.closest ? target.closest('.scheduler-slot') : null;
+            var slot = closestSchedulerSlot(target);
             if (!slot) return;
             if (resizeState.mode === 'horizontal') {
               var day = slot.getAttribute('data-day') || '';
@@ -7009,6 +7176,7 @@
               if (!chip) return;
               var payload = { kind: chip.getAttribute('data-kind') || '', id: chip.getAttribute('data-id') || '' };
               activeDrag = payload;
+              setSidebarChipSelection(payload.kind, payload.id, chip);
               if (e.dataTransfer) {
                 e.dataTransfer.effectAllowed = 'copy';
                 e.dataTransfer.setData('application/json', JSON.stringify(payload));
@@ -7024,6 +7192,22 @@
           bindDragStart(tasksEl);
           bindDragStart(ordersEl);
           bindDragStart(machinesEl);
+          var sidebarScroll = schedulerEl('scheduler-sidebar-scroll');
+          if (sidebarScroll) {
+            sidebarScroll.addEventListener('click', function (e) {
+              var chip = e.target && e.target.closest ? e.target.closest('.drag-chip') : null;
+              if (!chip) return;
+              e.preventDefault();
+              var kind = chip.getAttribute('data-kind') || '';
+              var id = chip.getAttribute('data-id') || '';
+              if (!kind || !id) return;
+              if (sidebarSelection && sidebarSelection.kind === kind && sidebarSelection.id === id) {
+                clearSidebarChipSelection();
+                return;
+              }
+              setSidebarChipSelection(kind, id, chip);
+            });
+          }
           table.addEventListener('dragstart', function (e) {
             var card = e.target && e.target.closest ? e.target.closest('.scheduler-assignment.is-start') : null;
             if (!card) return;
@@ -7039,7 +7223,7 @@
           });
 
           table.addEventListener('dragover', function (e) {
-            var slot = e.target && e.target.closest ? e.target.closest('.scheduler-slot') : null;
+            var slot = closestSchedulerSlot(e.target);
             if (!slot) return;
             e.preventDefault();
             if (highlightedSlot !== slot) {
@@ -7049,7 +7233,7 @@
             }
           });
           table.addEventListener('drop', function (e) {
-            var slot = e.target && e.target.closest ? e.target.closest('.scheduler-slot') : null;
+            var slot = closestSchedulerSlot(e.target);
             if (!slot) return;
             e.preventDefault();
             slot.classList.remove('drag-over');
@@ -7134,7 +7318,7 @@
             }
           });
           table.addEventListener('click', function (e) {
-            var slot = e.target && e.target.closest ? e.target.closest('.scheduler-slot') : null;
+            var slot = closestSchedulerSlot(e.target);
             var clearPendingBtn = e.target && e.target.closest
               ? e.target.closest('.scheduler-clear-pending-btn, .remove-btn[data-clear-pending]')
               : null;
@@ -7193,6 +7377,11 @@
               return;
             }
             if (e.target && e.target.closest && e.target.closest('.scheduler-slot-meta-input')) return;
+            if (sidebarSelection && slot) {
+              var daySel = slot.getAttribute('data-day') || '';
+              var timeSel = slot.getAttribute('data-time') || '';
+              if (daySel && timeSel && applySidebarPayloadToSlot(daySel, timeSel, sidebarSelection)) return;
+            }
             if (bulkMode && slot) {
               var k = slotKey(slot.getAttribute('data-day') || '', slot.getAttribute('data-time') || '');
               if (k !== '|') {
